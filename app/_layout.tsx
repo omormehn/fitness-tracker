@@ -55,7 +55,7 @@ function RootLayoutNav() {
     <ThemeProvider>
       <Stack>
         <Stack.Screen name="(screens)/(onboarding)/index" options={{ headerShown: false }} />
-        <Stack.Screen name="(screens)/(onboarding)/onboardingscreen1" options={{ headerShown: false }} />
+        <Stack.Screen name="(screens)/(onboarding)/OnboardingScreen" options={{ headerShown: false }} />
         {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
       </Stack>
     </ThemeProvider>

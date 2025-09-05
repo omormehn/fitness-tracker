@@ -25,7 +25,7 @@ const Onboarding = () => {
         <Text style={typography.body} className='text-white  text-center'>Everbody can train</Text>
       </View>
       {/* Button */}
-      <TouchableOpacity onPress={() => router.push('/onboardingscreen1')} className='absolute bottom-20'>
+      <TouchableOpacity onPress={() => router.push('/OnboardingScreen')} className='absolute bottom-20'>
         <Button   text='Get Started' />
       </TouchableOpacity>
     </LinearGradient>
