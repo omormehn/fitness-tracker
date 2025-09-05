@@ -1,11 +1,11 @@
-import { ThemeContextProvider } from '@/context/ThemeContext';
+import { ThemeProvider } from '@/context/ThemeContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { DarkTheme, DefaultTheme, } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+import '../global.css';
 
 
 
@@ -25,6 +25,8 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    PoppinsRegular: require('../assets/fonts/Poppins-Regular.ttf'),
+    PoppinsBold: require('../assets/fonts/Poppins-Bold.ttf'),
     ...FontAwesome.font,
   });
 
@@ -50,11 +52,12 @@ function RootLayoutNav() {
 
 
   return (
-    <ThemeContextProvider>
+    <ThemeProvider>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="(screens)/(onboarding)/index" options={{ headerShown: false }} />
+        <Stack.Screen name="(screens)/(onboarding)/onboardingscreen1" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
       </Stack>
-    </ThemeContextProvider>
+    </ThemeProvider>
   );
 }

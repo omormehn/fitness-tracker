@@ -1,12 +1,29 @@
 
 export const getImages = (theme: 'light' | 'dark') => {
-    onboarding1: require(`@/assets/images/${theme}/onboarding1.png`)
-    onboarding2: require(`@/assets/images/${theme}/onboarding2.png`)
-    onboarding3: require(`@/assets/images/${theme}/onboarding3.png`)
-    onboarding4: require(`@/assets/images/${theme}/onboarding4.png`)
-    goal1: require(`@/assets/images/${theme}/goal1.png`)
-    goal2: require(`@/assets/images/${theme}/goal2.png`)
-    goal3: require(`@/assets/images/${theme}/goal3.png`)
-    registerblob: require(`@/assets/images/${theme}/registerblob.png`)
-    regsuccess: require(`@/assets/images/${theme}/regsuccess.png`)
+    const images = {
+        light: {
+            onboarding1: require('@/assets/images/light/onboarding1.png'),
+            onboarding2: require('@/assets/images/light/onboarding2.png'),
+            onboarding3: require('@/assets/images/light/onboarding3.png'),
+            onboarding4: require('@/assets/images/light/onboarding4.png'),
+            goal1: require('@/assets/images/light/goal1.png'),
+            goal2: require('@/assets/images/light/goal2.png'),
+            goal3: require('@/assets/images/light/goal3.png'),
+            registerblob: require('@/assets/images/light/registerblob.png'),
+            regsuccess: require('@/assets/images/light/regsuccess.png'),
+        },
+        dark: {
+            onboarding1: require('@/assets/images/dark/onboarding1.png'),
+            onboarding2: require('@/assets/images/dark/onboarding2.png'),
+            onboarding3: require('@/assets/images/dark/onboarding3.png'),
+            onboarding4: require('@/assets/images/dark/onboarding4.png'),
+            goal1: require('@/assets/images/dark/goal1.png'),
+            goal2: require('@/assets/images/dark/goal2.png'),
+            goal3: require('@/assets/images/dark/goal3.png'),
+            registerblob: require('@/assets/images/dark/registerblob.png'),
+            regsuccess: require('@/assets/images/dark/regsuccess.png'),
+        },
+    }
+
+    return images[theme]
 }

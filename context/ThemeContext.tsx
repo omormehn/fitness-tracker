@@ -2,22 +2,24 @@ import { COLORS } from "@/theme/Colors";
 import { GRADIENTS } from "@/theme/gradients";
 import { getImages } from "@/theme/images";
 import { createContext, useContext, useState } from "react";
+import { useColorScheme } from "react-native";
 
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined)
 
-export const ThemeContextProvider = ({ children }: { children: React.ReactNode }) => {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     const [theme, setTheme] = useState<ThemeType>('light')
+    const systemTheme = useColorScheme() as ThemeType
 
     const toggleTheme = () => {
         setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
     };
 
     const value: ThemeContextProps = {
-        theme,
-        colors: COLORS[theme],
-        gradients: GRADIENTS[theme],
-        images: getImages(theme),
+        theme: systemTheme,
+        colors: COLORS[systemTheme] || COLORS,
+        gradients: GRADIENTS[systemTheme] || GRADIENTS,
+        images: getImages(systemTheme),
         toggleTheme,
     };
 
