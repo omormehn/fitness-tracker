@@ -1,4 +1,3 @@
-// onboardingData.ts
 import Onboarding1Dark from '@/assets/images/dark/onboarding1.svg'
 import Onboarding1Light from '@/assets/images/light/onboarding1.svg'
 import Onboarding2Dark from '@/assets/images/dark/onboarding2.svg'
