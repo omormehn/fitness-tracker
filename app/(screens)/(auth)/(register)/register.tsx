@@ -6,6 +6,7 @@ import InputContainer from '@/components/InputContainer'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/button';
 import SocialsContianer from '@/components/SocialContianer';
+import { router } from 'expo-router';
 
 
 
@@ -14,7 +15,7 @@ const RegisterScreen = () => {
     const { theme, colors } = useTheme()
     const [checked, setChecked] = useState(false);
     return (
-        <View style={[styles.container, theme === 'dark' ? { backgroundColor: colors.onboardingBg } : { backgroundColor: '#FFFFFF' }]}>
+        <View style={[styles.container, theme === 'dark' ? { backgroundColor: colors.background } : { backgroundColor: '#FFFFFF' }]}>
             {/* Top Section */}
             <View className='flex-col gap-2'>
                 <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 16, color: colors.text, textAlign: 'center' }}>Hey there,</Text>
@@ -26,7 +27,7 @@ const RegisterScreen = () => {
                 <InputContainer iconName={'person-outline'} placeholder='Full Name' theme={theme} />
                 <InputContainer iconName={'phone'} placeholder='Phone Number' theme={theme} />
                 <InputContainer iconName={'mail-outline'} placeholder='Email' theme={theme} />
-                <InputContainer type='password' iconName={'lock-outline'} placeholder='Password' theme={theme} />
+                <InputContainer inputWidth={'80%'} type='password' iconName={'lock-outline'} placeholder='Password' theme={theme} />
             </View>
 
             {/* Terms */}
@@ -43,7 +44,7 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             {/* button */}
-            <TouchableOpacity style={{ marginTop: 100 }}>
+            <TouchableOpacity onPress={() => router.push('/register2')} style={{ marginTop: 100 }}>
                 <Button text='Register' />
             </TouchableOpacity>
 
@@ -64,7 +65,7 @@ const RegisterScreen = () => {
 
             {/* Bottom */}
             <View style={{ top: 100 }}>
-                <Text style={{ color: colors.text, fontFamily: 'PoppinsRegular' }}>Already Have an account? <Text style={{fontFamily: 'PoppinsMedium', color: '#C150F6'}}>Login</Text></Text>
+                <Text style={{ color: colors.text, fontFamily: 'PoppinsRegular' }}>Already Have an account? <Text style={{ fontFamily: 'PoppinsMedium', color: '#C150F6' }}>Login</Text></Text>
 
             </View>
         </View>

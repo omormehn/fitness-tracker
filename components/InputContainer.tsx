@@ -4,20 +4,20 @@ import { InputContainerProps } from '@/types/types'
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-const InputContainer = ({ placeholder, type, theme, iconName = 'son', }: InputContainerProps) => {
+const InputContainer = ({ placeholder, type, theme, iconName, width = '100%', inputWidth = '90%' }: InputContainerProps) => {
     const [showEye, setShow] = useState(false)
     const eyeIcon = showEye ? 'eye' : 'eye-off'
     const toggleEye = () => setShow(!showEye)
 
     return (
-        <View style={[styles.container, theme === 'dark' ? { backgroundColor: '#161818' } : { backgroundColor: '#F7F8F8' }]}>
-            <View style={styles.input} className='flex-row'>
+        <View style={[styles.container, { width: width }, theme === 'dark' ? { backgroundColor: '#161818' } : { backgroundColor: '#F7F8F8' }]}>
+            <View style={styles.input} className='flex-row w-full'>
                 <MaterialIcons name={iconName} size={24} color={theme === 'dark' ? 'white' : 'black'} />
                 <TextInput
                     placeholderTextColor={theme === 'dark' ? '#ACA3A5' : '#A5A3B0'}
                     placeholder={placeholder}
                     secureTextEntry={type === 'password' && !showEye}
-                    style={[{ width: '80%' }, theme === 'dark' ? { color: 'white' } : { color: 'black' }]}
+                    style={[{ width: inputWidth }, theme === 'dark' ? { color: 'white' } : { color: 'black' }]}
                 />
             </View>
             {type === 'password' && (

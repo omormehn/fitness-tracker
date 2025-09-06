@@ -2,15 +2,13 @@ import { StyleSheet, Text, View } from 'react-native'
 import React, { useState } from 'react'
 import Onboarding from '@/components/Onboarding'
 import { useTheme } from '@/context/ThemeContext'
-import Onboarding1 from '@/assets/images/dark/onboarding1.svg'
-import Onboarding1light from '@/assets/images/light/onboarding1.svg'
-import { router, useLocalSearchParams } from 'expo-router'
+import { router } from 'expo-router'
 import { onboardingData } from '@/data/onboardingData'
 
 
 
 const OnboardingScreen = () => {
-  const { theme } = useTheme()
+  const { theme, colors } = useTheme()
   const [step, setStep] = useState(0)
   const { lightImage, darkImage, title, description } = onboardingData[step]
 
@@ -24,7 +22,7 @@ const OnboardingScreen = () => {
 
 
   return (
-    <View style={[{ flex: 1 }, theme === 'dark' ? { backgroundColor: '#2A2C38' } : { backgroundColor: '#FFFFFF' }]} >
+    <View style={[{ flex: 1 }, theme === 'dark' ? { backgroundColor: colors.background } : { backgroundColor: '#FFFFFF' }]} >
       <Onboarding
         lightImage={lightImage}
         darkImage={darkImage}

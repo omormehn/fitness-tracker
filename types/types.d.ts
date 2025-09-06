@@ -1,4 +1,4 @@
-import { TextInputProps } from 'react-native';
+import { TextInputProps, TextStyle } from 'react-native';
 
 import React, { ComponentType, ReactElement } from 'react';
 
@@ -25,5 +25,7 @@ export type InputContainerProps = {
   iconName?: any;
   Icon?: ReactElement
   type?: 'text' | 'password';
-  theme: ThemeType
+  theme: ThemeType,
+  width?: any
+  inputWidth?: any
 } & TextInputProps

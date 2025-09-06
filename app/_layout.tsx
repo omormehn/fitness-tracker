@@ -28,6 +28,7 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     PoppinsRegular: require('../assets/fonts/Poppins-Regular.ttf'),
     PoppinsBold: require('../assets/fonts/Poppins-Bold.ttf'),
+    PoppinsMedium: require('../assets/fonts/Poppins-Medium.ttf'),
     ...FontAwesome.font,
   });
 
