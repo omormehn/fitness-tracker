@@ -4,10 +4,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '@/context/ThemeContext'
 
 const Button = ({ text }: { text: string }) => {
+    const { gradients } = useTheme()
 
     return (
         <LinearGradient
-            colors={['#983BCB', '#4023D7']}
+            colors={gradients.button}
             start={{ x: 1, y: 0 }}
             end={{ x: 0, y: 0 }}
             style={styles.container}
@@ -21,7 +22,7 @@ export default Button
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 120,
+        paddingHorizontal: 140,
         paddingVertical: 15,
         borderRadius: 30
     },
@@ -29,6 +30,6 @@ const styles = StyleSheet.create({
         color: 'white',
         textAlign: 'center',
         fontFamily: 'PoppinsBold',
-        fontSize: 16    
+        fontSize: 16
     }
 })

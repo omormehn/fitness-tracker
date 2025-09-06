@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
+import { StatusBar } from 'react-native';
 
 
 
@@ -53,10 +54,10 @@ function RootLayoutNav() {
 
   return (
     <ThemeProvider>
+      <StatusBar backgroundColor={'black'} />
       <Stack>
-        <Stack.Screen name="(screens)/(onboarding)/index" options={{ headerShown: false }} />
-        <Stack.Screen name="(screens)/(onboarding)/OnboardingScreen" options={{ headerShown: false }} />
-        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

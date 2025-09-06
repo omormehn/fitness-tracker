@@ -1,4 +1,6 @@
-import { RelativePathString } from "expo-router";
+import { TextInputProps } from 'react-native';
+
+import React, { ComponentType, ReactElement } from 'react';
 
 type ThemeType = 'light' | 'dark';
 
@@ -17,3 +19,11 @@ interface OnboardingProps {
   description: string;
   route?: any;
 };
+
+export type InputContainerProps = {
+  placeholder: string;
+  iconName?: any;
+  Icon?: ReactElement
+  type?: 'text' | 'password';
+  theme: ThemeType
+} & TextInputProps
