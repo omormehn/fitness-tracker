@@ -7,6 +7,7 @@ import Carousel from '@/components/carousel';
 import RegBlob from '@/assets/images/light/regblob.svg';
 import RegBlobDark from '@/assets/images/dark/regblob.svg';
 import Button from '@/components/button';
+import { router } from 'expo-router';
 
 const GoalsScreen = () => {
     const { theme, colors } = useTheme();
@@ -22,7 +23,7 @@ const GoalsScreen = () => {
             <Carousel />
 
             {/* Button */}
-            <TouchableOpacity>
+            <TouchableOpacity onPress={() => router.push('/success')}>
                 <Button text='Confirm' />
             </TouchableOpacity>
         </View>
