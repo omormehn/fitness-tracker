@@ -5,6 +5,7 @@ import SuccessLight from '@/assets/images/light/regsuccess.svg'
 import SuccessDark from '@/assets/images/dark/regsuccess.svg'
 import { Colors } from '@/theme/Colors'
 import Button from '@/components/button'
+import { router } from 'expo-router'
 
 const RegSuccess = () => {
     const { theme, colors } = useTheme();
@@ -21,7 +22,7 @@ const RegSuccess = () => {
             </View>
 
             {/* Button */}
-            <TouchableOpacity style={{ position: 'absolute', bottom: 0, paddingBottom: 40, }}>
+            <TouchableOpacity onPress={() => router.push('/(tabs)')} style={{ position: 'absolute', bottom: 0, paddingBottom: 40, }}>
                 <Button text='Go To Home' />
             </TouchableOpacity>
         </View >

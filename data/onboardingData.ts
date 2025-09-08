@@ -34,6 +34,6 @@ export const onboardingData = [
     darkImage: Onboarding4Dark,
     title: 'Improve Sleep  Quality',
     description: 'Improve the quality of your sleep with us, good quality sleep can bring a good mood in the morning',
-    route: '/home' 
+    route: '/register' 
   }
 ]
