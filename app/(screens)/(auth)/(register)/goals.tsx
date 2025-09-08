@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import PagerView from 'react-native-pager-view';
@@ -6,6 +6,7 @@ import { Colors } from '@/theme/Colors';
 import Carousel from '@/components/carousel';
 import RegBlob from '@/assets/images/light/regblob.svg';
 import RegBlobDark from '@/assets/images/dark/regblob.svg';
+import Button from '@/components/button';
 
 const GoalsScreen = () => {
     const { theme, colors } = useTheme();
@@ -18,8 +19,12 @@ const GoalsScreen = () => {
             </View>
 
             {/* Carousel */}
-            <Carousel title='me' description='mee' lightImage={RegBlob} darkImage={RegBlobDark} />
+            <Carousel />
+
             {/* Button */}
+            <TouchableOpacity>
+                <Button text='Confirm' />
+            </TouchableOpacity>
         </View>
     )
 }
