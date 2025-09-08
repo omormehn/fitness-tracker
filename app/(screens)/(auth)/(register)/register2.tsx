@@ -10,17 +10,28 @@ import {
     Keyboard,
     TouchableOpacity
 } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import BlobDark from "@/assets/images/dark/regblob.svg"
 import BlobLight from "@/assets/images/light/regblob.svg"
 import InputContainer from '@/components/InputContainer'
 import { LinearGradient } from 'expo-linear-gradient'
 import Button from '@/components/button'
+import { Dropdown } from 'react-native-element-dropdown'
+import { Gender } from '@/types/types'
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { router } from 'expo-router'
+
+const OPTIONS = [
+    { label: 'Male', value: 'male' },
+    { label: 'Female', value: 'female' }
+]
 
 const RegisterScreen2 = () => {
     const { colors, theme, gradients } = useTheme();
     const { height } = useWindowDimensions()
+    const [gender, setGender] = useState<Gender | null>(null);
+
     const dark = theme === 'dark'
 
     return (
@@ -59,7 +70,23 @@ const RegisterScreen2 = () => {
 
                         {/* Text Input */}
                         <View style={styles.inputsContainer}>
-                            {/* Todo, add a select package */}
+                            <View style={{ justifyContent: 'center' }} className='relative justify-center'>
+                                <View style={{ position: 'absolute', top: 15, left: 10, zIndex: 1 }}>
+                                    <Ionicons name='people-outline' size={24} color={theme === 'dark' ? 'white' : 'black'} />
+                                </View>
+                                <Dropdown
+                                    style={[styles.dropdown, theme === 'dark' ? { backgroundColor: '#161818' } : { backgroundColor: '#F7F8F8' }]}
+                                    placeholderStyle={[{ fontSize: 13, fontFamily: 'PoppinsRegular', left: 35, top: 2 }, theme === 'dark' ? { color: '#ACA3A5' } : { color: '#A5A3B0' }]}
+                                    selectedTextStyle={{ fontSize: 13, color: colors.text, fontFamily: 'PoppinsRegular', left: 35, top: 2 }}
+                                    iconStyle={{ width: 20, height: 23, tintColor: colors.text }}
+                                    data={OPTIONS}
+                                    maxHeight={300}
+                                    labelField="label"
+                                    valueField="value"
+                                    placeholder="Choose Gender"
+                                    onChange={item => { setGender(item.value); }}
+                                />
+                            </View>
                             {/* Use a date picker */}
                             <InputContainer iconName={'date-range'} placeholder='Date of Birth' theme={theme} />
 
@@ -90,7 +117,7 @@ const RegisterScreen2 = () => {
                         </View>
 
                         {/* Button */}
-                        <TouchableOpacity style={styles.buttonContainer}>
+                        <TouchableOpacity onPress={() => router.push('/goals')} style={styles.buttonContainer}>
                             <Button text='Next' />
                         </TouchableOpacity>
                     </View>
@@ -133,7 +160,14 @@ const styles = StyleSheet.create({
     },
     buttonContainer: {
         width: '100%',
-        marginTop: 'auto', 
-        paddingBottom: 20, 
+        marginTop: 'auto',
+        paddingBottom: 20,
+    },
+    dropdown: {
+        borderRadius: 10,
+        paddingHorizontal: 10,
+        height: 55,
+        borderWidth: 1,
+
     }
 })

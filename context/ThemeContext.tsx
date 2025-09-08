@@ -1,6 +1,7 @@
 import { COLORS } from "@/theme/Colors";
 import { GRADIENTS } from "@/theme/gradients";
 import { getImages } from "@/theme/images";
+import { ThemeContextProps, ThemeType } from "@/types/types";
 import { createContext, useContext, useState } from "react";
 import { useColorScheme } from "react-native";
 
@@ -23,7 +24,7 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         toggleTheme,
     };
 
-
+    
     return (
         <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>
     )
