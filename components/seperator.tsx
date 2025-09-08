@@ -1,0 +1,38 @@
+import { StyleSheet, Text, View } from 'react-native'
+import React from 'react'
+import { useTheme } from '@/context/ThemeContext';
+
+
+const Seperator = () => {
+    const { colors } = useTheme();
+
+    return (
+        <View style={styles.seperator} >
+            <View style={styles.divider} />
+            <View style={styles.divider} />
+            <View style={styles.smallText}>
+                <Text style={{ color: colors.text }}>Or</Text>
+            </View>
+        </View >
+    )
+}
+
+export default Seperator
+
+const styles = StyleSheet.create({
+    seperator: {
+        flexDirection: 'row',
+        gap: 30,
+        justifyContent: 'center'
+    },
+    divider: {
+        backgroundColor: '#423C3D',
+        top: 30,
+        height: 1,
+        paddingHorizontal: 80,
+    },
+    smallText: {
+        top: 20,
+        position: 'absolute'
+    }
+})

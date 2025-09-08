@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-const SocialsContianer = ({ name }: { name: any }) => {
+const SocialsContainer = ({ name }: { name: any }) => {
     return (
         <TouchableOpacity style={styles.container}>
             <Ionicons name={name} size={30} />
@@ -10,7 +10,7 @@ const SocialsContianer = ({ name }: { name: any }) => {
     )
 }
 
-export default SocialsContianer
+export default SocialsContainer
 
 const styles = StyleSheet.create({
     container: {

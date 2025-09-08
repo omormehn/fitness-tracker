@@ -5,8 +5,9 @@ import InputContainer from '@/components/InputContainer'
 
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/button';
-import SocialsContianer from '@/components/SocialContianer';
 import { router } from 'expo-router';
+import Seperator from '@/components/seperator';
+import SocialsContainer from '@/components/SocialContianer';
 
 
 
@@ -34,7 +35,6 @@ const RegisterScreen = () => {
             <TouchableOpacity activeOpacity={0.8} onPress={() => setChecked(!checked)} style={styles.terms}>
                 <Pressable
                     style={[styles.checkboxBase, checked && styles.checkboxChecked]}
-
                 >
                     {checked && <Ionicons name="checkmark" size={16} color="white" />}
                 </Pressable>
@@ -49,24 +49,17 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             {/* Divider */}
-            <View style={styles.seperator} >
-                <View style={styles.divider} />
-                <View style={styles.divider} />
-                <View style={styles.smallText}>
-                    <Text style={{ color: colors.text }}>Or</Text>
-                </View>
-            </View>
+            <Seperator  />
 
             {/* Socials */}
             <View style={{ top: 60, flexDirection: 'row', gap: 30 }} >
-                <SocialsContianer name='logo-google' />
-                <SocialsContianer name='logo-facebook' />
+                <SocialsContainer name='logo-google' />
+                <SocialsContainer name='logo-facebook' />
             </View>
 
             {/* Bottom */}
             <View style={{ top: 100 }}>
-                <Text style={{ color: colors.text, fontFamily: 'PoppinsRegular' }}>Already Have an account? <Text style={{ fontFamily: 'PoppinsMedium', color: '#C150F6' }}>Login</Text></Text>
-
+                <Text style={{ color: colors.text, fontFamily: 'PoppinsRegular' }}>Already Have an account? <Text onPress={() => router.push('/login')} style={{ fontFamily: 'PoppinsMedium', color: '#C150F6' }}>Login</Text></Text>
             </View>
         </View>
     )
@@ -101,19 +94,5 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         paddingHorizontal: 15
     },
-    seperator: {
-        flexDirection: 'row',
-        gap: 30,
-        justifyContent: 'center'
-    },
-    divider: {
-        backgroundColor: '#423C3D',
-        top: 30,
-        height: 1,
-        paddingHorizontal: 80,
-    },
-    smallText: {
-        top: 20,
-        position: 'absolute'
-    }
+
 })
