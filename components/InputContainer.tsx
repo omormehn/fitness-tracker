@@ -11,13 +11,16 @@ const InputContainer = ({ placeholder, type, theme, iconName, width = '100%', in
 
     return (
         <View style={[styles.container, { width: width }, theme === 'dark' ? { backgroundColor: '#161818' } : { backgroundColor: '#F7F8F8' }]}>
-            <View style={styles.input} className='flex-row w-full'>
+            <View style={styles.input} >
                 <MaterialIcons name={iconName} size={24} color={theme === 'dark' ? 'white' : 'black'} />
                 <TextInput
                     placeholderTextColor={theme === 'dark' ? '#ACA3A5' : '#A5A3B0'}
                     placeholder={placeholder}
                     secureTextEntry={type === 'password' && !showEye}
-                    style={[{ width: inputWidth }, theme === 'dark' ? { color: 'white' } : { color: 'black' }]}
+                    style={[{
+                        width: inputWidth, fontFamily: "PoppinsRegular",
+                        fontSize: 13,
+                    }, theme === 'dark' ? { color: 'white' } : { color: 'black' }]}
                 />
             </View>
             {type === 'password' && (

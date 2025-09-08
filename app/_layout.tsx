@@ -29,6 +29,7 @@ export default function RootLayout() {
     PoppinsRegular: require('../assets/fonts/Poppins-Regular.ttf'),
     PoppinsBold: require('../assets/fonts/Poppins-Bold.ttf'),
     PoppinsMedium: require('../assets/fonts/Poppins-Medium.ttf'),
+    PoppinsSemiBold: require('../assets/fonts/Poppins-SemiBold.ttf'),
     ...FontAwesome.font,
   });
 
@@ -57,8 +58,8 @@ function RootLayoutNav() {
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} />
       <Stack>
-        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

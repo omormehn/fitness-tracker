@@ -29,3 +29,13 @@ export type InputContainerProps = {
   width?: any
   inputWidth?: any
 } & TextInputProps
+
+type Gender = { male: string, female: string };
+
+interface CarouselProps {
+  lightImage: React.FC<any>;
+  darkImage: React.FC<any>;
+  title: string;
+  description: string;
+  route?: any;
+};
