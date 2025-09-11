@@ -76,7 +76,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Activity Status */}
-        <View style={{ margin: 15 }}>
+        <View style={{ margin: 20 }}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Activity Status</Text>
 
           <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
@@ -138,7 +138,7 @@ const HomeScreen = () => {
         </View>
 
         {/* Workout */}
-        <View style={{ margin: 15 }}>
+        <View style={{ margin: 20 }}>
           <View style={styles.workoutHeader}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Workout Progress</Text>
             <TouchableOpacity >
@@ -164,11 +164,11 @@ const HomeScreen = () => {
                   },
                 ],
               }}
-              width={390}
+              width={400}
 
               height={180}
               chartConfig={{
-                
+
                 backgroundGradientFrom: graphBg,
                 backgroundGradientTo: graphBg,
                 decimalPlaces: 0,
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
   timeAgoText: { textAlign: 'center', fontSize: 12, color: '#FFFFFF' },
 
 
-  statsRow: { flexDirection: "row", justifyContent: "space-between", marginHorizontal: 15, marginBottom: 50, gap: 0 },
+  statsRow: { flexDirection: "row", justifyContent: "space-between", marginHorizontal: 15, marginBottom: 20, gap: 0 },
   statCard: {
     flex: 1, margin: 5, padding: 15, borderRadius: 16, backgroundColor: "#2a2940", shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
 
 
   workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
-  workoutGraph: { borderRadius: 16,  right: 10 },
+  workoutGraph: { borderRadius: 16, right: 30 },
 
   tabBar: { flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingVertical: 12, backgroundColor: "#2a2940", borderTopLeftRadius: 20, borderTopRightRadius: 20, position: "absolute", bottom: 0, left: 0, right: 0 },
   centerTab: { backgroundColor: "#5e3fff", padding: 14, borderRadius: 30, marginTop: -30 },
