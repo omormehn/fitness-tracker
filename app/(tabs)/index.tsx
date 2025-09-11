@@ -3,13 +3,24 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useTheme } from "@/context/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
+import SleepGraphDark from '@/assets/images/dark/sleepgraph.svg';
+import SleepGraphLight from '@/assets/images/light/sleepgraph.svg';
 
 const screenWidth = Dimensions.get("window").width;
 
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
+  const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
+  const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
+  const graphBg = theme === 'dark' ? '#2A2C38' : '#FFFFFF';
+  const lineChartBGFrom = theme === 'dark' ? '#2a2940' : '#e5daf5';
+  const lineChartBGTo = theme === 'dark' ? '#2a2940' : '#e5daf5';
+  const notificationBg = theme === 'dark' ? '#161818' : '#F7F8F8';
+  const notificationColor = theme === 'dark' ? '#FFFFFF' : '#000000';
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -20,16 +31,16 @@ const HomeScreen = () => {
             <Text style={[styles.welcome, { color: colors.tintText3 }]}>Welcome Back,</Text>
             <Text style={[styles.username, { color: colors.text }]}>John Doe</Text>
           </View>
-          <TouchableOpacity style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={18} color={colors.text} />
+          <TouchableOpacity style={[styles.notificationButton, { backgroundColor: notificationBg }]}>
+            <Ionicons name="notifications-outline" size={20} color={notificationColor} />
           </TouchableOpacity>
         </View>
 
         {/* BMI Card */}
         <LinearGradient
           colors={gradients.onboarding}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
+          start={{ x: 1, y: 0 }}
+          end={{ x: 1, y: 1 }}
           style={styles.card}
         >
           <Text style={styles.cardTitle}>BMI (Body Mass Index)</Text>
@@ -39,8 +50,8 @@ const HomeScreen = () => {
             <TouchableOpacity >
               <LinearGradient
                 colors={gradients.button}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                start={{ x: 0, y: 1 }}
+                end={{ x: 1, y: 1 }}
                 style={styles.viewMoreBtn}
               >
                 <Text style={styles.viewMoreText}>View More</Text>
@@ -50,75 +61,128 @@ const HomeScreen = () => {
         </LinearGradient>
 
         {/* Today Target */}
-        <View style={styles.targetCard}>
-          <Text style={styles.cardTitle}>Today Target</Text>
+        <View style={[styles.targetCard, { opacity: 0.7, }, { backgroundColor: colors.card }]}>
+          <Text style={[styles.cardTitle, { color: colors.text }]}>Today Target</Text>
           <TouchableOpacity >
             <LinearGradient
               colors={gradients.button}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={styles.checkBtn}
+              start={{ x: 1, y: 0 }}
+              end={{ x: 0, y: 0 }}
+              style={[styles.checkBtn,]}
             >
-              <Text style={[styles.checkText, { color: colors.text }]}>Check</Text>
-
+              <Text style={[styles.checkText]}>Check</Text>
             </LinearGradient>
           </TouchableOpacity>
         </View>
 
         {/* Activity Status */}
-        <Text style={styles.sectionTitle}>Activity Status</Text>
-        <View style={styles.chartCard}>
-          <Text style={[styles.heartRate, { color: colors.text }]}>Heart Rate</Text>
-          <Text style={[styles.heartRateValue, theme === 'dark' ? { color: '#C050F6' } : { color: '#C150F6' }]}>78 BPM</Text>
-          <LinearGradient
-            colors={['#983BCB', '#4023D7']}
-            start={{ x: 0, y: 1 }}
-            end={{ x: 0, y: 1 }}
-            style={styles.timeAgo}
-          >
-            <Text style={styles.timeAgoText}>3 mins ago</Text>
-          </LinearGradient>
+        <View style={{ margin: 15 }}>
+          <Text style={[styles.sectionTitle, { color: textColor }]}>Activity Status</Text>
 
-          {/* Chart */}
-          <LineChart
-            data={{
-              labels: ["", "", "", "", "", ""],
-              datasets: [
-                {
-                  data: [65, 72, 78, 75, 80, 78],
+          <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
+            <Text style={[styles.heartRate, { color: colors.text }]}>Heart Rate</Text>
+            <Text style={[styles.heartRateValue, theme === 'dark' ? { color: '#C050F6' } : { color: '#C150F6' }]}>78 BPM</Text>
+            <LinearGradient
+              colors={['#983BCB', '#4023D7']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.timeAgo}
+            >
+              <Text style={styles.timeAgoText}>3 mins ago</Text>
+            </LinearGradient>
+
+            {/* Chart */}
+            <LineChart
+              data={{
+                labels: ["", "", "", "", "", ""],
+                datasets: [
+                  {
+                    data: [65, 72, 78, 75, 80, 78],
+                  },
+                ],
+              }}
+              width={screenWidth * 0.85}
+              height={180}
+              chartConfig={{
+                backgroundGradientFrom: lineChartBGTo,
+                backgroundGradientTo: lineChartBGFrom,
+                decimalPlaces: 0,
+                color: (opacity = 2) => `rgba(138, 43, 226, ${opacity})`,
+                labelColor: () => "#aaa",
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "1",
+                  stroke: "#fff",
                 },
-              ],
-            }}
-            width={screenWidth * 0.85}
-            height={180}
-            chartConfig={{
-              backgroundColor: "#2a2940",
-              backgroundGradientFrom: "#2a2940",
-              backgroundGradientTo: "#2a2940",
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`,
-              labelColor: () => "#aaa",
-              propsForDots: {
-                r: "3",
-                strokeWidth: "1",
-                stroke: "#fff",
-              },
-            }}
-            bezier
-            style={{ marginVertical: 10, borderRadius: 12 }}
-          />
+              }}
+
+              style={{ marginVertical: 10, borderRadius: 12 }}
+            />
+          </View>
         </View>
 
         {/* Water & Sleep */}
         <View style={styles.statsRow}>
-          <View style={styles.statCard}>
-            <Text style={styles.statTitle}>Water Intake</Text>
-            <Text style={styles.statValue}>4 Liters</Text>
+          <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Water Intake</Text>
+            <Text style={styles.statWaterValue}>4 Liters</Text>
             <Text style={styles.statSub}>Real-time updates</Text>
           </View>
-          <View style={styles.statCard}>
-            <Text style={styles.statTitle}>Sleep</Text>
-            <Text style={styles.statValue}>8h 20m</Text>
+          <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Sleep</Text>
+            <Text style={styles.statSleepValue}>8h 20m</Text>
+            <View className="justify-center items-center">
+              <ImageComponent />
+            </View>
+          </View>
+        </View>
+
+        {/* Workout */}
+        <View style={{ margin: 15 }}>
+          <View style={styles.workoutHeader}>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>Workout Progress</Text>
+            <TouchableOpacity >
+              {/* Todo: add drop down for filter */}
+              <LinearGradient
+                colors={gradients.onboarding}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={[styles.checkBtn, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}
+              >
+                <Text style={[styles.checkText, { color: colors.text }]}>Weekly</Text>
+                <MaterialIcons size={23} name="keyboard-arrow-down" />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.workoutGraph}>
+            <LineChart
+              data={{
+                labels: ["", "", "", "", "", ""],
+                datasets: [
+                  {
+                    data: [65, 72, 78, 75, 80, 78],
+                  },
+                ],
+              }}
+              width={390}
+
+              height={180}
+              chartConfig={{
+                
+                backgroundGradientFrom: graphBg,
+                backgroundGradientTo: graphBg,
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`,
+                labelColor: () => "#aaa",
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "1",
+                  stroke: "#fff",
+                },
+              }}
+
+              style={{ marginVertical: 10, paddingHorizontal: -100, width: '100%', borderRadius: 12 }}
+            />
           </View>
         </View>
       </ScrollView>
@@ -135,7 +199,7 @@ const styles = StyleSheet.create({
   header: { padding: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   welcome: { fontFamily: "PoppinsRegular", fontSize: 13 },
   username: { fontFamily: "PoppinsBold", fontSize: 20, },
-  notificationButton: { backgroundColor: "#161818", padding: 10, borderRadius: 10 },
+  notificationButton: { padding: 10, borderRadius: 10 },
 
   card: { backgroundColor: "#2a2940", margin: 15, padding: 15, borderRadius: 16 },
   cardTitle: { fontFamily: "PoppinsSemiBold", color: '#FFFFFF', fontSize: 16 },
@@ -143,25 +207,36 @@ const styles = StyleSheet.create({
   bmiRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   bmiValue: { color: "#fff", fontSize: 28, fontWeight: "bold" },
   viewMoreBtn: { paddingHorizontal: 15, paddingVertical: 12, borderRadius: 20 },
-  viewMoreText: { fontFamily: "PoppinsSemiBold", color: "#FFFFFF", fontSize: 10 },
+  viewMoreText: { fontFamily: "PoppinsSemiBold", color: "#FFFFFF", fontSize: 10, textAlign: 'center' },
 
-  targetCard: { flexDirection: "row", justifyContent: "space-between", alignItems: 'center', backgroundColor: "#35334f", margin: 15, padding: 15, borderRadius: 16 },
-  checkBtn: { backgroundColor: "#5e3fff", paddingHorizontal: 14, paddingVertical: 6, borderRadius: 12 },
-  checkText: { fontFamily: "PoppinsMedium", fontSize: 13 },
+  targetCard: { flexDirection: "row", justifyContent: "space-between", alignItems: 'center', margin: 15, padding: 15, borderRadius: 16 },
+  checkBtn: { backgroundColor: "#5e3fff", paddingHorizontal: 18, paddingVertical: 6, borderRadius: 20 },
+  checkText: { color: 'white', fontFamily: "PoppinsRegular", fontSize: 13, marginTop: 2 },
 
-  sectionTitle: { color: "#fff", fontSize: 16, fontWeight: "600", marginLeft: 20, marginTop: 10 },
-  chartCard: { backgroundColor: "#35334f", margin: 15, padding: 15, borderRadius: 16, },
+  sectionTitle: { fontSize: 16, fontFamily: "PoppinsSemiBold", marginTop: 10 },
+  chartCard: { marginTop: 10, padding: 15, borderRadius: 20, },
   heartRate: { fontFamily: "PoppinsMedium", fontSize: 13 },
   heartRateValue: { fontFamily: "PoppinsMedium", fontSize: 18, },
-  timeAgo: { backgroundColor: "#5e3fff", width: 90, paddingVertical: 5, borderRadius: 8, marginTop: 5, },
+  timeAgo: { backgroundColor: "#5e3fff", width: 90, paddingVertical: 8, borderRadius: 20, marginTop: 5, },
   timeAgoText: { textAlign: 'center', fontSize: 12, color: '#FFFFFF' },
 
 
-  statsRow: { flexDirection: "row", justifyContent: "space-between", marginHorizontal: 15, marginBottom: 80 },
-  statCard: { backgroundColor: "#2a2940", flex: 1, margin: 5, padding: 15, borderRadius: 16 },
-  statTitle: { color: "#aaa", fontSize: 14 },
-  statValue: { color: "#fff", fontSize: 18, fontWeight: "bold", marginVertical: 4 },
+  statsRow: { flexDirection: "row", justifyContent: "space-between", marginHorizontal: 15, marginBottom: 50, gap: 0 },
+  statCard: {
+    flex: 1, margin: 5, padding: 15, borderRadius: 16, backgroundColor: "#2a2940", shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 6,
+  },
+  statTitle: { fontFamily: "PoppinsMedium", fontSize: 14 },
+  statSleepValue: { fontFamily: "PoppinsSemiBold", color: "#1AE56B", fontSize: 18, fontWeight: "bold", marginVertical: 4 },
+  statWaterValue: { color: "#C050F6", fontSize: 18, fontWeight: "bold", marginVertical: 4 },
   statSub: { color: "#aaa", fontSize: 12 },
+
+
+  workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
+  workoutGraph: { borderRadius: 16,  right: 10 },
 
   tabBar: { flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingVertical: 12, backgroundColor: "#2a2940", borderTopLeftRadius: 20, borderTopRightRadius: 20, position: "absolute", bottom: 0, left: 0, right: 0 },
   centerTab: { backgroundColor: "#5e3fff", padding: 14, borderRadius: 30, marginTop: -30 },

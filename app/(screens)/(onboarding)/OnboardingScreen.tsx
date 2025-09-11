@@ -16,7 +16,7 @@ const OnboardingScreen = () => {
     if (step < onboardingData.length - 1) {
       setStep(step + 1)
     } else {
-      router.back();
+      router.push('/register')
     }
   }
 
