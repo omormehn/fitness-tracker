@@ -8,6 +8,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import SleepGraphDark from '@/assets/images/dark/sleepgraph.svg';
 import SleepGraphLight from '@/assets/images/light/sleepgraph.svg';
+import { Colors } from "@/theme/Colors";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -152,6 +153,53 @@ const HomeScreen = () => {
                 <Text style={[styles.checkText, { color: colors.text }]}>Weekly</Text>
                 <MaterialIcons size={23} name="keyboard-arrow-down" />
               </LinearGradient>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.workoutGraph}>
+            <LineChart
+              data={{
+                labels: ["", "", "", "", "", ""],
+                datasets: [
+                  {
+                    data: [65, 72, 78, 75, 80, 78],
+                  },
+                ],
+              }}
+              width={400}
+
+              height={180}
+              chartConfig={{
+
+                backgroundGradientFrom: graphBg,
+                backgroundGradientTo: graphBg,
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`,
+                labelColor: () => "#aaa",
+                propsForDots: {
+                  r: "4",
+                  strokeWidth: "1",
+                  stroke: "#fff",
+                },
+              }}
+
+              style={{ marginVertical: 10, paddingHorizontal: -100, width: '100%', borderRadius: 12 }}
+            />
+          </View>
+        </View>
+
+
+        {/* Latest Workout */}
+        <View style={{ margin: 20 }}>
+          <View style={styles.workoutHeader}>
+            <Text style={[styles.sectionTitle, { color: textColor }]}>Latest Workout</Text>
+            <TouchableOpacity >
+
+              <View
+                style={[{ flexDirection: 'row', alignItems: 'center', gap: 4 }]}
+              >
+                <Text style={[{ fontFamily: 'PoppinsMedium', fontSize: 12, }, theme === 'dark' ? { color: 'A5A3AF' }: {color: Colors.gray2}]}>See more</Text>
+
+              </View>
             </TouchableOpacity>
           </View>
           <View style={styles.workoutGraph}>

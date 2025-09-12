@@ -26,6 +26,6 @@ export const COLORS = {
 export const Colors = {
   tintText1: '#B6B4C1',
   tintText2: '#8F8588',
-
+  gray2: '#A5A3AF'
 }
 
