@@ -9,6 +9,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import SleepGraphDark from '@/assets/images/dark/sleepgraph.svg';
 import SleepGraphLight from '@/assets/images/light/sleepgraph.svg';
 import { Colors } from "@/theme/Colors";
+import LineChartComponent from "@/components/LineChart";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -17,8 +18,7 @@ const HomeScreen = () => {
   const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
   const graphBg = theme === 'dark' ? '#2A2C38' : '#FFFFFF';
-  const lineChartBGFrom = theme === 'dark' ? '#2a2940' : '#e5daf5';
-  const lineChartBGTo = theme === 'dark' ? '#2a2940' : '#e5daf5';
+  const lineChartBg = theme === 'dark' ? '#2a2940' : '#e5daf5';
   const notificationBg = theme === 'dark' ? '#161818' : '#F7F8F8';
   const notificationColor = theme === 'dark' ? '#FFFFFF' : '#000000';
 
@@ -93,32 +93,7 @@ const HomeScreen = () => {
             </LinearGradient>
 
             {/* Chart */}
-            <LineChart
-              data={{
-                labels: ["", "", "", "", "", ""],
-                datasets: [
-                  {
-                    data: [65, 72, 78, 75, 80, 78],
-                  },
-                ],
-              }}
-              width={screenWidth * 0.85}
-              height={180}
-              chartConfig={{
-                backgroundGradientFrom: lineChartBGTo,
-                backgroundGradientTo: lineChartBGFrom,
-                decimalPlaces: 0,
-                color: (opacity = 2) => `rgba(138, 43, 226, ${opacity})`,
-                labelColor: () => "#aaa",
-                propsForDots: {
-                  r: "4",
-                  strokeWidth: "1",
-                  stroke: "#fff",
-                },
-              }}
-
-              style={{ marginVertical: 10, borderRadius: 12 }}
-            />
+            <LineChartComponent theme={theme} graphFrom={lineChartBg} graphTo={lineChartBg} width={screenWidth * 0.85} />
           </View>
         </View>
 
@@ -156,34 +131,7 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.workoutGraph}>
-            <LineChart
-              data={{
-                labels: ["", "", "", "", "", ""],
-                datasets: [
-                  {
-                    data: [65, 72, 78, 75, 80, 78],
-                  },
-                ],
-              }}
-              width={400}
-
-              height={180}
-              chartConfig={{
-
-                backgroundGradientFrom: graphBg,
-                backgroundGradientTo: graphBg,
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`,
-                labelColor: () => "#aaa",
-                propsForDots: {
-                  r: "4",
-                  strokeWidth: "1",
-                  stroke: "#fff",
-                },
-              }}
-
-              style={{ marginVertical: 10, paddingHorizontal: -100, width: '100%', borderRadius: 12 }}
-            />
+            <LineChartComponent theme={theme} graphFrom={graphBg} graphTo={graphBg} width={screenWidth} />
           </View>
         </View>
 
@@ -192,8 +140,14 @@ const HomeScreen = () => {
         <View style={{ margin: 20 }}>
           <View style={styles.workoutHeader}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Latest Workout</Text>
-            <TouchableOpacity >
-
+            <TouchableOpacity
+              accessibilityRole="button"
+              accessibilityLabel="See more workouts"
+              hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
+              onPress={() => {
+                // TODO: navigate to workout history
+              }}
+            >
               <View
                 style={[{ flexDirection: 'row', alignItems: 'center', gap: 4 }]}
               >
@@ -232,10 +186,8 @@ const HomeScreen = () => {
             />
           </View>
         </View>
-      </ScrollView>
-
-
-    </View>
+      </ScrollView >
+    </View >
   );
 };
 
@@ -283,7 +235,7 @@ const styles = StyleSheet.create({
 
 
   workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
-  workoutGraph: { borderRadius: 16, right: 30 },
+  workoutGraph: { borderRadius: 16, right: 20 },
 
   tabBar: { flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingVertical: 12, backgroundColor: "#2a2940", borderTopLeftRadius: 20, borderTopRightRadius: 20, position: "absolute", bottom: 0, left: 0, right: 0 },
   centerTab: { backgroundColor: "#5e3fff", padding: 14, borderRadius: 30, marginTop: -30 },
