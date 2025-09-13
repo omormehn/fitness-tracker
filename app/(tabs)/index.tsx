@@ -228,7 +228,7 @@ const HomeScreen = () => {
                 },
               }}
 
-              style={{ marginVertical: 10, paddingHorizontal: -100, width: '100%', borderRadius: 12 }}
+              style={{ marginVertical: 10, width: '100%', borderRadius: 12 }}
             />
           </View>
         </View>
