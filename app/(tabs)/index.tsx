@@ -211,7 +211,7 @@ const HomeScreen = () => {
                   },
                 ],
               }}
-              width={400}
+              width={screenWidth * 0.85}
 
               height={180}
               chartConfig={{
