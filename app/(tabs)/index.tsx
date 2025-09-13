@@ -197,8 +197,7 @@ const HomeScreen = () => {
               <View
                 style={[{ flexDirection: 'row', alignItems: 'center', gap: 4 }]}
               >
-                <Text style={[{ fontFamily: 'PoppinsMedium', fontSize: 12, }, theme === 'dark' ? { color: 'A5A3AF' }: {color: Colors.gray2}]}>See more</Text>
-
+                <Text style={{ fontFamily: 'PoppinsMedium', fontSize: 12, color: colors.tintText3 }}>See more</Text>
               </View>
             </TouchableOpacity>
           </View>
