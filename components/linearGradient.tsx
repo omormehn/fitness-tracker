@@ -12,14 +12,19 @@ interface LinearGradientProps {
     style?: StyleProp<ViewStyle>;
     children?: React.ReactNode;
 }
-const LinearGradientComponent = ({ x1, x2, y1, y2, styles, children }: LinearGradientProps) => {
+const LinearGradientComponent = ({ 
+    start = { x: 0, y: 0 }, 
+    end = { x: 1, y: 1 }, 
+    style, 
+    children 
+}: LinearGradientProps) => {
     const { gradients } = useTheme();
     return (
         <LinearGradient
             colors={gradients.card}
-            start={{ x: x1!, y: y1! }}
-            end={{ x: x2!, y: y2! }}
-            style={styles}
+            start={start}
+            end={end}
+            style={style}
         >
             {children}
         </LinearGradient>
