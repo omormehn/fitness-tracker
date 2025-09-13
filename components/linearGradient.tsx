@@ -2,12 +2,14 @@ import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { LinearGradient, LinearGradientPoint } from 'expo-linear-gradient'
 import { useTheme } from '@/context/ThemeContext'
+import { StyleProp, ViewStyle } from 'react-native';
+
+type LinearGradientPoint = { x: number; y: number };
+
 interface LinearGradientProps {
-    x1?: number;
-    y1?: number;
-    x2?: number;
-    y2?: number;
-    styles: object;
+    start?: LinearGradientPoint;
+    end?: LinearGradientPoint;
+    style?: StyleProp<ViewStyle>;
     children?: React.ReactNode;
 }
 const LinearGradientComponent = ({ x1, x2, y1, y2, styles, children }: LinearGradientProps) => {
