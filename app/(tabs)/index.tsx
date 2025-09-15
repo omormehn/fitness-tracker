@@ -11,6 +11,7 @@ import SleepGraphLight from '@/assets/images/light/sleepgraph.svg';
 import { Colors } from "@/theme/Colors";
 import LineChartComponent from "@/components/LineChart";
 import WorkoutCard from "@/components/WorkoutCard";
+import { workouts } from "@/data/workout";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -158,9 +159,14 @@ const HomeScreen = () => {
           </View>
 
           <View style={styles.workoutCardContainer}>
-            <WorkoutCard title="Fullbody Workout" calories="180" time="20" />
-            <WorkoutCard title="Lowerbody Workout" calories="380" time="90" />
-            <WorkoutCard title="AB Workout" calories="180" time="20" />
+            {workouts.map((workout, index) => (
+              <WorkoutCard
+                key={index}
+                title={workout.title}
+                calories={workout.calories}
+                time={workout.time} />
+            ))}
+            
           </View>
         </View>
       </ScrollView >
