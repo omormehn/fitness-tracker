@@ -1,16 +1,14 @@
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import React from 'react';
 import { useTheme } from '@/context/ThemeContext';
-import PagerView from 'react-native-pager-view';
 import { Colors } from '@/theme/Colors';
 import Carousel from '@/components/carousel';
-import RegBlob from '@/assets/images/light/regblob.svg';
-import RegBlobDark from '@/assets/images/dark/regblob.svg';
 import Button from '@/components/button';
 import { router } from 'expo-router';
 
+
 const GoalsScreen = () => {
-    const { theme, colors } = useTheme();
+    const { colors } = useTheme();
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* Top Section */}
@@ -33,8 +31,10 @@ const GoalsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
+        flexDirection: 'column',
+        justifyContent: 'center',
         alignItems: 'center',
-        paddingVertical: 60, gap: 40,
+        gap: 40,
     },
     text: {
         fontSize: 22,
