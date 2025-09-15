@@ -11,7 +11,7 @@ interface WorkoutCardProps {
 }
 
 const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
-    const { theme, colors } = useTheme();
+    const { colors } = useTheme();
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -38,10 +38,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'row',
-        justifyContent: 'space-evenly',
+        justifyContent: 'space-between',
         alignItems: 'center',
         paddingVertical: 15,
-        gap: 5,
+        gap: 15,
+        paddingHorizontal: 10
     },
     column2: {
         flexDirection: 'column',
@@ -52,7 +53,8 @@ const styles = StyleSheet.create({
     },
     subTitle: {
         fontSize: 14,
-        fontFamily: 'PoppinsRegular'
+        fontFamily: 'PoppinsRegular',
+        width: 200
     },
     circle: {
         width: 40,

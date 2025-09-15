@@ -158,16 +158,15 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
 
-          <View style={styles.workoutCardContainer}>
-            {workouts.map((workout, index) => (
+          {workouts.map((workout, index) => (
+            <View style={styles.workoutCardContainer}>
               <WorkoutCard
-                key={index}
+                key={workout.title}
                 title={workout.title}
                 calories={workout.calories}
                 time={workout.time} />
-            ))}
-            
-          </View>
+            </View>
+          ))}
         </View>
       </ScrollView >
     </View >
@@ -219,7 +218,7 @@ const styles = StyleSheet.create({
 
   workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   workoutGraph: { borderRadius: 16, right: 20 },
-  workoutCardContainer: { flexDirection: 'column', gap: 10 },
+  workoutCardContainer: { flexDirection: 'column', },
 
   tabBar: { flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingVertical: 12, backgroundColor: "#2a2940", borderTopLeftRadius: 20, borderTopRightRadius: 20, position: "absolute", bottom: 0, left: 0, right: 0 },
   centerTab: { backgroundColor: "#5e3fff", padding: 14, borderRadius: 30, marginTop: -30 },
