@@ -1,0 +1,30 @@
+# Node modules and caches
+node_modules/
+.expo/
+.expo-shared/
+.git/
+.gitignore
+.DS_Store
+
+# System files
+*.log
+*.tmp
+
+# Build and output folders
+dist/
+build/
+web-build/
+.next/
+.output/
+
+# Assets you don't need in the build (e.g. raw assets or test data)
+assets/raw/
+assets/test/
+tests/
+__tests__/
+.vscode/
+.idea/
+
+# Local environment files
+.env.local
+.env.development

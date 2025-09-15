@@ -9,7 +9,7 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
-      "image": "./assets/images/splash-icon.png",
+      "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -22,7 +22,8 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "package": "com.thefirstnative.healthtracker"
     },
     "web": {
       "bundler": "metro",
@@ -40,7 +41,7 @@
             "image": "./assets/splash-icon-dark.png",
             "backgroundColor": "#2A2C38"
           },
-          "imageWidth": 200
+          "imageWidth": 300
         }
       ]
     ],

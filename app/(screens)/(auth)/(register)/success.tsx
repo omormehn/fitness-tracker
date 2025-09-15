@@ -5,10 +5,14 @@ import SuccessLight from '@/assets/images/light/regsuccess.svg'
 import SuccessDark from '@/assets/images/dark/regsuccess.svg'
 import { Colors } from '@/theme/Colors'
 import Button from '@/components/button'
+import { router } from 'expo-router'
 
 const RegSuccess = () => {
     const { theme, colors } = useTheme();
     const Svg = theme === 'light' ? SuccessLight : SuccessDark;
+    const routeToHome = () => {
+        router.replace('/(tabs)')
+    }
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* Top SVG */}
@@ -21,7 +25,7 @@ const RegSuccess = () => {
             </View>
 
             {/* Button */}
-            <TouchableOpacity style={{ position: 'absolute', bottom: 0, paddingBottom: 40, }}>
+            <TouchableOpacity onPress={routeToHome} style={{ position: 'absolute', bottom: 0, paddingBottom: 40, }}>
                 <Button text='Go To Home' />
             </TouchableOpacity>
         </View >

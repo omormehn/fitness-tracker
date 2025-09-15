@@ -158,15 +158,15 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
 
-          {workouts.map((workout, index) => (
-            <View style={styles.workoutCardContainer}>
+          <View style={styles.workoutCardContainer}>
+            {workouts.map((workout, index) => (
               <WorkoutCard
-                key={workout.title}
+                key={workout.title + index}
                 title={workout.title}
                 calories={workout.calories}
                 time={workout.time} />
-            </View>
-          ))}
+            ))}
+          </View>
         </View>
       </ScrollView >
     </View >
