@@ -16,7 +16,7 @@ const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* First col */}
-            <LinearGradientComponent styles={{ padding: 35, borderRadius: 35, }} >
+            <LinearGradientComponent style={{ padding: 35, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
             </LinearGradientComponent>
 

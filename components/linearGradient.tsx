@@ -5,20 +5,27 @@ import { useTheme } from '@/context/ThemeContext'
 import type { StyleProp, ViewStyle } from 'react-native';
 
 
+
 interface LinearGradientProps {
     start?: LinearGradientPoint;
     end?: LinearGradientPoint;
-    styles: StyleProp<ViewStyle>;
+    style: StyleProp<ViewStyle>;
     children?: React.ReactNode;
 }
-const LinearGradientComponent = ({ start = { x: 0, y: 0 }, end = { x: 1, y: 1 }, styles, children }: LinearGradientProps) => {
+
+const LinearGradientComponent = ({ 
+    start = { x: 0, y: 0 }, 
+    end = { x: 1, y: 1 }, 
+    style, 
+    children 
+}: LinearGradientProps) => {
     const { gradients } = useTheme();
     return (
         <LinearGradient
             colors={gradients.card}
             start={start}
             end={end}
-            style={styles}
+            style={style}
         >
             {children}
         </LinearGradient>
