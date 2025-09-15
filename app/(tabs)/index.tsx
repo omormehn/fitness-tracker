@@ -10,6 +10,8 @@ import SleepGraphDark from '@/assets/images/dark/sleepgraph.svg';
 import SleepGraphLight from '@/assets/images/light/sleepgraph.svg';
 import { Colors } from "@/theme/Colors";
 import LineChartComponent from "@/components/LineChart";
+import WorkoutCard from "@/components/WorkoutCard";
+import { workouts } from "@/data/workout";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -131,7 +133,7 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
           <View style={styles.workoutGraph}>
-            <LineChartComponent theme={theme} graphFrom={graphBg} graphTo={graphBg} width={screenWidth} />
+            <LineChartComponent theme={theme} graphFrom={graphBg} graphTo={graphBg} />
           </View>
         </View>
 
@@ -155,36 +157,16 @@ const HomeScreen = () => {
               </View>
             </TouchableOpacity>
           </View>
-          <View style={styles.workoutGraph}>
-            <LineChart
-              data={{
-                labels: ["", "", "", "", "", ""],
-                datasets: [
-                  {
-                    data: [65, 72, 78, 75, 80, 78],
-                  },
-                ],
-              }}
-              width={screenWidth * 0.85}
 
-              height={180}
-              chartConfig={{
-
-                backgroundGradientFrom: graphBg,
-                backgroundGradientTo: graphBg,
-                decimalPlaces: 0,
-                color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`,
-                labelColor: () => "#aaa",
-                propsForDots: {
-                  r: "4",
-                  strokeWidth: "1",
-                  stroke: "#fff",
-                },
-              }}
-
-              style={{ marginVertical: 10, width: '100%', borderRadius: 12 }}
-            />
-          </View>
+          {workouts.map((workout, index) => (
+            <View style={styles.workoutCardContainer}>
+              <WorkoutCard
+                key={workout.title}
+                title={workout.title}
+                calories={workout.calories}
+                time={workout.time} />
+            </View>
+          ))}
         </View>
       </ScrollView >
     </View >
@@ -236,6 +218,7 @@ const styles = StyleSheet.create({
 
   workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   workoutGraph: { borderRadius: 16, right: 20 },
+  workoutCardContainer: { flexDirection: 'column', },
 
   tabBar: { flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingVertical: 12, backgroundColor: "#2a2940", borderTopLeftRadius: 20, borderTopRightRadius: 20, position: "absolute", bottom: 0, left: 0, right: 0 },
   centerTab: { backgroundColor: "#5e3fff", padding: 14, borderRadius: 30, marginTop: -30 },

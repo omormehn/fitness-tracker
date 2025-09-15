@@ -8,31 +8,33 @@ interface LineChartProps {
     width?: number;
     graphFrom: string;
     graphTo: string;
+    data?: number[];
+    labels?: string[];
 }
 const screenWidth = Dimensions.get("window").width;
 
-const LineChartComponent = ({ theme, width, graphFrom, graphTo }: LineChartProps) => {
+const LineChartComponent = ({ theme, width, graphFrom, graphTo, data, labels }: LineChartProps) => {
 
-    const lineChartBGFrom = theme === 'dark' ? '#2a2940' : '#e5daf5';
-    const lineChartBGTo = theme === 'dark' ? '#2a2940' : '#e5daf5';
+    const chartWidth = width ?? screenWidth;
+
     return (
         <View>
             <LineChart
                 data={{
-                    labels: ["", "", "", "", "", ""],
+                    labels: labels ?? ["", "", "", "", "", ""],
                     datasets: [
                         {
-                            data: [65, 72, 78, 75, 80, 78],
+                            data: data ?? [65, 72, 78, 75, 80, 78],
                         },
                     ],
                 }}
-                width={width!}
+                width={chartWidth}
                 height={180}
                 chartConfig={{
                     backgroundGradientFrom: graphFrom,
                     backgroundGradientTo: graphTo,
                     decimalPlaces: 0,
-                    color: (opacity = 2) => `rgba(138, 43, 226, ${opacity})`,
+                    color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`,
                     labelColor: () => "#aaa",
                     propsForDots: {
                         r: "4",
