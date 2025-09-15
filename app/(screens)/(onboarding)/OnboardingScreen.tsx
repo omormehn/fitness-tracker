@@ -23,13 +23,18 @@ const OnboardingScreen = () => {
 
   return (
     <View style={[{ flex: 1 }, theme === 'dark' ? { backgroundColor: colors.background } : { backgroundColor: '#FFFFFF' }]} >
-      <Onboarding
-        lightImage={lightImage}
-        darkImage={darkImage}
-        title={title}
-        description={description}
-        route={handleNext}
-      />
+      {onboardingData.map((item, index) => (
+        index === step && (
+          <Onboarding
+            key={index}
+            lightImage={item.lightImage}
+            darkImage={item.darkImage}
+            title={item.title}
+            description={item.description}
+            route={handleNext}
+          />
+        )
+      ))}
     </View>
   )
 }

@@ -27,13 +27,13 @@ export const onboardingData = [
     darkImage: Onboarding3Dark,
     title: 'Eat Well',
     description: 'Tracking your meals and calories has never been easier.',
-    route: '/onboarding/4' 
+    route: '/onboarding/4'
   },
   {
     lightImage: Onboarding4Light,
     darkImage: Onboarding4Dark,
     title: 'Improve Sleep  Quality',
     description: 'Improve the quality of your sleep with us, good quality sleep can bring a good mood in the morning',
-    route: '/home' 
+    route: '/home'
   }
 ]
