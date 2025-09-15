@@ -10,7 +10,6 @@ import { onboardingData } from '@/data/onboardingData'
 const OnboardingScreen = () => {
   const { theme, colors } = useTheme()
   const [step, setStep] = useState(0)
-  const { lightImage, darkImage, title, description } = onboardingData[step]
 
   const handleNext = () => {
     if (step < onboardingData.length - 1) {
