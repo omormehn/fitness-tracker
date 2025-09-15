@@ -1,7 +1,17 @@
 import React from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Tabs } from 'expo-router';
-
+import { useTheme } from '@/context/ThemeContext';
+import CustomIcon from '@/components/CustomIcon';
+import ActivityIcon from '@/assets/activityIcon.svg'
+import CameraIcon from '@/assets/cameraIcon.svg'
+import SearchIcon from '@/assets/SearchIcon.svg'
+import HomeIcon from '@/assets/HomeIcon.svg'
+import ProfileIcon from '@/assets/ProfileIcon.svg'
+import { BottomTabsProps } from 'react-native-screens';
+import { View } from 'react-native';
+import LineChartComponent from '@/components/LineChart';
+import LinearGradientComponent from '@/components/linearGradient';
 
 
 // You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
@@ -13,24 +23,78 @@ function TabBarIcon(props: {
 }
 
 export default function TabLayout() {
+  const { theme, gradients } = useTheme();
 
 
+  const bg = theme === 'dark' ? '#22242E' : '#FFFFFF';
   return (
     <Tabs
+      screenOptions={{
+        tabBarShowLabel: false,
+        tabBarStyle: {
+          height: 85,
+          borderTopWidth: 0,
+          backgroundColor: bg,
+        },
+        tabBarIconStyle: {
+          marginTop: 20,
+          borderWidth: 0,
+        },
+      }}
     >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Home',
+          tabBarIcon: ({ focused }) => <CustomIcon name={HomeIcon} focused={focused} />,
           headerShown: false
         }}
       />
       <Tabs.Screen
-        name="two"
+        name="activity"
         options={{
-          title: 'Tab Two',
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          title: 'Activity',
+          tabBarIcon: ({ focused }) => <CustomIcon name={ActivityIcon} focused={focused} />,
+          headerShown: false
+        }}
+      />
+      <Tabs.Screen
+        name="search"
+        options={{
+          title: 'Search',
+          tabBarIcon: ({ focused }) => (
+            <LinearGradientComponent
+              gradient={gradients.button}
+              style={{
+                width: 63,
+                height: 63,
+                borderRadius: 35,
+                justifyContent: 'center',
+                alignItems: 'center',
+                marginBottom: 50,
+               
+              }}
+            >
+              <CustomIcon name={SearchIcon}  />
+            </LinearGradientComponent>
+          ),
+          headerShown: false
+        }}
+      />
+      <Tabs.Screen
+        name="camera"
+        options={{
+          title: 'Camera',
+          tabBarIcon: ({ focused }) => <CustomIcon name={CameraIcon} focused={focused} />,
+          headerShown: false
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ focused }) => <CustomIcon name={ProfileIcon} focused={focused} />,
+          headerShown: false
         }}
       />
     </Tabs>

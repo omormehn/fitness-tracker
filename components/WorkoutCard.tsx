@@ -11,12 +11,12 @@ interface WorkoutCardProps {
 }
 
 const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
-    const { colors } = useTheme();
+    const { colors, gradients } = useTheme();
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* First col */}
-            <LinearGradientComponent style={{ padding: 35, borderRadius: 35, }} >
+            <LinearGradientComponent gradient={gradients.card} style={{ padding: 35, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
             </LinearGradientComponent>
 
