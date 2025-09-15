@@ -12,12 +12,11 @@ interface WorkoutCardProps {
 
 const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
     const { theme, colors } = useTheme();
-    const backgroundColor = theme === 'dark' ? '#2A2C38' : '#FFFFFF';
 
     return (
-        <View style={[styles.container, { backgroundColor }]}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* First col */}
-            <LinearGradientComponent styles={{ padding: 35, borderRadius: 35, }} x1={0} y1={0} x2={1} y2={1}>
+            <LinearGradientComponent styles={{ padding: 35, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
             </LinearGradientComponent>
 
@@ -27,7 +26,7 @@ const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
                 <Text style={[styles.subTitle, { color: colors.tintText3 }]}>{calories} Calories Burn | {time} minutes</Text>
             </View>
             {/* 3rd col */}
-            <View style={styles.cirlce} />
+            <View style={styles.circle} />
 
         </View>
     )
@@ -55,7 +54,7 @@ const styles = StyleSheet.create({
         fontSize: 14,
         fontFamily: 'PoppinsRegular'
     },
-    cirlce: {
+    circle: {
         width: 40,
         height: 40,
         borderWidth: 2,
