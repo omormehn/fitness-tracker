@@ -139,7 +139,7 @@ const HomeScreen = () => {
           </View>
         </View>
 
-
+        {/* TODO: FIX THIS GUYS INLINE PADDING ISSUES ✅✅✅*/}
         {/* Latest Workout */}
         <View style={{ margin: 20 }}>
           <View style={styles.workoutHeader}>
@@ -221,7 +221,4 @@ const styles = StyleSheet.create({
   workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   workoutGraph: { borderRadius: 16, right: 20 },
   workoutCardContainer: { flexDirection: 'column', },
-
-  tabBar: { flexDirection: "row", justifyContent: "space-around", alignItems: "center", paddingVertical: 12, backgroundColor: "#2a2940", borderTopLeftRadius: 20, borderTopRightRadius: 20, position: "absolute", bottom: 0, left: 0, right: 0 },
-  centerTab: { backgroundColor: "#5e3fff", padding: 14, borderRadius: 30, marginTop: -30 },
 });
