@@ -100,7 +100,7 @@ const RegisterScreen2 = () => {
                                     end={{ x: 0, y: 1 }}
                                     style={{ paddingHorizontal: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
                                 >
-                                    <View style={{ backgroundColor: '' }}><Text style={{ color: colors.text, fontFamily: 'PoppinsMedium', fontSize: 12 }}>KG</Text></View>
+                                    <View ><Text style={{ color: colors.text, fontFamily: 'PoppinsMedium', fontSize: 12 }}>KG</Text></View>
                                 </LinearGradient>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
@@ -111,7 +111,7 @@ const RegisterScreen2 = () => {
                                     end={{ x: 0, y: 1 }}
                                     style={{ paddingHorizontal: 20, borderRadius: 10, alignItems: 'center', justifyContent: 'center' }}
                                 >
-                                    <View style={{ backgroundColor: '' }}><Text style={{ color: colors.text, fontFamily: 'PoppinsMedium', fontSize: 12 }}>CM</Text></View>
+                                    <View ><Text style={{ color: colors.text, fontFamily: 'PoppinsMedium', fontSize: 12 }}>CM</Text></View>
                                 </LinearGradient>
                             </View>
                         </View>

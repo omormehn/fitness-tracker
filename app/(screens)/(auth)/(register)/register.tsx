@@ -1,4 +1,4 @@
-import { LogBox, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import InputContainer from '@/components/InputContainer'
@@ -10,13 +10,17 @@ import Seperator from '@/components/seperator';
 import SocialsContainer from '@/components/SocialContianer';
 
 
-
+// TODO: ADD A SCROLL VIEW | FIX SEPERATOR ✅✅✅
 const RegisterScreen = () => {
 
     const { theme, colors } = useTheme()
     const [checked, setChecked] = useState(false);
     return (
-        <View style={[styles.container, theme === 'dark' ? { backgroundColor: colors.background } : { backgroundColor: '#FFFFFF' }]}>
+        <ScrollView style={[
+            theme === 'dark'
+                ? { backgroundColor: colors.background }
+                : { backgroundColor: '#FFFFFF' },
+        ]} contentContainerStyle={styles.container}>
             {/* Top Section */}
             <View className='flex-col gap-2'>
                 <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 16, color: colors.text, textAlign: 'center' }}>Hey there,</Text>
@@ -49,7 +53,7 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             {/* Divider */}
-            <Seperator  />
+            <Seperator />
 
             {/* Socials */}
             <View style={{ top: 60, flexDirection: 'row', gap: 30 }} >
@@ -61,7 +65,7 @@ const RegisterScreen = () => {
             <View style={{ top: 100 }}>
                 <Text style={{ color: colors.text, fontFamily: 'PoppinsRegular' }}>Already Have an account? <Text onPress={() => router.push('/login')} style={{ fontFamily: 'PoppinsMedium', color: '#C150F6' }}>Login</Text></Text>
             </View>
-        </View>
+        </ScrollView>
     )
 }
 
@@ -69,10 +73,11 @@ export default RegisterScreen
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
+        // flex: 1,
         alignItems: 'center',
         paddingTop: 60,
         paddingHorizontal: 30,
+        paddingBottom: 150,
     },
     checkboxBase: {
         width: 24,
