@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { useTheme } from '@/context/ThemeContext';
 
-
+const screenWidth = Dimensions.get('window').width
 const Seperator = () => {
     const { colors } = useTheme();
 
@@ -23,13 +23,14 @@ const styles = StyleSheet.create({
     seperator: {
         flexDirection: 'row',
         gap: 30,
-        justifyContent: 'center'
+        justifyContent: 'center',
+        position: 'relative'
     },
     divider: {
         backgroundColor: '#423C3D',
         top: 30,
         height: 1,
-        paddingHorizontal: 80,
+        paddingHorizontal: screenWidth * 0.2,
     },
     smallText: {
         top: 20,
