@@ -16,21 +16,29 @@ export const registerValidators = [
 
 export const register = async (req: Request, res: Response) => {
     const { fullName, email, password } = req.body;
-    const existing = await User.findOne({ email });
-    console.log(existing)
+    const emailNorm = (email || '').toLowerCase().trim();
+    const existing = await User.findOne({ email: emailNorm });
     if (existing) return res.status(409).json({ message: 'Email already in use' });
 
-    const user = new User({ fullName, email, password });
-    await user.save();
 
-    const accessToken = createAccessToken(user._id);
-    const refreshToken = await createRefreshToken(user._id);
+    const user = new User({ fullName: fullName?.trim(), email: emailNorm, password });
 
-    res.status(201).json({
-        user: { id: user._id, fullName: user.fullName, email: user.email },
-        accessToken,
-        refreshToken,
-    });
+
+    try {
+        await user.save();
+        const accessToken = createAccessToken(user._id);
+        const refreshToken = await createRefreshToken(user._id);
+        res.status(201).json({
+            user: { id: user._id, fullName: user.fullName, email: user.email },
+            accessToken,
+            refreshToken,
+        });
+    } catch (error) {
+        console.log('error in reg', error)
+    }
+
+
+
 };
 
 export const loginValidators = [
@@ -52,7 +60,7 @@ export const login = async (req: Request, res: Response) => {
     const refreshToken = await createRefreshToken(user._id);
 
     res.json({
-        user: { id: user._id, name: user.name, email: user.email },
+        user: { id: user._id, fullName: user.fullName, email: user.email },
         accessToken,
         refreshToken,
     });
