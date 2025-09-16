@@ -4,7 +4,7 @@
     "slug": "health-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/activityIcon.svg",
+    "icon": "./assets/app-icon.png",
     "scheme": "healthtracker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/activityIcon.svg",
+        "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
