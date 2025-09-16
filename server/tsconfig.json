@@ -9,7 +9,7 @@
     // See also https://aka.ms/tsconfig/module
     "module": "commonjs",
     "target": "ES2020",
-    "types": [],
+    "types": ["node"],
 
     "esModuleInterop": true,  
     

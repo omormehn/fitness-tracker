@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.ts",
   "scripts": {
-    "dev": "nodemon ./index.ts",
+    "dev": "ts-node-dev --respawn --transpile-only index.t",
     "build": "tsc",
     "start": "node dist/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
