@@ -12,6 +12,7 @@ import { Colors } from "@/theme/Colors";
 import LineChartComponent from "@/components/LineChart";
 import WorkoutCard from "@/components/WorkoutCard";
 import { workouts } from "@/data/workout";
+import { router } from "expo-router";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -26,18 +27,19 @@ const HomeScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <ScrollView showsVerticalScrollIndicator={false}>
 
-        {/* Welcome Section */}
-        <View style={styles.header}>
-          <View style={{ flexDirection: "column" }}>
-            <Text style={[styles.welcome, { color: colors.tintText3 }]}>Welcome Back,</Text>
-            <Text style={[styles.username, { color: colors.text }]}>John Doe</Text>
-          </View>
-          <TouchableOpacity style={[styles.notificationButton, { backgroundColor: notificationBg }]}>
-            <Ionicons name="notifications-outline" size={20} color={notificationColor} />
-          </TouchableOpacity>
+      {/* Welcome Section */}
+      <View style={styles.header}>
+        <View style={{ flexDirection: "column" }}>
+          <Text style={[styles.welcome, { color: colors.tintText3 }]}>Welcome Back,</Text>
+          <Text style={[styles.username, { color: colors.text }]}>John Doe</Text>
         </View>
+        <TouchableOpacity onPress={() => router.push('/notification')} style={[styles.notificationButton, { backgroundColor: notificationBg }]}>
+          <Ionicons name="notifications-outline" size={20} color={notificationColor} />
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* BMI Card */}
         <LinearGradient
@@ -177,12 +179,12 @@ export default HomeScreen;
 
 const styles = StyleSheet.create({
   container: { flex: 1, paddingTop: 40 },
-  header: { padding: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
+  header: { padding: 20, flexDirection: "row", justifyContent: "space-between", alignItems: "center", },
   welcome: { fontFamily: "PoppinsRegular", fontSize: 13 },
   username: { fontFamily: "PoppinsBold", fontSize: 20, },
   notificationButton: { padding: 10, borderRadius: 10 },
 
-  card: { backgroundColor: "#2a2940", margin: 15, padding: 15, borderRadius: 16 },
+  card: { backgroundColor: "#2a2940", margin: 15, padding: 15, marginTop: 20, borderRadius: 16 },
   cardTitle: { fontFamily: "PoppinsSemiBold", color: '#FFFFFF', fontSize: 16 },
   cardSubtitle: { fontFamily: "PoppinsRegular", color: "#FFFFFF", fontSize: 13, marginVertical: 4 },
   bmiRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
