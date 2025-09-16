@@ -65,17 +65,20 @@ export default function TabLayout() {
           tabBarIcon: ({ focused }) => (
             <LinearGradientComponent
               gradient={gradients.button}
-              style={{
+              style={[{
                 width: 63,
                 height: 63,
                 borderRadius: 35,
                 justifyContent: 'center',
                 alignItems: 'center',
                 marginBottom: 50,
-               
-              }}
+                shadowOffset: { width: 0, height: 6 },
+                shadowOpacity: 0.2,
+                shadowRadius: 5,
+                elevation: 6,
+              }, theme === 'light' ? { shadowColor: '#000000' } : { shadowColor: '#95ADFE' }]}
             >
-              <CustomIcon name={SearchIcon}  />
+              <CustomIcon name={SearchIcon} />
             </LinearGradientComponent>
           ),
           headerShown: false
