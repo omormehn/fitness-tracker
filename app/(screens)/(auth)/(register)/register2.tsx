@@ -8,7 +8,8 @@ import {
     View,
     TouchableWithoutFeedback,
     Keyboard,
-    TouchableOpacity
+    TouchableOpacity,
+    Dimensions
 } from 'react-native'
 import React, { useState } from 'react'
 import { useTheme } from '@/context/ThemeContext'
@@ -26,7 +27,7 @@ const OPTIONS = [
     { label: 'Male', value: 'male' },
     { label: 'Female', value: 'female' }
 ]
-
+const { width, height } = Dimensions.get('window')
 const RegisterScreen2 = () => {
     const { colors, theme, gradients } = useTheme();
     const { height } = useWindowDimensions()
@@ -48,11 +49,11 @@ const RegisterScreen2 = () => {
                     bounces={false}
                 >
                     {/* Top section */}
-                    <View style={styles.blobContainer}>
+                    <View >
                         {dark ? (
-                            <BlobDark width="100%" height="100%" />
+                            <BlobDark width="100%" height={height * 0.35} />
                         ) : (
-                            <BlobLight width="100%" height="100%" />
+                            <BlobLight width="100%" height={height * 0.35} />
                         )}
                     </View>
 
@@ -121,6 +122,7 @@ const RegisterScreen2 = () => {
                             <Button text='Next' />
                         </TouchableOpacity>
                     </View>
+
                 </ScrollView>
             </KeyboardAvoidingView>
         </TouchableWithoutFeedback>
@@ -137,11 +139,6 @@ const styles = StyleSheet.create({
         flexGrow: 1,
         justifyContent: 'space-between',
     },
-    blobContainer: {
-        height: '40%',
-        width: '100%',
-        minHeight: 200,
-    },
     formContainer: {
         flex: 1,
         alignItems: 'center',
@@ -156,12 +153,12 @@ const styles = StyleSheet.create({
     inputsContainer: {
         width: '100%',
         gap: 16,
-        marginBottom: 30,
+        marginBottom: 0,
     },
     buttonContainer: {
         width: '100%',
         marginTop: 'auto',
-        paddingBottom: 20,
+        paddingBottom: 50,
     },
     dropdown: {
         borderRadius: 10,

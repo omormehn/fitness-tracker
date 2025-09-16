@@ -10,7 +10,7 @@ const CustomIcon = ({ name, fill, focused }: { name: any, fill?: string, focused
     const Icon = name;
     return (
         <View style={styles.container}>
-            <Icon fill={focused ? color : 'transparent'} />
+            <Icon width={25}  fill={focused ? color : 'transparent'} />
             {focused && (
                 <View style={[styles.dot, { backgroundColor: color }]} />
             )}

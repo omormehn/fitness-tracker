@@ -3,7 +3,7 @@ import React from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import InputContainer from '@/components/InputContainer';
 import Button from '@/components/button';
-import Seperator from '@/components/seperator';
+import Seperator from '@/components/Seperator';
 import SocialsContainer from '@/components/SocialContianer';
 import { router } from 'expo-router';
 

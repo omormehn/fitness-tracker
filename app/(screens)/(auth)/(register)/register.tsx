@@ -6,7 +6,7 @@ import InputContainer from '@/components/InputContainer'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/button';
 import { router } from 'expo-router';
-import Seperator from '@/components/seperator';
+import Seperator from '@/components/Seperator';
 import SocialsContainer from '@/components/SocialContianer';
 
 
