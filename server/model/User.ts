@@ -30,7 +30,7 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: Number,
-        required: true,
+        // required: true,
         unique: true
     },
     password: {
@@ -40,22 +40,22 @@ const userSchema = new mongoose.Schema({
     },
     gender: {
         type: String,
-        required: true,
+        // required: true,
         enum: ['male', 'female']
     },
     height: {
         type: String,
-        required: true,
+        // required: true,
         min: 0
     },
     weight: {
         type: String,
-        required: true,
+        // required: true,
         min: 0
     },
     dateOfBirth: {
         type: Date,
-        required: true,
+        // required: true,
     },
 }, {
     timestamps: true

@@ -10,9 +10,7 @@ const ACCESS_EXPIRES = process.env.ACCESS_TOKEN_EXPIRES! || '15m';
 const REFRESH_EXPIRES_DAYS = Number(process.env.REFRESH_TOKEN_EXPIRES_DAYS || 30);
 
 // Create JWT access token
-export const createAccessToken = (userId: mongoose.Types.ObjectId | string): string => {
-
-
+export const createAccessToken = (userId: mongoose.Types.ObjectId | string | any): string => {
     return jwt.sign(
         { sub: userId.toString() },
         ACCESS_SECRET,
@@ -21,7 +19,7 @@ export const createAccessToken = (userId: mongoose.Types.ObjectId | string): str
 };
 
 // Create refresh token: generate random string, store hash in DB
-export const createRefreshToken = async (userId: mongoose.Types.ObjectId | string) => {
+export const createRefreshToken = async (userId: mongoose.Types.ObjectId | string | any) => {
     const tokenPlain = crypto.randomBytes(64).toString('hex'); // long random string
     const tokenHash = crypto.createHash('sha256').update(tokenPlain).digest('hex');
     const expiresAt = new Date(Date.now() + REFRESH_EXPIRES_DAYS * 24 * 60 * 60 * 1000);
