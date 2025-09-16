@@ -2,14 +2,13 @@ import mongoose, { Document, Model, Schema } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
 export interface IUser extends Document {
-    name: string;
+    fullName: string;
     email: string;
     password: string;
-    fullName: string;
     phone: number;
     gender: string;
-    height: number;
-    weight: number;
+    height?: number;
+    weight?: number;
     dateOfBirth: Date;
     createdAt: Date;
     comparePassword(candidatePassword: string): Promise<boolean>;
@@ -31,12 +30,14 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: Number,
         // required: true,
-        unique: true
+        unique: true,
+        trim: true
     },
     password: {
         type: String,
         required: true,
-        minlength: 6
+        minlength: 6,
+        
     },
     gender: {
         type: String,
@@ -44,12 +45,12 @@ const userSchema = new mongoose.Schema({
         enum: ['male', 'female']
     },
     height: {
-        type: String,
+        type: Number,
         // required: true,
         min: 0
     },
     weight: {
-        type: String,
+        type: Number,
         // required: true,
         min: 0
     },
