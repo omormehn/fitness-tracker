@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import React from 'react';
 import { CarouselProps } from '@/types/types';
 import { useTheme } from '@/context/ThemeContext';
@@ -14,14 +14,8 @@ import GoalCard from './GoalCard';
 import { GOALS } from '@/data/goals';
 import Button from './button';
 
-
+const { height } = Dimensions.get('window')
 const Carousel = () => {
-    const { theme, colors, images, gradients } = useTheme();
-    const Goal1 = theme === 'dark' ? Goal1Dark : Goal1Light;
-    const Goal2 = theme === 'dark' ? Goal2Dark : Goal2Light;
-    const Goal3 = theme === 'dark' ? Goal3Dark : Goal3Light;
-
-
     return (
         <PagerView style={styles.pager} initialPage={0}>
             {/* Page 1 */}
@@ -38,8 +32,6 @@ const Carousel = () => {
             <View key="3" style={styles.page}>
                 <GoalCard lightImage={Goal3Light} darkImage={Goal3Dark} title={GOALS.goal3.title} description={GOALS.goal3.description} />
             </View>
-
-            
         </PagerView>
     );
 };
@@ -49,11 +41,10 @@ export default Carousel;
 const styles = StyleSheet.create({
     pager: {
         width: '100%',
-        height: 600,
+        height: height * 0.65,
     },
     page: {
         justifyContent: 'center',
         alignItems: 'center',
-        padding: 20,
     },
 });
