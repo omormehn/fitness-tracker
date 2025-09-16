@@ -14,7 +14,7 @@ import WorkoutCard from "@/components/WorkoutCard";
 import { workouts } from "@/data/workout";
 import { router } from "expo-router";
 
-const screenWidth = Dimensions.get("window").width;
+const { width, height } = Dimensions.get("window");
 
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
@@ -97,7 +97,7 @@ const HomeScreen = () => {
             </LinearGradient>
 
             {/* Chart */}
-            <LineChartComponent theme={theme} graphFrom={lineChartBg} graphTo={lineChartBg} width={screenWidth * 0.85} />
+            <LineChartComponent theme={theme} graphFrom={lineChartBg} graphTo={lineChartBg} width={width * 0.80} />
           </View>
         </View>
 
@@ -194,11 +194,11 @@ const styles = StyleSheet.create({
 
   targetCard: { flexDirection: "row", justifyContent: "space-between", alignItems: 'center', margin: 15, padding: 15, borderRadius: 16 },
   checkBtn: { backgroundColor: "#5e3fff", paddingHorizontal: 18, paddingVertical: 6, borderRadius: 20 },
-  checkText: { color: 'white', fontFamily: "PoppinsRegular", fontSize: 13, marginTop: 2 },
+  checkText: { color: 'white', fontFamily: "PoppinsRegular", fontSize: 12, marginTop: 2 },
 
   sectionTitle: { fontSize: 16, fontFamily: "PoppinsSemiBold", marginTop: 10 },
   chartCard: { marginTop: 10, padding: 15, borderRadius: 20, },
-  heartRate: { fontFamily: "PoppinsMedium", fontSize: 13 },
+  heartRate: { fontFamily: "PoppinsMedium", fontSize: 12 },
   heartRateValue: { fontFamily: "PoppinsMedium", fontSize: 18, },
   timeAgo: { backgroundColor: "#5e3fff", width: 90, paddingVertical: 8, borderRadius: 20, marginTop: 5, },
   timeAgoText: { textAlign: 'center', fontSize: 12, color: '#FFFFFF' },
