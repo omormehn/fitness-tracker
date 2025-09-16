@@ -6,6 +6,7 @@ export default function ScreenLayout() {
         <Stack>
             <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
             <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+            <Stack.Screen name="notification" options={{ headerShown: false }} />
         </Stack>
     )
 }

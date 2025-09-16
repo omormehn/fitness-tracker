@@ -58,7 +58,7 @@ function RootLayoutNav() {
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} />
       <Stack>
-        {/* <Stack.Screen name="(screens)" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>

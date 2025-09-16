@@ -12,6 +12,7 @@ import { Colors } from "@/theme/Colors";
 import LineChartComponent from "@/components/LineChart";
 import WorkoutCard from "@/components/WorkoutCard";
 import { workouts } from "@/data/workout";
+import { router } from "expo-router";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -33,7 +34,7 @@ const HomeScreen = () => {
           <Text style={[styles.welcome, { color: colors.tintText3 }]}>Welcome Back,</Text>
           <Text style={[styles.username, { color: colors.text }]}>John Doe</Text>
         </View>
-        <TouchableOpacity style={[styles.notificationButton, { backgroundColor: notificationBg }]}>
+        <TouchableOpacity onPress={() => router.push('/notification')} style={[styles.notificationButton, { backgroundColor: notificationBg }]}>
           <Ionicons name="notifications-outline" size={20} color={notificationColor} />
         </TouchableOpacity>
       </View>
