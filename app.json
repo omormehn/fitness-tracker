@@ -4,7 +4,7 @@
     "slug": "health-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/app-icon.png",
     "scheme": "healthtracker",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -18,7 +18,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/app-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
@@ -41,7 +41,7 @@
             "image": "./assets/splash-icon-dark.png",
             "backgroundColor": "#2A2C38"
           },
-          "imageWidth": 300
+          "imageWidth": 150
         }
       ]
     ],

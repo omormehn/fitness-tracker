@@ -6,7 +6,7 @@ import Carousel from '@/components/carousel';
 import Button from '@/components/button';
 import { router } from 'expo-router';
 
-
+//TODO: FIX PAGE PADDING ISSUES ✅✅✅
 const GoalsScreen = () => {
     const { colors } = useTheme();
     return (
@@ -32,9 +32,9 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: 'column',
-        justifyContent: 'center',
         alignItems: 'center',
-        gap: 40,
+        gap: 30,
+        paddingVertical: 50
     },
     text: {
         fontSize: 22,
