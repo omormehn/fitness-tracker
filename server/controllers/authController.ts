@@ -73,10 +73,9 @@ export const refreshToken = async (req: Request, res: Response) => {
     const tokenDoc = await findRefreshTokenDocument(tokenPlain);
     if (!tokenDoc) return res.status(401).json({ message: 'Invalid or expired refresh token' });
 
-    // rotate: revoke existing and issue new refresh token
-    await revokeRefreshToken(tokenDoc, null); // mark old as revoked
-
+    // rotate: issue new token, then revoke old and link to the new token
     const newRefreshToken = await createRefreshToken(tokenDoc.user._id);
+    await revokeRefreshToken(tokenDoc, newRefreshToken); // mark old as revoked
     const newAccessToken = createAccessToken(tokenDoc.user._id);
 
     res.json({
