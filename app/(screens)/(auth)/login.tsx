@@ -1,15 +1,34 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import InputContainer from '@/components/InputContainer';
 import Button from '@/components/button';
 import Seperator from '@/components/Seperator';
 import SocialsContainer from '@/components/SocialContianer';
 import { router } from 'expo-router';
+import { useAuthStore } from '@/store/useAuthStore';
 
 
 const LoginScreen = () => {
     const { colors, theme } = useTheme();
+    const { loading, error, login } = useAuthStore();
+
+    const [form, setForm] = useState({
+        email: "",
+        password: "",
+    });
+
+    const handleChange = (field: string, value: string) => {
+        setForm({ ...form, [field]: value });
+    };
+    const handleLogin = async () => {
+        try {
+            await login(form)
+            router.replace('/(tabs)')
+        } catch (error) {
+            console.log('err', error)
+        }
+    };
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* Top section */}
@@ -24,24 +43,29 @@ const LoginScreen = () => {
                     placeholder='Email'
                     iconName={'mail-outline'}
                     theme={theme}
+                    value={form.email}
+                    onChangeText={(v) => handleChange('email', v)}
                 />
                 <InputContainer
                     placeholder='Password'
                     iconName={'lock-outline'}
                     theme={theme}
                     type='password'
+                    value={form.password}
+                    onChangeText={(v) => handleChange('password', v)}
                 />
                 <Text style={{ fontFamily: 'PoppinsMedium', fontSize: 12, color: colors.tintText3, textDecorationLine: 'underline', textAlign: 'center' }}>Forgot your password?</Text>
             </View>
+            {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
 
             {/* Button */}
-            <TouchableOpacity style={styles.button} >
-                <Button text='Login' />
+            <TouchableOpacity onPress={handleLogin} style={styles.button} >
+                <Button loading={loading} text='Login' />
             </TouchableOpacity>
 
             {/* Divider */}
             <View >
-                <Seperator  />
+                <Seperator />
             </View>
 
             {/* Socials */}

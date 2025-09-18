@@ -1,11 +1,11 @@
-import { Dimensions, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, Dimensions, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useTheme } from '@/context/ThemeContext'
 const screenWidth = Dimensions.get('window').width;
 
-const Button = ({ text }: { text: string }) => {
-    const { gradients } = useTheme()
+const Button = ({ text, loading = false }: { text: string, loading?: boolean }) => {
+    const { gradients, colors } = useTheme()
 
     return (
         <LinearGradient
@@ -14,7 +14,11 @@ const Button = ({ text }: { text: string }) => {
             end={{ x: 0, y: 0 }}
             style={styles.container}
         >
-            <Text style={styles.text}>{text}</Text>
+            {loading ? (
+                <ActivityIndicator size={20} color={colors.text} />
+            ) : (
+                <Text style={styles.text}>{text}</Text>
+            )}
         </LinearGradient>
     )
 }

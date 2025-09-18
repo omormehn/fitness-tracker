@@ -1,11 +1,11 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-
+console.log(process.env.EXPO_PUBLIC_SERVER_URI)
 const api = axios.create({
-    baseURL: `http://${process.env.EXPO_PUBLIC_SERVER_URL}/`,
+    baseURL: `${process.env.EXPO_PUBLIC_SERVER_URI}/api`,
     timeout: 10000,
-    headers: { "Content-Type": "application/json" },
+    withCredentials: true
 });
 
 api.interceptors.request.use(

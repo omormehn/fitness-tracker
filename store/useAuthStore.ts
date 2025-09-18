@@ -1,30 +1,24 @@
 import { create } from 'zustand';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '@/lib/axios';
+import { AuthState } from '@/types/types';
 
-
-interface AuthState {
-    user: null | { id: string; email: string };
-    token: string | null;
-    loading: boolean;
-    login: (email: string, password: string) => Promise<void>;
-    register: (email: string, password: string) => Promise<void>;
-    logout: () => Promise<void>;
-    loadSession: () => Promise<void>;
-}
 
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     token: null,
     loading: false,
+    error: null,
 
-    login: async (email, password) => {
+    login: async (data) => {
         try {
-            set({ loading: true });
-            const { data } = await api.post("/auth/login", { email, password });
-            await AsyncStorage.setItem("token", data.token);
-            set({ user: data.user, token: data.token });
+            set({ loading: true, error: null });
+            const res = await api.post("/auth/login", data);
+            console.log(res.data)
+            await AsyncStorage.setItem("token", res.data.accessToken);
+            set({ user: res.data.user, token: res.data.token });
         } catch (err: any) {
+            set({ error: err.response?.data?.message || "Login failed", loading: false });
             console.error("Login error", err.response?.data || err.message);
         } finally {
             set({ loading: false });
@@ -32,14 +26,16 @@ export const useAuthStore = create<AuthState>((set) => ({
     },
 
 
-    register: async (email, password) => {
+    register: async (data) => {
         try {
-            set({ loading: true });
-            const { data } = await api.post("/auth/register", { email, password });
-            await AsyncStorage.setItem("token", data.token);
-            set({ user: data.user, token: data.token });
+            set({ loading: true, error: null });
+            const res = await api.post("/auth/register", data);
+            console.log('res', res)
+            await AsyncStorage.setItem("token", res.data.accessToken);
+            set({ user: res.data.user, loading: false });
         } catch (err: any) {
-            console.error("Register error", err.response?.data || err.message);
+            set({ error: err.response?.data?.message || "Registration failed", loading: false });
+            console.log(err)
         } finally {
             set({ loading: false });
         }

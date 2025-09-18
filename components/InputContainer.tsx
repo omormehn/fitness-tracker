@@ -4,7 +4,7 @@ import { InputContainerProps } from '@/types/types'
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-const InputContainer = ({ placeholder, type, theme, iconName, width = '100%', inputWidth = '90%' }: InputContainerProps) => {
+const InputContainer = ({ placeholder, type, theme, value, onChangeText, iconName, width = '100%', inputWidth = '90%' }: InputContainerProps) => {
     const [showEye, setShow] = useState(false)
     const eyeIcon = showEye ? 'eye' : 'eye-off'
     const toggleEye = () => setShow(!showEye)
@@ -17,6 +17,8 @@ const InputContainer = ({ placeholder, type, theme, iconName, width = '100%', in
                     placeholderTextColor={theme === 'dark' ? '#ACA3A5' : '#A5A3B0'}
                     placeholder={placeholder}
                     secureTextEntry={type === 'password' && !showEye}
+                    value={value}
+                    onChangeText={onChangeText}
                     style={[{
                         width: inputWidth, fontFamily: "PoppinsRegular",
                         fontSize: 13,
