@@ -23,8 +23,8 @@ const LoginScreen = () => {
     };
     const handleLogin = async () => {
         try {
-            await login(form)
-            router.replace('/(tabs)')
+            const res = await login(form)
+            if (res) router.replace('/(tabs)')
         } catch (error) {
             console.log('err', error)
         }

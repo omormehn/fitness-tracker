@@ -30,7 +30,6 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             set({ loading: true, error: null });
             const res = await api.post("/auth/register", data);
-            console.log('res', res)
             await AsyncStorage.setItem("token", res.data.accessToken);
             set({ user: res.data.user, loading: false });
         } catch (err: any) {

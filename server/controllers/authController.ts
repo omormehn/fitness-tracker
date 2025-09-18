@@ -17,7 +17,6 @@ export const registerValidators = [
 
 export const register = async (req: Request, res: Response) => {
     const { fullName, email, password, phone } = req.body;
-    console.log("Incoming body:", req.body);
     const emailNorm = (email || '').toLowerCase().trim();
     const existing = await User.findOne({ email: emailNorm });
     if (existing) return res.status(409).json({ message: 'Email already in use' });
