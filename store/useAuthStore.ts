@@ -17,9 +17,11 @@ export const useAuthStore = create<AuthState>((set) => ({
             console.log(res.data)
             await AsyncStorage.setItem("token", res.data.accessToken);
             set({ user: res.data.user, token: res.data.token });
+            return true
         } catch (err: any) {
             set({ error: err.response?.data?.message || "Login failed", loading: false });
             console.error("Login error", err.response?.data || err.message);
+            return false;
         } finally {
             set({ loading: false });
         }
@@ -31,10 +33,12 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({ loading: true, error: null });
             const res = await api.post("/auth/register", data);
             await AsyncStorage.setItem("token", res.data.accessToken);
-            set({ user: res.data.user, loading: false });
+            set({ user: res.data.user, loading: false, token: res.data.accessToken });
+            return true;
         } catch (err: any) {
             set({ error: err.response?.data?.message || "Registration failed", loading: false });
             console.log(err)
+            return false
         } finally {
             set({ loading: false });
         }

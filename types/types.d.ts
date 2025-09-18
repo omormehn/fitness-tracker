@@ -54,8 +54,8 @@ interface AuthState {
   user: null | User;
   token: string | null;
   loading: boolean;
-  login: (data) => Promise<void>;
-  register: (data) => Promise<void>;
+  login: (data) => Promise<boolean>;
+  register: (data) => Promise<boolean>;
   logout: () => Promise<void>;
   loadSession: () => Promise<void>;
   error: string | null
