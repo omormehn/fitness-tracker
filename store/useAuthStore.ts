@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '@/lib/axios';
 import { AuthState } from '@/types/types';
 
-
 export const useAuthStore = create<AuthState>((set) => ({
     user: null,
     token: null,
@@ -14,12 +13,15 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             set({ loading: true, error: null });
             const res = await api.post("/auth/login", data);
-            console.log(res.data)
-            await AsyncStorage.setItem("token", res.data.accessToken);
-            set({ user: res.data.user, token: res.data.token });
+            const token = res.data.accessToken ?? res.data.token;
+            if(token) {
+                await AsyncStorage.setItem("token", res.data.accessToken);
+                api.defaults.headers.common.Authorization = `Bearer ${token}`;
+            }
+            set({ user: res.data.user, token });
             return true
         } catch (err: any) {
-            set({ error: err.response?.data?.message || "Login failed", loading: false });
+            set({ error: err.response?.data?.message || "Login failed", });
             console.error("Login error", err.response?.data || err.message);
             return false;
         } finally {
@@ -32,11 +34,15 @@ export const useAuthStore = create<AuthState>((set) => ({
         try {
             set({ loading: true, error: null });
             const res = await api.post("/auth/register", data);
-            await AsyncStorage.setItem("token", res.data.accessToken);
-            set({ user: res.data.user, loading: false, token: res.data.accessToken });
+            const token = res.data.accessToken;
+            if(token) {
+                await AsyncStorage.setItem("token", token);
+                api.defaults.headers.common.Authorization = `Bearer ${token}`
+            }
+            set({ user: res.data.user, token: token });
             return true;
         } catch (err: any) {
-            set({ error: err.response?.data?.message || "Registration failed", loading: false });
+            set({ error: err.response?.data?.message || "Registration failed" });
             console.log(err)
             return false
         } finally {
