@@ -59,7 +59,7 @@ const LoginScreen = () => {
             {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
 
             {/* Button */}
-            <TouchableOpacity onPress={handleLogin} style={styles.button} >
+            <TouchableOpacity disabled={loading} onPress={handleLogin} style={styles.button} >
                 <Button loading={loading} text='Login' />
             </TouchableOpacity>
 

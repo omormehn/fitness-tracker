@@ -71,7 +71,7 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             {/* button */}
-            <TouchableOpacity onPress={handleRegister} style={{ marginTop: 100 }}>
+            <TouchableOpacity disabled={loading} onPress={handleRegister} style={{ marginTop: 100 }}>
                 <Button loading={loading} text='Register' />
             </TouchableOpacity>
 
