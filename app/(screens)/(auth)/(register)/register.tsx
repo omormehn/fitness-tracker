@@ -32,7 +32,8 @@ const RegisterScreen = () => {
     };
     const handleRegister = async () => {
         try {
-            await register(form)
+            const ok = await register(form)
+            if(ok) router.replace('/(tabs)')
         } catch (error) {
             console.log('err', error)
         }
