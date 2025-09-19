@@ -9,12 +9,24 @@ export const useAuthStore = create<AuthState>((set) => ({
     loading: false,
     error: null,
 
+    hasOnboarded: false,
+
+    setOnboarded: async () => {
+        await AsyncStorage.setItem("hasOnboarded", "true");
+        set({ hasOnboarded: true });
+    },
+
+    checkOnboarding: async () => {
+        const value = await AsyncStorage.getItem("hasOnboarded");
+        set({ hasOnboarded: value === "true" });
+    },
+
     login: async (data) => {
         try {
             set({ loading: true, error: null });
             const res = await api.post("/auth/login", data);
             const token = res.data.accessToken ?? res.data.token;
-            if(token) {
+            if (token) {
                 await AsyncStorage.setItem("token", res.data.accessToken);
                 api.defaults.headers.common.Authorization = `Bearer ${token}`;
             }
@@ -35,7 +47,7 @@ export const useAuthStore = create<AuthState>((set) => ({
             set({ loading: true, error: null });
             const res = await api.post("/auth/register", data);
             const token = res.data.accessToken;
-            if(token) {
+            if (token) {
                 await AsyncStorage.setItem("token", token);
                 api.defaults.headers.common.Authorization = `Bearer ${token}`
             }

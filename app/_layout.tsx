@@ -7,6 +7,7 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 import { StatusBar } from 'react-native';
+import { useAuthStore } from '@/store/useAuthStore';
 
 
 
@@ -52,13 +53,18 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const { user, token, hasOnboarded, checkOnboarding } = useAuthStore();
 
+  console.log('hd', hasOnboarded)
+  console.log('tk', token)
+  console.log('user', user)
 
   return (
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} />
-      <Stack>
-        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
+      <Stack >
+        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>

@@ -59,4 +59,7 @@ interface AuthState {
   logout: () => Promise<void>;
   loadSession: () => Promise<void>;
   error: string | null
+  hasOnboarded: boolean;
+  setOnboarded: () => Promise<void>;
+  checkOnboarding: () => Promise<void>;
 }
