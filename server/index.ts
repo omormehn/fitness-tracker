@@ -38,10 +38,6 @@ connectDB(MONGO_URI);
 
 app.use('/api/auth', authRoutes);
 
-app.get('/api/protected', (req, res) => {
-  res.json({ msg: 'This is a placeholder protected route. Use requireAuth middleware to protect.' });
-});
-
 app.use(errorHandler);
 
 

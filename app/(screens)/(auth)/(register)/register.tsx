@@ -8,13 +8,37 @@ import Button from '@/components/button';
 import { router } from 'expo-router';
 import Seperator from '@/components/Seperator';
 import SocialsContainer from '@/components/SocialContianer';
+import { useAuthStore } from '@/store/useAuthStore';
+import api from '@/lib/axios';
+import { register } from '@/server/controllers/authController';
 
 
-// TODO: ADD A SCROLL VIEW | FIX SEPERATOR ✅✅✅
+
 const RegisterScreen = () => {
 
     const { theme, colors } = useTheme()
     const [checked, setChecked] = useState(false);
+    const { loading, error, register } = useAuthStore();
+
+    const [form, setForm] = useState({
+        fullName: "",
+        email: "",
+        phone: "",
+        password: "",
+    });
+
+    const handleChange = (field: string, value: string) => {
+        setForm({ ...form, [field]: value });
+    };
+    const handleRegister = async () => {
+        try {
+            const ok = await register(form)
+            if(ok) router.replace('/(tabs)')
+        } catch (error) {
+            console.log('err', error)
+        }
+    };
+
     return (
         <ScrollView style={[
             theme === 'dark'
@@ -29,12 +53,12 @@ const RegisterScreen = () => {
 
             {/* Form */}
             <View className='w-full gap-4 pt-10'>
-                <InputContainer iconName={'person-outline'} placeholder='Full Name' theme={theme} />
-                <InputContainer iconName={'phone'} placeholder='Phone Number' theme={theme} />
-                <InputContainer iconName={'mail-outline'} placeholder='Email' theme={theme} />
-                <InputContainer inputWidth={'80%'} type='password' iconName={'lock-outline'} placeholder='Password' theme={theme} />
+                <InputContainer value={form.fullName} textContentType='name' onChangeText={(v) => handleChange("fullName", v)} iconName={'person-outline'} placeholder='Full Name' theme={theme} />
+                <InputContainer value={form.email} textContentType='emailAddress' onChangeText={(v) => handleChange("email", v)} iconName={'mail-outline'} placeholder='Email' theme={theme} />
+                <InputContainer value={form.phone} textContentType='telephoneNumber' onChangeText={(v) => handleChange("phone", v)} iconName={'phone'} placeholder='Phone Number' theme={theme} />
+                <InputContainer value={form.password} textContentType='password' onChangeText={(v) => handleChange("password", v)} inputWidth={'80%'} type='password' iconName={'lock-outline'} placeholder='Password' theme={theme} />
             </View>
-
+            {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
             {/* Terms */}
             <TouchableOpacity activeOpacity={0.8} onPress={() => setChecked(!checked)} style={styles.terms}>
                 <Pressable
@@ -48,8 +72,8 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             {/* button */}
-            <TouchableOpacity onPress={() => router.push('/register2')} style={{ marginTop: 100 }}>
-                <Button text='Register' />
+            <TouchableOpacity disabled={loading} onPress={handleRegister} style={{ marginTop: 100 }}>
+                <Button loading={loading} text='Register' />
             </TouchableOpacity>
 
             {/* Divider */}

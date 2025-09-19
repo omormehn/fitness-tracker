@@ -14,7 +14,9 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
+    "@react-native-async-storage/async-storage": "2.2.0",
     "@react-navigation/native": "^7.1.6",
+    "axios": "^1.12.2",
     "expo": "^54.0.7",
     "expo-dev-client": "~6.0.12",
     "expo-font": "~14.0.8",
@@ -41,7 +43,8 @@
     "react-native-svg": "15.12.1",
     "react-native-svg-transformer": "^1.5.1",
     "react-native-web": "^0.21.0",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "zustand": "^5.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

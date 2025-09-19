@@ -11,17 +11,18 @@ export const registerValidators = [
     body('fullName').isString().isLength({ min: 2 }),
     body('email').isEmail(),
     body('password').isLength({ min: 6 }),
+    body('phone').isLength({ min: 5 }),
     validateRequest,
 ];
 
 export const register = async (req: Request, res: Response) => {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, phone } = req.body;
     const emailNorm = (email || '').toLowerCase().trim();
     const existing = await User.findOne({ email: emailNorm });
     if (existing) return res.status(409).json({ message: 'Email already in use' });
 
 
-    const user = new User({ fullName: fullName?.trim(), email: emailNorm, password });
+    const user = new User({ fullName: fullName?.trim(), email: emailNorm, password, phone });
 
 
     try {
