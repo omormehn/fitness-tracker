@@ -25,6 +25,7 @@ const LoginScreen = () => {
         try {
             const res = await login(form)
             if (res) router.replace('/(tabs)')
+            router.dismissAll();
         } catch (error) {
             console.log('err', error)
         }
