@@ -11,7 +11,7 @@ const AccountOptions = ({ option, iconName, isSetting = false, route }: { option
     const { theme, colors } = useTheme();
 
     return (
-        <Pressable onPress={() => router.push(route)} style={styles.container}>
+        <Pressable onPress={() => route && router.push(route)} disabled={!route} style={styles.container}>
             <View style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
                 {isSetting ? (
                     <Ionicons name={iconName} size={24} color={colors.iconColor} />

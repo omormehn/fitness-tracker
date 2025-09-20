@@ -57,11 +57,15 @@ export const useAuthStore = create<AuthState>()(
             },
 
             logout: async () => {
-                set({ user: null, token: null });
+                try {
+                    delete (api.defaults.headers.common as any).Authorization;
+                } finally {
+                    set({ user: null, token: null });
+                }
             },
         }),
         {
-            name: "auth-storage", 
+            name: "auth-storage",
             storage: createJSONStorage(() => AsyncStorage),
         }
     )

@@ -76,7 +76,7 @@ const ProfileScreen = () => {
             {/* Options */}
             <AccountOptions option='Contact Us' iconName={'email-outline'} />
             <AccountOptions option='Privacy Policy' iconName={'shield-check-outline'} />
-            <AccountOptions route={'(tabs)/settings'} option='Settings' iconName={'settings-outline'} isSetting />
+            <AccountOptions route={'/(tabs)/settings'} option='Settings' iconName={'settings-outline'} isSetting />
           </View>
         </View>
       </ScrollView>
