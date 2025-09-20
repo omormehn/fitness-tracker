@@ -53,7 +53,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { user, token, hasOnboarded, checkOnboarding } = useAuthStore();
+  const { user, token, hasOnboarded } = useAuthStore();
 
   console.log('hd', hasOnboarded)
   console.log('tk', token)
@@ -62,10 +62,10 @@ function RootLayoutNav() {
   return (
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} />
-      <Stack >
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

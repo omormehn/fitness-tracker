@@ -1,10 +1,21 @@
-import { Redirect } from "expo-router";
+import { Redirect, useRouter } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
+import { useEffect } from "react";
 
 export default function Index() {
     const { hasOnboarded, token } = useAuthStore();
 
-    if (!hasOnboarded) return <Redirect href="/(onboarding)" />;
-    if (!token) return <Redirect href="/(auth)/login" />;
-    return <Redirect href="/(tabs)" />;
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!hasOnboarded) {
+            router.replace("/(onboarding)");
+        } else if (!token) {
+            router.replace("/(auth)/login");
+        } else {
+            router.replace("/(tabs)");
+        }
+    }, [hasOnboarded, token]);
+
+    return null;
 }

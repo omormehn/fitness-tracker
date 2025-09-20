@@ -15,7 +15,7 @@ const OnboardingScreen = () => {
 
   const finishOnboarding = async () => {
     await setOnboarded();
-    router.push('/register')
+    router.replace('/(auth)/(register)/register')
   };
 
 
