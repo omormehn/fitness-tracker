@@ -1,6 +1,6 @@
 // HomeScreen.js
 import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -13,17 +13,21 @@ import LineChartComponent from "@/components/LineChart";
 import WorkoutCard from "@/components/WorkoutCard";
 import { workouts } from "@/data/workout";
 import { router } from "expo-router";
+import { useAuthStore } from "@/store/useAuthStore";
 
 const { width, height } = Dimensions.get("window");
 
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
+  const { user } = useAuthStore();
   const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
   const graphBg = theme === 'dark' ? '#2A2C38' : '#FFFFFF';
   const lineChartBg = theme === 'dark' ? '#2a2940' : '#e5daf5';
   const notificationBg = theme === 'dark' ? '#161818' : '#F7F8F8';
   const notificationColor = theme === 'dark' ? '#FFFFFF' : '#000000';
+
+
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -32,11 +36,11 @@ const HomeScreen = () => {
       <View style={styles.header}>
         <View style={{ flexDirection: "column" }}>
           <Text style={[styles.welcome, { color: colors.tintText3 }]}>Welcome Back,</Text>
-          <Text style={[styles.username, { color: colors.text }]}>John Doe</Text>
+          <Text style={[styles.username, { color: colors.text }]}>{user?.fullName}</Text>
         </View>
-        <TouchableOpacity onPress={() => router.push('/notification')} style={[styles.notificationButton, { backgroundColor: notificationBg }]}>
+        <Pressable onPress={() => router.push('/notification')} style={[styles.notificationButton, { backgroundColor: notificationBg }]}>
           <Ionicons name="notifications-outline" size={20} color={notificationColor} />
-        </TouchableOpacity>
+        </Pressable>
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
