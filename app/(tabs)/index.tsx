@@ -114,7 +114,7 @@ const HomeScreen = () => {
           </View>
           <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
             <Text style={[styles.statTitle, { color: colors.text }]}>Sleep</Text>
-            <Text style={styles.statSleepValue}>8h 20m</Text>
+            <Text style={styles.statSleepValue}>9h 20m</Text>
             <View className="justify-center items-center">
               <ImageComponent />
             </View>
