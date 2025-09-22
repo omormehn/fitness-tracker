@@ -5,7 +5,14 @@ import mongoose from 'mongoose';
 import User from '../model/User';
 import { createAccessToken, createRefreshToken, findRefreshTokenDocument, revokeRefreshToken } from '../utils/token';
 import { validateRequest } from '../middlewares/validateRequest';
-import { RefreshToken } from '../model/RefreshToken';
+import { OAuth2Client } from "google-auth-library";
+import dotenv from 'dotenv'
+import jwt from 'jsonwebtoken';
+dotenv.config()
+
+const clientId = process.env.CLIENT_ID || ''
+const client = new OAuth2Client(clientId);
+const ACCESS_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET!
 
 export const registerValidators = [
     body('fullName').isString().isLength({ min: 2 }),
@@ -95,3 +102,28 @@ export const logout = async (req: Request, res: Response) => {
     }
     res.json({ message: 'Logged out' });
 };
+export const verifyGoogleToken = async (req: Request, res: Response) => {
+    const { token } = req.body;
+
+    try {
+        const ticket = await client.verifyIdToken({
+            idToken: token,
+            audience: clientId,
+        });
+
+        const payload = ticket.getPayload();
+        console.log('payload', payload)
+        const { sub, email, name, picture } = payload;
+
+        const appToken = jwt.sign(
+            { userId: sub, email },
+            ACCESS_SECRET,
+            { expiresIn: "7d" }
+        );
+
+        res.json({ token: appToken, user: { email, name, picture } });
+    } catch (error) {
+        res.status(401).json({ error: "Invalid Google token" });
+    }
+}
+

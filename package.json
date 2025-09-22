@@ -44,7 +44,8 @@
     "react-native-svg-transformer": "^1.5.1",
     "react-native-web": "^0.21.0",
     "tailwindcss": "^3.4.17",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "expo-auth-session": "~7.0.8"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

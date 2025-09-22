@@ -1,5 +1,5 @@
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import InputContainer from '@/components/InputContainer';
 import Button from '@/components/button';
@@ -7,16 +7,43 @@ import Seperator from '@/components/Seperator';
 import SocialsContainer from '@/components/SocialContianer';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
+import * as Google from "expo-auth-session/providers/google";
+import api from '@/lib/axios';
+import * as AuthSession from "expo-auth-session";
 
+console.log(AuthSession.makeRedirectUri({ useProxy: true }));
+
+
+
+const clientId = process.env.EXPO_PUBLIC_CLIENT_ID
 
 const LoginScreen = () => {
     const { colors, theme } = useTheme();
     const { loading, error, login } = useAuthStore();
-
     const [form, setForm] = useState({
         email: "",
         password: "",
     });
+
+    const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+        clientId: clientId,
+    }, );
+
+    console.log(response)
+
+    useEffect(() => {
+        const googleLogin = async () => {
+            if (response?.type === "success") {
+                const { id_token } = response.params;
+
+                await api.post('/auth/google', {
+                    token: id_token
+                })
+            }
+        }
+        googleLogin()
+    }, [response]);
+
 
     const handleChange = (field: string, value: string) => {
         setForm({ ...form, [field]: value });
@@ -70,7 +97,7 @@ const LoginScreen = () => {
 
             {/* Socials */}
             <View style={{ top: 60, flexDirection: 'row', gap: 30 }} >
-                <SocialsContainer name='logo-google' />
+                <SocialsContainer disable={!request} onpress={() => promptAsync()} name='logo-google' />
                 <SocialsContainer name='logo-facebook' />
             </View>
 

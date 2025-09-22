@@ -8,6 +8,10 @@ import 'react-native-reanimated';
 import '../global.css';
 import { StatusBar } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
+import * as WebBrowser from "expo-web-browser";
+
+WebBrowser.maybeCompleteAuthSession();
+
 
 
 
@@ -63,8 +67,8 @@ function RootLayoutNav() {
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} />
       <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
+        {/* <Stack.Screen name="(onboarding)" options={{ headerShown: false }} /> */}
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
