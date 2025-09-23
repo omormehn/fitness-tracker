@@ -8,9 +8,7 @@ import 'react-native-reanimated';
 import '../global.css';
 import { StatusBar } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
-import * as WebBrowser from "expo-web-browser";
-
-WebBrowser.maybeCompleteAuthSession();
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
 
 
 
@@ -48,6 +46,14 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+  
+  useEffect(() => {
+    GoogleSignin.configure({
+      iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
+      webClientId: process.env.EXPO_PUBLIC_CLIENT_ID,
+      profileImageSize: 150
+    })
+  })
 
   if (!loaded) {
     return null;
@@ -58,6 +64,8 @@ export default function RootLayout() {
 
 function RootLayoutNav() {
   const { user, token, hasOnboarded } = useAuthStore();
+
+
 
   console.log('hd', hasOnboarded)
   console.log('tk', token)

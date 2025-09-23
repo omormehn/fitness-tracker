@@ -4,7 +4,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 
 const SocialsContainer = ({ name, onpress, disable }: { name: any, onpress?: (e: GestureResponderEvent) => void, disable?: boolean }) => {
     return (
-        <TouchableOpacity disabled={disable} onPress={onpress} style={styles.container}>
+        <TouchableOpacity activeOpacity={0.5} disabled={disable} onPress={onpress} style={styles.container}>
             <Ionicons name={name} size={30} />
         </TouchableOpacity>
     )

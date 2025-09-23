@@ -7,20 +7,12 @@ import { createAccessToken, createRefreshToken, findRefreshTokenDocument, revoke
 import { validateRequest } from '../middlewares/validateRequest';
 import { OAuth2Client } from "google-auth-library";
 import dotenv from 'dotenv'
-import jwt from 'jsonwebtoken';
 dotenv.config()
 
 const clientId = process.env.CLIENT_ID || ''
 const client = new OAuth2Client(clientId);
-const ACCESS_SECRET = process.env.JWT_ACCESS_TOKEN_SECRET!
 
-export const registerValidators = [
-    body('fullName').isString().isLength({ min: 2 }),
-    body('email').isEmail(),
-    body('password').isLength({ min: 6 }),
-    body('phone').isLength({ min: 5 }),
-    validateRequest,
-];
+
 
 export const register = async (req: Request, res: Response) => {
     const { fullName, email, password, phone } = req.body;
@@ -49,11 +41,7 @@ export const register = async (req: Request, res: Response) => {
 
 };
 
-export const loginValidators = [
-    body('email').isEmail(),
-    body('password').isString().isLength({ min: 6 }),
-    validateRequest,
-];
+
 
 export const login = async (req: Request, res: Response) => {
     const { email, password } = req.body;
@@ -112,17 +100,37 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
         });
 
         const payload = ticket.getPayload();
+        if (!payload) {
+            return res.status(401).json({ error: "Invalid Google token" });
+        }
         console.log('payload', payload)
-        const { sub, email, name, picture } = payload;
+        const { email, name, } = payload;
+        const emailNorm = (email || "").toLowerCase().trim();
 
-        const appToken = jwt.sign(
-            { userId: sub, email },
-            ACCESS_SECRET,
-            { expiresIn: "7d" }
-        );
+        let user = await User.findOne({ email: emailNorm });
+        if (!user) {
+            user = new User({
+                fullName: name,
+                email: emailNorm,
+                password: new mongoose.Types.ObjectId().toString(), // dummy
+            });
+            await user.save();
+        }
 
-        res.json({ token: appToken, user: { email, name, picture } });
+        const accessToken = createAccessToken(user._id);
+        const refreshToken = await createRefreshToken(user._id);
+
+        res.json({
+            user: {
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+            },
+            accessToken,
+            refreshToken,
+        });
     } catch (error) {
+        console.error("Google login error:", error);
         res.status(401).json({ error: "Invalid Google token" });
     }
 }

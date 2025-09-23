@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { register, login, refreshToken, logout, registerValidators, loginValidators, verifyGoogleToken } from '../controllers/authController';
+import { register, login, refreshToken, logout, verifyGoogleToken } from '../controllers/authController';
+import { registerValidators, loginValidators } from '../middlewares/validateRequest';
 
 const router = Router();
 
