@@ -53,7 +53,7 @@ export default function RootLayout() {
       webClientId: process.env.EXPO_PUBLIC_CLIENT_ID,
       profileImageSize: 150
     })
-  })
+  }, [])
 
   if (!loaded) {
     return null;
