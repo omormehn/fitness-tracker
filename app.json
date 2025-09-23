@@ -18,8 +18,7 @@
       "bundleIdentifier": "com.thefirstnative.healthtracker",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
-      },
-      "icon": "./assets/adaptive-icon.png"
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -49,6 +48,12 @@
           },
           "imageWidth": 150
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin", 
+        {
+           "iosUrlScheme": "com.googleusercontent.apps.98467727321-hhptat4pkndun9qpq3b53o5j3cajrqr8"
+        }
       ]
     ],
     "experiments": {
@@ -59,6 +64,12 @@
       "eas": {
         "projectId": "fde36330-3489-409d-91d3-32e1ed3c554f"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/fde36330-3489-409d-91d3-32e1ed3c554f"
     }
   }
 }

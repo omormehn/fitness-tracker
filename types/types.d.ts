@@ -54,11 +54,13 @@ interface AuthState {
   user: null | User;
   token: string | null;
   loading: boolean;
+  googleSignIn: () => Promise<boolean>;
   login: (data) => Promise<boolean>;
   register: (data) => Promise<boolean>;
   logout: () => Promise<void>;
-  error: string | null
+  error: { field?: string | null, msg: string | null }
   hasOnboarded: boolean;
   setOnboarded: () => void;
-  
+  setAuth: (payload: { user: any; token: string }) => void;
+  setError: (error: { field: string | null, msg: string | null }) => void
 }

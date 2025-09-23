@@ -11,6 +11,8 @@ import SocialsContainer from '@/components/SocialContianer';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/axios';
 import { register } from '@/server/controllers/authController';
+import ErrorText from '@/components/ErrorText';
+import FullPageLoader from '@/components/PageLoader';
 
 
 
@@ -18,7 +20,8 @@ const RegisterScreen = () => {
 
     const { theme, colors } = useTheme()
     const [checked, setChecked] = useState(false);
-    const { loading, error, register } = useAuthStore();
+    const [isloading, setIsLoading] = useState(false)
+    const { loading, error, register, setError, googleSignIn } = useAuthStore();
 
     const [form, setForm] = useState({
         fullName: "",
@@ -30,14 +33,45 @@ const RegisterScreen = () => {
     const handleChange = (field: string, value: string) => {
         setForm({ ...form, [field]: value });
     };
-    const handleRegister = async () => {
+
+
+    const routeToLogin = () => {
+        router.push('/(auth)/login')
+        setError({ field: null, msg: null })
+
+    }
+    const handleGoogleSignIn = async () => {
+        setIsLoading(true)
         try {
+            const ok = await googleSignIn();
+            if (ok) {
+                router.replace('/(tabs)')
+            }
+        } catch (error) {
+            console.log('err in goog', error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    const handleRegister = async () => {
+
+        try {
+            if (form.email.length <= 0) {
+                setError({ field: 'email', msg: 'Invalid Email Address' })
+            }
             const ok = await register(form)
-            if(ok) router.replace('/(tabs)')
+            if (ok) router.replace('/(tabs)')
         } catch (error) {
             console.log('err', error)
         }
     };
+
+    if (isloading) {
+        return (
+            <FullPageLoader visible={isloading} />
+        )
+    }
 
     return (
         <ScrollView style={[
@@ -53,12 +87,24 @@ const RegisterScreen = () => {
 
             {/* Form */}
             <View className='w-full gap-4 pt-10'>
-                <InputContainer value={form.fullName} textContentType='name' onChangeText={(v) => handleChange("fullName", v)} iconName={'person-outline'} placeholder='Full Name' theme={theme} />
-                <InputContainer value={form.email} textContentType='emailAddress' onChangeText={(v) => handleChange("email", v)} iconName={'mail-outline'} placeholder='Email' theme={theme} />
-                <InputContainer value={form.phone} textContentType='telephoneNumber' onChangeText={(v) => handleChange("phone", v)} iconName={'phone'} placeholder='Phone Number' theme={theme} />
-                <InputContainer value={form.password} textContentType='password' onChangeText={(v) => handleChange("password", v)} inputWidth={'80%'} type='password' iconName={'lock-outline'} placeholder='Password' theme={theme} />
+                <View>
+                    <InputContainer value={form.fullName} textContentType='name' onChangeText={(v) => handleChange("fullName", v)} iconName={'person-outline'} placeholder='Full Name' theme={theme} />
+                    {error.field === 'fullName' && <ErrorText msg={error.msg} />}
+                </View>
+                <View>
+                    <InputContainer value={form.email} textContentType='emailAddress' onChangeText={(v) => handleChange("email", v)} iconName={'mail-outline'} placeholder='Email' theme={theme} />
+                    {error.field === 'email' && <ErrorText msg={error.msg} />}
+                </View>
+                <View>
+                    <InputContainer value={form.phone} textContentType='telephoneNumber' onChangeText={(v) => handleChange("phone", v)} iconName={'phone'} placeholder='Phone Number' theme={theme} />
+                    {error.field === 'phone' && <ErrorText msg={error.msg} />}
+                </View>
+                <View>
+                    <InputContainer value={form.password} textContentType='password' onChangeText={(v) => handleChange("password", v)} inputWidth={'80%'} type='password' iconName={'lock-outline'} placeholder='Password' theme={theme} />
+                    {error.field === 'password' && <ErrorText msg={error.msg} />}
+                </View>
             </View>
-            {error && <Text style={{ color: "red", marginTop: 10 }}>{error}</Text>}
+
             {/* Terms */}
             <TouchableOpacity activeOpacity={0.8} onPress={() => setChecked(!checked)} style={styles.terms}>
                 <Pressable
@@ -81,13 +127,12 @@ const RegisterScreen = () => {
 
             {/* Socials */}
             <View style={{ top: 60, flexDirection: 'row', gap: 30 }} >
-                <SocialsContainer name='logo-google' />
-                <SocialsContainer name='logo-facebook' />
+                <SocialsContainer onpress={handleGoogleSignIn} name='logo-google' />
             </View>
 
             {/* Bottom */}
             <View style={{ top: 100 }}>
-                <Text style={{ color: colors.text, fontFamily: 'PoppinsRegular' }}>Already Have an account? <Text onPress={() => router.push('/login')} style={{ fontFamily: 'PoppinsMedium', color: '#C150F6' }}>Login</Text></Text>
+                <Text style={{ color: colors.text, fontFamily: 'PoppinsRegular' }}>Already Have an account? <Text onPress={routeToLogin} style={{ fontFamily: 'PoppinsMedium', color: '#C150F6' }}>Login</Text></Text>
             </View>
         </ScrollView>
     )

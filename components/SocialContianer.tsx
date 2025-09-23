@@ -1,10 +1,10 @@
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { GestureResponderEvent, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import React from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons'
 
-const SocialsContainer = ({ name }: { name: any }) => {
+const SocialsContainer = ({ name, onpress, disable }: { name: any, onpress?: (e: GestureResponderEvent) => void, disable?: boolean }) => {
     return (
-        <TouchableOpacity style={styles.container}>
+        <TouchableOpacity activeOpacity={0.5} disabled={disable} onPress={onpress} style={styles.container}>
             <Ionicons name={name} size={30} />
         </TouchableOpacity>
     )
