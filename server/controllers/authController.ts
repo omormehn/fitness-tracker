@@ -6,8 +6,9 @@ import User from '../model/User';
 import { createAccessToken, createRefreshToken, findRefreshTokenDocument, revokeRefreshToken } from '../utils/token';
 import { validateRequest } from '../middlewares/validateRequest';
 import { OAuth2Client } from "google-auth-library";
-import dotenv from 'dotenv'
-dotenv.config()
+import crypto from 'crypto';
+
+
 
 const clientId = process.env.CLIENT_ID || ''
 const client = new OAuth2Client(clientId);
@@ -112,7 +113,7 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
             user = new User({
                 fullName: name,
                 email: emailNorm,
-                password: new mongoose.Types.ObjectId().toString(), // dummy
+                password: crypto.randomBytes(32).toString('hex') // dummy
             });
             await user.save();
         }
