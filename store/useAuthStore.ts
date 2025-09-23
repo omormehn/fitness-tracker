@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import api from '@/lib/axios';
 import { AuthState } from '@/types/types';
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
-import { set } from 'mongoose';
 import { ToastAndroid } from 'react-native';
 
 export const useAuthStore = create<AuthState>()(
