@@ -1,6 +1,6 @@
 // HomeScreen.js
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable, Platform } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -14,12 +14,37 @@ import WorkoutCard from "@/components/WorkoutCard";
 import { workouts } from "@/data/workout";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
+import healthconnectService from "@/services/healthconnect.service";
+import { getSdkStatus, initialize, Permission, requestPermission, SdkAvailabilityStatus } from 'react-native-health-connect'
 
 const { width, height } = Dimensions.get("window");
+console.log('ht', initialize)
 
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
   const { user } = useAuthStore();
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const permissions: Permission[] = [
+    { accessType: 'read', recordType: 'Steps' },
+    { accessType: 'write', recordType: 'Steps' },
+    { accessType: 'read', recordType: 'Distance' },
+    { accessType: 'write', recordType: 'Distance' },
+    { accessType: 'read', recordType: 'TotalCaloriesBurned' },
+    { accessType: 'write', recordType: 'TotalCaloriesBurned' },
+    { accessType: 'read', recordType: 'HeartRate' },
+    { accessType: 'read', recordType: 'ExerciseSession' },
+    { accessType: 'write', recordType: 'ExerciseSession' },
+  ];
+
+  // Activity data states
+  const [todaySteps, setTodaySteps] = useState(0);
+  const [todayDistance, setTodayDistance] = useState(0);
+  const [todayCalories, setTodayCalories] = useState(0);
+  const [heartRate, setHeartRate] = useState<{ bpm: number; timeAgo: string } | null>(null);
+  const [stepGoal] = useState(10000); // Default goal, would be customized later
+
   const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
   const graphBg = theme === 'dark' ? '#2A2C38' : '#FFFFFF';
@@ -27,6 +52,112 @@ const HomeScreen = () => {
   const notificationBg = theme === 'dark' ? '#161818' : '#F7F8F8';
   const notificationColor = theme === 'dark' ? '#FFFFFF' : '#000000';
 
+
+  // Initialize Health Connect and fetch data
+  useEffect(() => {
+    initHealth()
+  }, [user]);
+  const requestHealthPermissions = async () => {
+    try {
+      const basicPermissions: Permission[] = [
+        { accessType: 'read', recordType: 'Steps' },
+        { accessType: 'read', recordType: 'Distance' }
+      ];
+      console.log('bs', basicPermissions)
+      const granted = await requestPermission([
+        {
+          accessType: 'read',
+          recordType: 'BackgroundAccessPermission',
+        },
+        // Other permissions...
+      ]);
+      console.log('Permissions granted:', granted);
+      return granted;
+    } catch (error) {
+      console.error('Error requesting permissions:', error);
+      return false;
+    }
+  };
+
+  const initHealth = async () => {
+    try {
+      const isAvailable = await healthconnectService.initialize();
+      console.log('ava', isAvailable)
+      if (!isAvailable) {
+        console.log('Health Connect not available');
+        return;
+      }
+
+      const granted = await requestHealthPermissions()
+      console.log('gr', granted)
+      if (granted) {
+        const healthData = await fetchHealthData();
+        console.log('Health data:', healthData);
+      } else {
+        console.log('Permissions not granted, cannot fetch data');
+      }
+    } catch (error) {
+      console.error('Error initializing health connect:', error);
+    }
+  };
+
+
+  const initializeHealthTracking = async () => {
+    if (Platform.OS === 'android') {
+      const initialized = await healthconnectService.initialize();
+      console.log(initialized)
+      if (initialized) {
+        const hasPermissions = await healthconnectService.requestPermissions();
+        console.log('hs', hasPermissions)
+        // if (hasPermissions) {
+        //   await fetchHealthData();
+        // }
+      }
+    }
+    setLoading(false);
+  };
+
+  const fetchHealthData = async () => {
+    try {
+      // Fetch today's activity data
+      const activityData = await healthconnectService.getTodayActivity();
+      setTodaySteps(activityData.steps);
+      setTodayDistance(activityData.distance);
+      setTodayCalories(activityData.calories);
+
+      // Fetch heart rate
+      const hrData = await healthconnectService.getHeartRate();
+      if (hrData) {
+        setHeartRate(hrData);
+      }
+    } catch (error) {
+      console.error('Error fetching health data:', error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchHealthData();
+    setRefreshing(false);
+  };
+
+  // const calculateBMI = () => {
+  //   if (user?.weight && user?.height) {
+  //     const heightInMeters = user.height / 100;
+  //     const bmi = user.weight / (heightInMeters * heightInMeters);
+  //     return bmi.toFixed(1);
+  //   }
+  //   return '20.1'; // Default value
+  // };
+
+  const getBMIStatus = (bmi: number) => {
+    if (bmi < 18.5) return 'Underweight';
+    if (bmi < 25) return 'Normal weight';
+    if (bmi < 30) return 'Overweight';
+    return 'Obese';
+  };
+
+  const stepProgress = (todaySteps / stepGoal) * 100;
 
 
   return (
@@ -226,3 +357,6 @@ const styles = StyleSheet.create({
   workoutGraph: { borderRadius: 16, right: 20 },
   workoutCardContainer: { flexDirection: 'column', },
 });
+
+
+

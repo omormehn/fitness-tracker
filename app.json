@@ -28,7 +28,18 @@
       },
       "edgeToEdgeEnabled": true,
       "softwareKeyboardLayoutMode": "pan",
-      "package": "com.thefirstnative.healthtracker"
+      "package": "com.thefirstnative.healthtracker",
+      "permissions": [
+        "android.permission.health.READ_STEPS",
+        "android.permission.health.WRITE_STEPS",
+        "android.permission.health.READ_DISTANCE",
+        "android.permission.health.WRITE_DISTANCE",
+        "android.permission.health.READ_TOTAL_CALORIES_BURNED",
+        "android.permission.health.WRITE_TOTAL_CALORIES_BURNED",
+        "android.permission.health.READ_HEART_RATE",
+        "android.permission.health.READ_EXERCISE",
+        "android.permission.health.WRITE_EXERCISE"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -50,9 +61,21 @@
         }
       ],
       [
-        "@react-native-google-signin/google-signin", 
+        "@react-native-google-signin/google-signin",
         {
-           "iosUrlScheme": "com.googleusercontent.apps.98467727321-hhptat4pkndun9qpq3b53o5j3cajrqr8"
+          "iosUrlScheme": "com.googleusercontent.apps.98467727321-hhptat4pkndun9qpq3b53o5j3cajrqr8"
+        }
+      ],
+      "react-native-health-connect",
+      "expo-health-connect",
+       [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "minSdkVersion": 26
+          }
         }
       ]
     ],
@@ -65,9 +88,7 @@
         "projectId": "fde36330-3489-409d-91d3-32e1ed3c554f"
       }
     },
-    "runtimeVersion": {
-      "policy": "appVersion"
-    },
+   "runtimeVersion": "1.0.0", 
     "updates": {
       "url": "https://u.expo.dev/fde36330-3489-409d-91d3-32e1ed3c554f"
     }

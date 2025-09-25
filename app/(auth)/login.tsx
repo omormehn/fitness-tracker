@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import InputContainer from '@/components/InputContainer';
 import Button from '@/components/button';
-import Seperator from '@/components/Seperator';
+import LineSeperator from '@/components/LineSeperator';
 import SocialsContainer from '@/components/SocialContianer';
 import { router } from 'expo-router';
 import { useAuthStore } from '@/store/useAuthStore';
@@ -122,7 +122,7 @@ const LoginScreen = () => {
 
             {/* Divider */}
             <View >
-                <Seperator />
+                <LineSeperator />
             </View>
 
             {/* Socials */}
