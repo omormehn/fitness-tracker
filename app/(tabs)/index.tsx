@@ -1,5 +1,5 @@
 // HomeScreen.js
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable, Platform } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -54,24 +54,8 @@ const HomeScreen = () => {
 
 
   // Initialize Health Connect and fetch data
-  useEffect(() => {
-    initializeHealthTracking()
-  }, []);
 
-  const initializeHealthTracking = async () => {
-    if (Platform.OS === 'android') {
-      const initialized = await healthconnectService.initialize();
-      if (initialized) {
-        const hasPermissions = await healthconnectService.requestPermissions();
-        if (hasPermissions) {
-          await fetchHealthData();
-        }
-      }
-    }
-    setLoading(false);
-  };
-
-  const fetchHealthData = async () => {
+  const fetchHealthData = useCallback(async () => {
     try {
       // Fetch today's activity data
       const activityData = await healthconnectService.getTodayActivity();
@@ -88,7 +72,24 @@ const HomeScreen = () => {
     } catch (error) {
       console.error('Error fetching health data:', error);
     }
-  };
+  }, [])
+
+  const initializeHealthTracking = useCallback(async () => {
+    if (Platform.OS === 'android') {
+      const initialized = await healthconnectService.initialize();
+      if (initialized) {
+        const hasPermissions = await healthconnectService.requestPermissions();
+        if (hasPermissions) {
+          await fetchHealthData();
+        }
+      }
+    }
+    setLoading(false);
+  }, [fetchHealthData])
+
+  useEffect(() => {
+    void initializeHealthTracking();
+  }, [initializeHealthTracking]);
 
   const onRefresh = async () => {
     setRefreshing(true);
