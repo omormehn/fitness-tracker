@@ -94,3 +94,44 @@ export const logout = async (req: Request, res: Response) => {
     }
     res.json({ message: 'Logged out' });
 };
+
+export const updateUser = async (req: Request, res: Response) => {
+    try {
+        const userId = req.user?.id || req.body.userId;
+        console.log('rq', req)
+        // if you're attaching user to req in auth middleware (req.user), use that
+        // otherwise accept from body (less secure)
+
+        if (!userId) {
+            return res.status(400).json({ message: 'User ID required' });
+        }
+
+        // Allowed fields for update
+        const { fullName, weight, height, age, gender } = req.body;
+
+        const updates: any = {};
+        if (fullName) updates.fullName = fullName.trim();
+        if (weight) updates.weight = weight;
+        if (height) updates.height = height;
+        if (age) updates.age = age;
+        if (gender) updates.gender = gender;
+
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { $set: updates },
+            { new: true, runValidators: true }
+        ).select('-password'); 
+
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json({
+            message: 'Profile updated successfully',
+            user,
+        });
+    } catch (error) {
+        console.error('Error updating user:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
