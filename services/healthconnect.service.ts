@@ -70,10 +70,14 @@ class HealthConnectService {
             return false;
         }
         try {
-
             const granted = await requestPermission(this.permissions);
-            // return granted.length === this.permissions.length;
-            console.log('gr', granted)
+            const allRequestedGranted = this.permissions.every(requestedPerm =>
+                granted.some(grantedPerm =>
+                    grantedPerm.recordType === requestedPerm.recordType &&
+                    grantedPerm.accessType === requestedPerm.accessType
+                )
+            );
+            return allRequestedGranted;
         } catch (error) {
             console.error('Failed to request permissions:', error);
             return false;

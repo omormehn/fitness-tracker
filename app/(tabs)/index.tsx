@@ -55,63 +55,17 @@ const HomeScreen = () => {
 
   // Initialize Health Connect and fetch data
   useEffect(() => {
-    initHealth()
-  }, [user]);
-  const requestHealthPermissions = async () => {
-    try {
-      const basicPermissions: Permission[] = [
-        { accessType: 'read', recordType: 'Steps' },
-        { accessType: 'read', recordType: 'Distance' }
-      ];
-      console.log('bs', basicPermissions)
-      const granted = await requestPermission([
-        {
-          accessType: 'read',
-          recordType: 'BackgroundAccessPermission',
-        },
-        // Other permissions...
-      ]);
-      console.log('Permissions granted:', granted);
-      return granted;
-    } catch (error) {
-      console.error('Error requesting permissions:', error);
-      return false;
-    }
-  };
-
-  const initHealth = async () => {
-    try {
-      const isAvailable = await healthconnectService.initialize();
-      console.log('ava', isAvailable)
-      if (!isAvailable) {
-        console.log('Health Connect not available');
-        return;
-      }
-
-      const granted = await requestHealthPermissions()
-      console.log('gr', granted)
-      if (granted) {
-        const healthData = await fetchHealthData();
-        console.log('Health data:', healthData);
-      } else {
-        console.log('Permissions not granted, cannot fetch data');
-      }
-    } catch (error) {
-      console.error('Error initializing health connect:', error);
-    }
-  };
-
+    initializeHealthTracking()
+  }, []);
 
   const initializeHealthTracking = async () => {
     if (Platform.OS === 'android') {
       const initialized = await healthconnectService.initialize();
-      console.log(initialized)
       if (initialized) {
         const hasPermissions = await healthconnectService.requestPermissions();
-        console.log('hs', hasPermissions)
-        // if (hasPermissions) {
-        //   await fetchHealthData();
-        // }
+        if (hasPermissions) {
+          await fetchHealthData();
+        }
       }
     }
     setLoading(false);
@@ -121,6 +75,7 @@ const HomeScreen = () => {
     try {
       // Fetch today's activity data
       const activityData = await healthconnectService.getTodayActivity();
+      console.log('act', activityData)
       setTodaySteps(activityData.steps);
       setTodayDistance(activityData.distance);
       setTodayCalories(activityData.calories);
