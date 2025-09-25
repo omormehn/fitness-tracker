@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
     },
     phone: {
         type: Number,
-        // required: true,
+        sparse: true,
         unique: true,
         trim: true
     },
@@ -37,7 +37,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         minlength: 6,
-        
+
     },
     gender: {
         type: String,

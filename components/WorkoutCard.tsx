@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import React from 'react'
 import { useTheme } from '@/context/ThemeContext';
 import LinearGradientComponent from './linearGradient';
@@ -10,13 +10,14 @@ interface WorkoutCardProps {
     time: string
 }
 
+
 const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
     const { colors, gradients } = useTheme();
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             {/* First col */}
-            <LinearGradientComponent gradient={gradients.card} style={{ padding: 35, borderRadius: 35, }} >
+            <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
             </LinearGradientComponent>
 
@@ -25,7 +26,7 @@ const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
                 <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
                 <Text style={[styles.subTitle, { color: colors.tintText3 }]}>{calories} Calories Burn | {time} minutes</Text>
             </View>
-            
+
             {/* 3rd col */}
             <View style={styles.circle} />
         </View>

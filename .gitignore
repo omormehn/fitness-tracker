@@ -37,3 +37,4 @@ server/.env
 
 # typescript
 *.tsbuildinfo
+/android

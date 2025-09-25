@@ -26,7 +26,7 @@ const Onboarding = () => {
       </View>
       {/* Button */}
       <TouchableOpacity onPress={() => router.push('/OnboardingScreen')} className='absolute bottom-20'>
-        <Button   text='Get Started' />
+        <Button  text='Get Started' />
       </TouchableOpacity>
     </LinearGradient>
   )

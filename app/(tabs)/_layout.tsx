@@ -12,29 +12,23 @@ import { BottomTabsProps } from 'react-native-screens';
 import { View } from 'react-native';
 import LineChartComponent from '@/components/LineChart';
 import LinearGradientComponent from '@/components/linearGradient';
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>['name'];
-  color: string;
-}) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
 
 export default function TabLayout() {
   const { theme, gradients } = useTheme();
-
-
+  const insets = useSafeAreaInsets();
   const bg = theme === 'dark' ? '#22242E' : '#FFFFFF';
   return (
+
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,
         tabBarStyle: {
-          height: 85,
+          height: 80 + insets.bottom,
           borderTopWidth: 0,
           backgroundColor: bg,
+          paddingBottom: insets.bottom,
         },
         tabBarIconStyle: {
           marginTop: 20,
@@ -100,6 +94,23 @@ export default function TabLayout() {
           headerShown: false
         }}
       />
+      <Tabs.Screen
+        name="notification"
+        options={{
+          href: null,
+          headerShown: false,
+          tabBarStyle: { display: "none" },
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          href: null,
+          headerShown: false,
+          tabBarStyle: { display: "none" },
+        }}
+      />
     </Tabs>
+
   );
 }

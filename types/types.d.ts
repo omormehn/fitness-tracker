@@ -28,6 +28,8 @@ export type InputContainerProps = {
   theme: ThemeType,
   width?: any
   inputWidth?: any
+  value: string;
+  onChangeText: (text: string) => void
 } & TextInputProps
 
 type Gender = { male: string, female: string };
@@ -39,3 +41,26 @@ interface CarouselProps {
   description: string;
   route?: any;
 };
+
+
+interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  phone?: string;
+}
+
+interface AuthState {
+  user: null | User;
+  token: string | null;
+  loading: boolean;
+  googleSignIn: () => Promise<boolean>;
+  login: (data) => Promise<boolean>;
+  register: (data) => Promise<boolean>;
+  logout: () => Promise<void>;
+  error: { field?: string | null, msg: string | null }
+  hasOnboarded: boolean;
+  setOnboarded: () => void;
+  setAuth: (payload: { user: any; token: string }) => void;
+  setError: (error: { field: string | null, msg: string | null }) => void
+}

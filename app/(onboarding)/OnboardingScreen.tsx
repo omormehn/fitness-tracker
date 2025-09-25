@@ -4,18 +4,27 @@ import Onboarding from '@/components/Onboarding'
 import { useTheme } from '@/context/ThemeContext'
 import { router } from 'expo-router'
 import { onboardingData } from '@/data/onboardingData'
+import { useAuthStore } from '@/store/useAuthStore'
 
 
 
 const OnboardingScreen = () => {
   const { theme, colors } = useTheme()
   const [step, setStep] = useState(0)
+  const setOnboarded = useAuthStore((s) => s.setOnboarded);
+
+  const finishOnboarding = async () => {
+    await setOnboarded();
+    router.replace('/(auth)/(register)/register')
+  };
+
 
   const handleNext = () => {
     if (step < onboardingData.length - 1) {
       setStep(step + 1)
     } else {
-      router.push('/register')
+      console.log('clicked')
+      finishOnboarding()
     }
   }
 

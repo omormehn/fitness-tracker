@@ -3,5 +3,6 @@
         "Fullbody",
         "Seperator",
         "sleepgraph"
-    ]
+    ],
+    "java.configuration.updateBuildConfiguration": "interactive"
 }

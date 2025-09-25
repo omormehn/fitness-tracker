@@ -7,6 +7,9 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 import { StatusBar } from 'react-native';
+import { useAuthStore } from '@/store/useAuthStore';
+import { GoogleSignin } from '@react-native-google-signin/google-signin'
+
 
 
 
@@ -43,6 +46,14 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+  
+  useEffect(() => {
+    GoogleSignin.configure({
+      iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
+      webClientId: process.env.EXPO_PUBLIC_CLIENT_ID,
+      profileImageSize: 150
+    })
+  }, [])
 
   if (!loaded) {
     return null;
@@ -52,14 +63,21 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const { user, token, hasOnboarded } = useAuthStore();
 
+
+
+  console.log('hd', hasOnboarded)
+  console.log('tk', token)
+  console.log('user', user)
 
   return (
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} />
-      <Stack>
-        <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
+        {/* <Stack.Screen name="(onboarding)" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );
