@@ -6,7 +6,7 @@ import InputContainer from '@/components/InputContainer'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import Button from '@/components/button';
 import { router } from 'expo-router';
-import Seperator from '@/components/Seperator';
+import LineSeperator from '@/components/LineSeperator';
 import SocialsContainer from '@/components/SocialContianer';
 import { useAuthStore } from '@/store/useAuthStore';
 import api from '@/lib/axios';
@@ -123,7 +123,7 @@ const RegisterScreen = () => {
             </TouchableOpacity>
 
             {/* Divider */}
-            <Seperator />
+            <LineSeperator />
 
             {/* Socials */}
             <View style={{ top: 60, flexDirection: 'row', gap: 30 }} >
