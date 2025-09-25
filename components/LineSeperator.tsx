@@ -3,7 +3,7 @@ import React from 'react'
 import { useTheme } from '@/context/ThemeContext';
 
 const screenWidth = Dimensions.get('window').width
-const Seperator = () => {
+const LineSeperator = () => {
     const { colors } = useTheme();
 
     return (
@@ -17,7 +17,7 @@ const Seperator = () => {
     )
 }
 
-export default Seperator
+export default LineSeperator
 
 const styles = StyleSheet.create({
     seperator: {
