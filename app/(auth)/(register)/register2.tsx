@@ -31,7 +31,17 @@ const { width, height } = Dimensions.get('window')
 const RegisterScreen2 = () => {
     const { colors, theme, gradients } = useTheme();
     const { height } = useWindowDimensions()
-    const [gender, setGender] = useState<Gender | null>(null);
+
+    const [form, setForm] = useState({
+        gender: null,
+        dob: '',
+        weight: '',
+        height: ''
+    })
+
+    const handleChange = (field: string, value: string) => {
+        setForm({ ...form, [field]: value });
+    };
 
     const dark = theme === 'dark'
 
@@ -85,15 +95,15 @@ const RegisterScreen2 = () => {
                                     labelField="label"
                                     valueField="value"
                                     placeholder="Choose Gender"
-                                    onChange={item => { setGender(item.value); }}
+                                    onChange={item => { handleChange('gender', item); }}
                                 />
                             </View>
                             {/* Use a date picker */}
-                            <InputContainer iconName={'date-range'} placeholder='Date of Birth' theme={theme} />
+                            <InputContainer iconName={'date-range'} placeholder='Date of Birth' theme={theme} value={form.dob} onChangeText={(v) => handleChange('dob', v)} />
 
                             {/* Todo create a component */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                                <InputContainer width={'80%'} iconName={'monitor-weight'} placeholder='Your Weight' theme={theme} />
+                                <InputContainer width={'80%'} iconName={'monitor-weight'} placeholder='Your Weight' theme={theme} value={form.weight} onChangeText={(v) => handleChange('weight', v)} />
 
                                 <LinearGradient
                                     colors={gradients.onboarding}
@@ -105,7 +115,7 @@ const RegisterScreen2 = () => {
                                 </LinearGradient>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                                <InputContainer width={'80%'} iconName={'height'} placeholder='Your Height' theme={theme} />
+                                <InputContainer width={'80%'} iconName={'height'} placeholder='Your Height' theme={theme} value={form.height} onChangeText={(v) => handleChange('height', v)} />
                                 <LinearGradient
                                     colors={gradients.onboarding}
                                     start={{ x: 0, y: 0 }}
