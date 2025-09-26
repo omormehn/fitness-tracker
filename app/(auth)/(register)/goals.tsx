@@ -6,7 +6,7 @@ import Carousel from '@/components/carousel';
 import Button from '@/components/button';
 import { router } from 'expo-router';
 
-//TODO: FIX PAGE PADDING ISSUES ✅✅✅
+
 const GoalsScreen = () => {
     const { colors } = useTheme();
     return (
