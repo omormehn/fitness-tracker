@@ -7,6 +7,7 @@ import { createAccessToken, createRefreshToken, findRefreshTokenDocument, revoke
 import { validateRequest } from '../middlewares/validateRequest';
 import { OAuth2Client } from "google-auth-library";
 import crypto from 'crypto';
+import { AuthRequest } from '../middlewares/authMiddleware';
 
 
 
@@ -93,12 +94,12 @@ export const logout = async (req: Request, res: Response) => {
 };
 
 
-export const updateUser = async (req: Request, res: Response) => {
+export const updateUser = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id || req.body.userId;
         console.log('rq', req)
-        // if you're attaching user to req in auth middleware (req.user), use that
-        // otherwise accept from body (less secure)
+      
+        
 
         if (!userId) {
             return res.status(400).json({ message: 'User ID required' });
