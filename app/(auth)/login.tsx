@@ -68,11 +68,14 @@ const LoginScreen = () => {
 
     };
     const handleLogin = async () => {
+        const email = form.email.trim()
+        const password = form.password.trim()
+        const formData = { email, password }
         try {
             if (form.email.length <= 0) {
                 setError({ field: 'email', msg: 'Invalid Email Address' })
             }
-            const res = await login(form)
+            const res = await login(formData)
             if (res) router.replace('/(tabs)')
         } catch (error) {
             console.log('err', error)

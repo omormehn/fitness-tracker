@@ -44,9 +44,10 @@ const RegisterScreen = () => {
         setIsLoading(true)
         try {
             const ok = await googleSignIn();
-            if (ok) {
-                router.replace('/(tabs)')
-            }
+
+            if (ok) router.replace('/(auth)/(register)/register2')
+
+
         } catch (error) {
             console.log('err in goog', error)
         } finally {
@@ -55,13 +56,17 @@ const RegisterScreen = () => {
     }
 
     const handleRegister = async () => {
-
+        const email = form.email.trim()
+        const fullName = form.fullName.trim()
+        const phone = form.phone.trim()
+        const pass = form.password
+        const formData = { email, fullName, phone, pass }
         try {
             if (form.email.length <= 0) {
                 setError({ field: 'email', msg: 'Invalid Email Address' })
             }
-            const ok = await register(form)
-            if (ok) router.replace('/(tabs)')
+            const ok = await register(formData)
+            if (ok) router.replace('/(auth)/(register)/register2')
         } catch (error) {
             console.log('err', error)
         }
