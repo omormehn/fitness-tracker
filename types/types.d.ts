@@ -1,3 +1,4 @@
+import { updateUser } from './../server/controllers/authController';
 import { TextInputProps, TextStyle } from 'react-native';
 
 import React, { ComponentType, ReactElement } from 'react';
@@ -45,9 +46,13 @@ interface CarouselProps {
 
 interface User {
   id: string;
+  _id?: string;
   fullName: string;
   email: string;
   phone?: string;
+  height: number;
+  weight: number
+  dob: Date
 }
 
 interface AuthState {
@@ -58,9 +63,20 @@ interface AuthState {
   login: (data) => Promise<boolean>;
   register: (data) => Promise<boolean>;
   logout: () => Promise<void>;
+  updateUser: (data) => Promise<boolean>
   error: { field?: string | null, msg: string | null }
   hasOnboarded: boolean;
   setOnboarded: () => void;
   setAuth: (payload: { user: any; token: string }) => void;
   setError: (error: { field: string | null, msg: string | null }) => void
+}
+
+interface EditModalProps {
+  visible: boolean;
+  onClose: () => void;
+  field: string;
+  value: string;
+  onSave: (value: string) => void;
+  inputType?: 'text' | 'numeric' | 'email-address';
+  unit?: string;
 }

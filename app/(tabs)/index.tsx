@@ -1,24 +1,22 @@
 // HomeScreen.js
 import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable, Platform } from "react-native";
-import { LineChart } from "react-native-chart-kit";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useTheme } from "@/context/ThemeContext";
 import { LinearGradient } from "expo-linear-gradient";
 import SleepGraphDark from '@/assets/images/dark/sleepgraph.svg';
 import SleepGraphLight from '@/assets/images/light/sleepgraph.svg';
-import { Colors } from "@/theme/Colors";
 import LineChartComponent from "@/components/LineChart";
 import WorkoutCard from "@/components/WorkoutCard";
 import { workouts } from "@/data/workout";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
 import healthconnectService from "@/services/healthconnect.service";
-import { getSdkStatus, initialize, Permission, requestPermission, SdkAvailabilityStatus } from 'react-native-health-connect'
+
+
 
 const { width, height } = Dimensions.get("window");
-console.log('ht', initialize)
 
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
@@ -26,17 +24,7 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const permissions: Permission[] = [
-    { accessType: 'read', recordType: 'Steps' },
-    { accessType: 'write', recordType: 'Steps' },
-    { accessType: 'read', recordType: 'Distance' },
-    { accessType: 'write', recordType: 'Distance' },
-    { accessType: 'read', recordType: 'TotalCaloriesBurned' },
-    { accessType: 'write', recordType: 'TotalCaloriesBurned' },
-    { accessType: 'read', recordType: 'HeartRate' },
-    { accessType: 'read', recordType: 'ExerciseSession' },
-    { accessType: 'write', recordType: 'ExerciseSession' },
-  ];
+  const [isInitialized, setIsInitialize] = useState(false)
 
   // Activity data states
   const [todaySteps, setTodaySteps] = useState(0);
@@ -44,6 +32,7 @@ const HomeScreen = () => {
   const [todayCalories, setTodayCalories] = useState(0);
   const [heartRate, setHeartRate] = useState<{ bpm: number; timeAgo: string } | null>(null);
   const [stepGoal] = useState(10000); // Default goal, would be customized later
+  const [bmi, setBmi] = useState<number>();
 
   const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
@@ -54,12 +43,10 @@ const HomeScreen = () => {
 
 
   // Initialize Health Connect and fetch data
-
   const fetchHealthData = useCallback(async () => {
     try {
       // Fetch today's activity data
       const activityData = await healthconnectService.getTodayActivity();
-      console.log('act', activityData)
       setTodaySteps(activityData.steps);
       setTodayDistance(activityData.distance);
       setTodayCalories(activityData.calories);
@@ -78,6 +65,7 @@ const HomeScreen = () => {
     if (Platform.OS === 'android') {
       const initialized = await healthconnectService.initialize();
       if (initialized) {
+        setIsInitialize(true)
         const hasPermissions = await healthconnectService.requestPermissions();
         if (hasPermissions) {
           await fetchHealthData();
@@ -89,6 +77,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     void initializeHealthTracking();
+    calculateBMI();
   }, [initializeHealthTracking]);
 
   const onRefresh = async () => {
@@ -96,16 +85,16 @@ const HomeScreen = () => {
     await fetchHealthData();
     setRefreshing(false);
   };
-
-  // const calculateBMI = () => {
-  //   if (user?.weight && user?.height) {
-  //     const heightInMeters = user.height / 100;
-  //     const bmi = user.weight / (heightInMeters * heightInMeters);
-  //     return bmi.toFixed(1);
-  //   }
-  //   return '20.1'; // Default value
-  // };
-
+  const calculateBMI = () => {
+    if (user?.weight && user?.height) {
+      const heightInMeters = user.height / 100;
+      const bmi = user.weight / (heightInMeters * heightInMeters);
+      console.log('bmt', bmi)
+      setBmi(bmi)
+      return bmi.toFixed(1);
+    }
+    return '0';
+  };
   const getBMIStatus = (bmi: number) => {
     if (bmi < 18.5) return 'Underweight';
     if (bmi < 25) return 'Normal weight';
@@ -114,7 +103,6 @@ const HomeScreen = () => {
   };
 
   const stepProgress = (todaySteps / stepGoal) * 100;
-
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -130,6 +118,8 @@ const HomeScreen = () => {
         </Pressable>
       </View>
 
+      
+
       <ScrollView showsVerticalScrollIndicator={false}>
 
         {/* BMI Card */}
@@ -140,9 +130,9 @@ const HomeScreen = () => {
           style={styles.card}
         >
           <Text style={styles.cardTitle}>BMI (Body Mass Index)</Text>
-          <Text style={styles.cardSubtitle}>You have a normal weight</Text>
+          <Text style={styles.cardSubtitle}>You have a status: {getBMIStatus(bmi!)}</Text>
           <View style={styles.bmiRow}>
-            <Text style={styles.bmiValue}>20.1</Text>
+            <Text style={styles.bmiValue}>{bmi?.toFixed(1)}</Text>
             <TouchableOpacity >
               <LinearGradient
                 colors={gradients.button}

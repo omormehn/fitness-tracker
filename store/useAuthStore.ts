@@ -28,7 +28,6 @@ export const useAuthStore = create<AuthState>()(
                     if (token) {
                         api.defaults.headers.common.Authorization = `Bearer ${token}`;
                     }
-
                     set({ user: res.data.user, token });
                     return true;
                 } catch (err: any) {
@@ -49,21 +48,44 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/register", data);
+                    console.log('res', res.data);
                     const token = res.data.accessToken;
-
+                    console.log('tkk', token);
                     if (token) {
                         api.defaults.headers.common.Authorization = `Bearer ${token}`;
                     }
-
                     set({ user: res.data.user, token });
                     return true;
                 } catch (err: any) {
+                    console.log('err', err)
                     const errors = err.response?.data?.errors;
                     console.log('err', errors)
                     if (Array.isArray(errors) && errors.length > 0) {
                         set({ error: { field: errors[0].field, msg: errors[0].message } });
                     } else {
                         set({ error: { msg: "Registration failed" } });
+                    }
+                    return false;
+                } finally {
+                    set({ loading: false });
+                }
+            },
+
+            updateUser: async (data) => {
+                try {
+                    set({ loading: true, error: { field: null, msg: null } });
+                    const res = await api.post("/auth/update", data);
+                    console.log('res', res.data);                   
+                    set({ user: res.data.user });
+                    return true;
+                } catch (err: any) {
+                    console.log('err', err)
+                    const errors = err.response?.data?.errors;
+                    console.log('err', errors)
+                    if (Array.isArray(errors) && errors.length > 0) {
+                        set({ error: { field: errors[0].field, msg: errors[0].message } });
+                    } else {
+                        set({ error: { msg: "Update failed" } });
                     }
                     return false;
                 } finally {

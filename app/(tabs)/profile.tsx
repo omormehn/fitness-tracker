@@ -37,8 +37,8 @@ const ProfileScreen = () => {
 
         <View style={{ gap: 40 }}>
           <View style={styles.header}>
-            <ProfileCard text='180cm' type='Height' />
-            <ProfileCard text='65kg' type='Weight' />
+            <ProfileCard text={`${user?.height?.toString()!}cm`} type='Height' />
+            <ProfileCard text={`${user?.weight?.toString()!}kg`} type='Weight' />
             <ProfileCard text='22yo' type='Age' />
           </View>
 
@@ -46,7 +46,7 @@ const ProfileScreen = () => {
           <View style={[styles.account, { backgroundColor: colors.background }]}>
             <Text style={{ fontFamily: 'PoppinsSemiBold', fontSize: 16, color: colors.text }}>Account</Text>
             {/* Options */}
-            <AccountOptions option='Personal Data' iconName='pac-man' />
+            <AccountOptions route={'/(profile)/PersonalData'} option='Personal Data' iconName='pac-man' />
             <AccountOptions option='Achievement' iconName='clipboard-list-outline' />
             <AccountOptions option='Achievement History' iconName='history' />
             <AccountOptions option='Workout Progress' iconName='progress-star-four-points' />

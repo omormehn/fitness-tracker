@@ -31,7 +31,7 @@ export const register = async (req: Request, res: Response) => {
         const accessToken = createAccessToken(user._id);
         const refreshToken = await createRefreshToken(user._id);
         res.status(201).json({
-            user: { id: user._id, fullName: user.fullName, email: user.email },
+            user: { id: user._id, fullName: user.fullName, email: user.email, phone: user.phone },
             accessToken,
             refreshToken,
         });
@@ -57,8 +57,17 @@ export const login = async (req: Request, res: Response) => {
     const accessToken = createAccessToken(user._id);
     const refreshToken = await createRefreshToken(user._id);
 
+    const userData = {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        weight: user.weight,
+        height: user.height,
+        phone: user.phone
+    }
+
     res.json({
-        user: { id: user._id, fullName: user.fullName, email: user.email },
+        user: userData,
         accessToken,
         refreshToken,
     });
@@ -95,39 +104,52 @@ export const logout = async (req: Request, res: Response) => {
 
 
 export const updateUser = async (req: AuthRequest, res: Response) => {
+    console.log('clickedddd')
+
     try {
         const userId = req.user?.id || req.body.userId;
-        console.log('rq', req)
-      
-        
-
         if (!userId) {
+            console.log('no id')
             return res.status(400).json({ message: 'User ID required' });
         }
 
         // Allowed fields for update
-        const { fullName, weight, height, age, gender } = req.body;
-
+        const { fullName, weight, height, age, gender, phone, dob } = req.body;
+        console.log('upd', req.body)
+        console.log('er', dob)
         const updates: any = {};
         if (fullName) updates.fullName = fullName.trim();
         if (weight) updates.weight = weight;
         if (height) updates.height = height;
         if (age) updates.age = age;
         if (gender) updates.gender = gender;
+        if (phone) updates.phone = phone;
+        if (dob) updates.dateOfBirth = dob;
+
+        console.log('updates', updates)
 
         const user = await User.findByIdAndUpdate(
             userId,
             { $set: updates },
             { new: true, runValidators: true }
-        ).select('-password'); 
+        ).select('-password');
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
+        const userData = {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            weight: user.weight,
+            height: user.height,
+            phone: user.phone,
+            dob: user.dateOfBirth
+        }
+        console.log('is', user, userData)
         res.json({
             message: 'Profile updated successfully',
-            user,
+            user: userData,
         });
     } catch (error) {
         console.error('Error updating user:', error);

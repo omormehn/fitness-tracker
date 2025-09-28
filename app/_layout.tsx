@@ -1,14 +1,16 @@
 import { ThemeProvider } from '@/context/ThemeContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 import { StatusBar } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
-import { GoogleSignin } from '@react-native-google-signin/google-signin'
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { ToastAndroid } from 'react-native';
+
 
 
 
@@ -46,7 +48,7 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
-  
+
   useEffect(() => {
     GoogleSignin.configure({
       iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
@@ -65,11 +67,17 @@ export default function RootLayout() {
 function RootLayoutNav() {
   const { user, token, hasOnboarded } = useAuthStore();
 
+  useEffect(() => {
+    if (user) {
+      if (!user?.height || !user?.weight) {
+        ToastAndroid.show('Please set extra details', 2000)
+        router.replace('/(auth)/(register)/register2')
+      }
+    }
+  }, [user])
 
 
-  console.log('hd', hasOnboarded)
-  console.log('tk', token)
-  console.log('user', user)
+
 
   return (
     <ThemeProvider>
@@ -77,7 +85,7 @@ function RootLayoutNav() {
       <Stack screenOptions={{ headerShown: false }}>
         {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
         {/* <Stack.Screen name="(onboarding)" options={{ headerShown: false }} /> */}
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        {/* <Stack.Screen name="(auth)" options={{ headerShown: false }} /> */}
       </Stack>
     </ThemeProvider>
   );

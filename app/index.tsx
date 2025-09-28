@@ -4,8 +4,13 @@ import { useEffect } from "react";
 
 export default function Index() {
     const { hasOnboarded, token } = useAuthStore();
+    console.log('token', token)
 
     const router = useRouter();
+
+    useEffect(() => {
+        console.log('sjsj')
+    }, [])
 
     useEffect(() => {
         if (!hasOnboarded) {
