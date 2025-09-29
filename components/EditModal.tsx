@@ -2,7 +2,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { EditModalProps } from "@/types/types";
 import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
-import { Modal, StyleSheet, TouchableOpacity, View, Text } from "react-native";
+import { Modal, StyleSheet, TextInput, TouchableOpacity, View, Text } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
 const EditModal: React.FC<EditModalProps> = ({
@@ -11,12 +11,16 @@ const EditModal: React.FC<EditModalProps> = ({
     field,
     value,
     onSave,
+    inputType = 'text',
+    unit
 }) => {
     const { colors, gradients, theme } = useTheme();
-    const [gender, setGender] = useState(value || null);
+    const [inputValue, setInputValue] = useState(value || '');
+    const [gender, setGender] = useState(value || null); // Initialize with current value
 
     const handleSave = () => {
-        onSave(gender!);
+        const saveValue = gender !== undefined ? gender : inputValue;
+        onSave(saveValue!);
         onClose();
     };
 
@@ -25,7 +29,6 @@ const EditModal: React.FC<EditModalProps> = ({
         { label: 'Female', value: 'female' }
     ];
 
-    // Simple test - remove all complex styling first
     return (
         <Modal
             animationType="slide"
@@ -34,30 +37,100 @@ const EditModal: React.FC<EditModalProps> = ({
             onRequestClose={onClose}
         >
             <View style={styles.modalOverlay}>
-                <View style={[styles.modalContent, { backgroundColor: 'white' }]}>
-                    <Text style={styles.modalTitle}>Edit {field}</Text>
+                <View style={[styles.modalContent, { backgroundColor: colors.card }]}>
+                    <Text style={[styles.modalTitle, { color: colors.text }]}>Edit {field}</Text>
 
-                    {/* Minimal dropdown test */}
-                    <Dropdown
-                        data={OPTIONS}
-                        labelField="label"
-                        valueField="value"
-                        value={gender}
-                        onChange={item => {
-                            console.log('Dropdown selected:', item); // Check if this logs
-                            setGender(item.value);
-                        }}
-                        style={styles.testDropdown}
-                        placeholder="Select gender"
-                    />
+
+                    {field.toLowerCase() === 'gender' ? (
+                        <Dropdown
+                            style={[
+                                styles.dropdown,
+                                {
+                                    borderColor: colors.tintText3,
+                                }
+                            ]}
+                            placeholderStyle={[
+                                styles.placeholderStyle,
+                                { color: theme === 'dark' ? '#ACA3A5' : '#A5A3B0' }
+                            ]}
+                            selectedTextStyle={[
+                                styles.selectedTextStyle,
+                                { color: colors.text }
+                            ]}
+                            inputSearchStyle={styles.inputSearchStyle}
+                            iconStyle={[
+                                styles.iconStyle,
+                                { tintColor: colors.text }
+                            ]}
+                            itemTextStyle={[
+                                styles.itemTextStyle,
+                                { color: colors.text }
+                            ]}
+                            itemContainerStyle={[
+                                styles.itemContainerStyle,
+                                // { backgroundColor: theme === 'dark' ? '#161818' : '#F7F8F8' }
+                            ]}
+                            data={OPTIONS}
+                            maxHeight={300}
+                            labelField="label"
+                            valueField="value"
+                            placeholder="Choose Gender"
+                            value={gender}
+                            onChange={item => {
+                                setGender(item.value);
+                            }}
+                            renderItem={(item) => (
+                                <View style={[
+                                    styles.item,
+                                    { backgroundColor: theme === 'dark' ? '#161818' : '#F7F8F8' }
+                                ]}>
+                                    <Text style={[
+                                        styles.textItem,
+                                        { color: colors.text }
+                                    ]}>
+                                        {item.label}
+                                    </Text>
+                                </View>
+                            )}
+                        />
+                    ) : (
+                        <View style={styles.inputContainer}>
+                            <TextInput
+                                style={[
+                                    styles.modalInput,
+                                    {
+                                        color: colors.text,
+                                        borderColor: colors.tintText3
+                                    }
+                                ]}
+                                value={inputValue}
+                                onChangeText={setInputValue}
+                                autoFocus
+                                placeholder={`Enter ${field.toLowerCase()}`}
+                                placeholderTextColor={colors.tintText3}
+                                keyboardType={inputType === 'numeric' ? 'numeric' : 'default'}
+                            />
+                            {unit && (
+                                <Text style={[styles.unitText, { color: colors.tintText3 }]}>{unit}</Text>
+                            )}
+                        </View>
+                    )}
 
                     <View style={styles.modalButtons}>
                         <TouchableOpacity onPress={onClose} style={styles.cancelButton}>
-                            <Text>Cancel</Text>
+                            <Text style={[styles.cancelButtonText, { color: colors.tintText3 }]}>Cancel</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={handleSave} style={styles.saveButton}>
-                            <Text>Save</Text>
-                        </TouchableOpacity>
+
+                        <LinearGradient
+                            colors={gradients.button}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            style={styles.saveButton}
+                        >
+                            <TouchableOpacity onPress={handleSave} style={styles.saveButtonTouchable}>
+                                <Text style={styles.saveButtonText}>Save</Text>
+                            </TouchableOpacity>
+                        </LinearGradient>
                     </View>
                 </View>
             </View>
@@ -73,42 +146,106 @@ const styles = StyleSheet.create({
         backgroundColor: 'rgba(0, 0, 0, 0.5)',
     },
     modalContent: {
-        width: 300,
+        width: '85%',
         padding: 20,
-        borderRadius: 10,
+        borderRadius: 20,
     },
     modalTitle: {
+        fontFamily: 'PoppinsSemiBold',
         fontSize: 18,
         marginBottom: 20,
         textAlign: 'center',
     },
-    testDropdown: {
-        height: 50,
+    inputContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginBottom: 30,
+    },
+    modalInput: {
+        flex: 1,
         borderWidth: 1,
-        borderColor: '#ccc',
-        borderRadius: 8,
+        borderRadius: 10,
+        padding: 12,
+        fontFamily: 'PoppinsRegular',
+        fontSize: 14,
+    },
+    unitText: {
+        fontFamily: 'PoppinsRegular',
+        fontSize: 14,
+        marginLeft: 10,
+    },
+    dropdown: {
+        borderRadius: 10,
         paddingHorizontal: 10,
-        marginBottom: 20,
+        height: 55,
+        borderWidth: 1,
+        marginBottom: 30,
+    },
+    placeholderStyle: {
+        fontSize: 13,
+        fontFamily: 'PoppinsRegular',
+    },
+    selectedTextStyle: {
+        fontSize: 13,
+        fontFamily: 'PoppinsRegular',
+    },
+    iconStyle: {
+        width: 20,
+        height: 20,
+    },
+    inputSearchStyle: {
+        height: 40,
+        fontSize: 13,
+        fontFamily: 'PoppinsRegular',
+    },
+    itemTextStyle: {
+        fontFamily: 'PoppinsRegular',
+    },
+    itemContainerStyle: {
+        borderRadius: 8,
+        marginHorizontal: 5,
+        marginVertical: 2,
+    },
+    item: {
+        padding: 17,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    textItem: {
+        flex: 1,
+        fontSize: 13,
+        fontFamily: 'PoppinsRegular',
     },
     modalButtons: {
         flexDirection: 'row',
         justifyContent: 'space-between',
     },
     cancelButton: {
-        padding: 10,
-        backgroundColor: '#ccc',
-        borderRadius: 5,
         flex: 1,
-        marginRight: 10,
+        padding: 12,
         alignItems: 'center',
+        marginRight: 10,
+    },
+    cancelButtonText: {
+        fontFamily: 'PoppinsMedium',
+        fontSize: 14,
     },
     saveButton: {
-        padding: 10,
-        backgroundColor: 'blue',
-        borderRadius: 5,
         flex: 1,
+        padding: 12,
+        borderRadius: 10,
         marginLeft: 10,
+    },
+    saveButtonTouchable: {
+        width: '100%',
         alignItems: 'center',
+    },
+    saveButtonText: {
+        fontFamily: 'PoppinsMedium',
+        fontSize: 14,
+        color: '#FFFFFF',
+        textAlign: 'center',
     },
 });
 

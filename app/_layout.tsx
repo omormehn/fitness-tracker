@@ -1,12 +1,12 @@
 import { ThemeProvider } from '@/context/ThemeContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { router, Stack } from 'expo-router';
+import { router, Stack, useSegments } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
-import { StatusBar } from 'react-native';
+import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 import { ToastAndroid } from 'react-native';
@@ -64,17 +64,74 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
+function LoadingScreen() {
+  // const { colors } = useTheme();
+
+  return (
+    <View style={{
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'brown'
+    }}>
+      <ActivityIndicator size="large" color={'yellow'} />
+    </View>
+  );
+}
+
 function RootLayoutNav() {
-  const { user, token, hasOnboarded } = useAuthStore();
+  const { user, initializeAuthState, hasOnboarded, loading } = useAuthStore();
+  const segments = useSegments();
+
+  const [appIsReady, setAppIsReady] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      if (!user?.height || !user?.weight) {
-        ToastAndroid.show('Please set extra details', 2000)
-        router.replace('/(auth)/(register)/register2')
+    async function prepare() {
+      try {
+        await initializeAuthState();
+        console.log('doen')
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppIsReady(true);
+        await SplashScreen.hideAsync();
       }
     }
-  }, [user])
+
+    prepare();
+  }, []);
+
+  useEffect(() => {
+    if (appIsReady && !loading) {
+      SplashScreen.hideAsync();
+
+      const inAuthGroup = segments[0] === '(auth)';
+      const inOnboardingGroup = segments[0] === '(onboarding)';
+      const inAppGroup = segments[0] === '(tabs)';
+
+
+      if (!user && !inAuthGroup && !inOnboardingGroup) {
+        router.replace('/(auth)/login');
+        return;
+      }
+
+
+      if (user && !hasOnboarded && !inOnboardingGroup && !inAuthGroup) {
+        router.replace('/(onboarding)');
+        return;
+      }
+
+      if (user && hasOnboarded && (inAuthGroup || inOnboardingGroup)) {
+        router.replace('/(tabs)');
+        return;
+      }
+    }
+  }, [appIsReady, loading, user, hasOnboarded, segments]);
+
+
+   if (!appIsReady || loading) {
+    return null;
+  }
 
 
 
@@ -83,9 +140,9 @@ function RootLayoutNav() {
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} />
       <Stack screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-        {/* <Stack.Screen name="(onboarding)" options={{ headerShown: false }} /> */}
-        {/* <Stack.Screen name="(auth)" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
   );

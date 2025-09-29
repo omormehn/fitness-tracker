@@ -75,7 +75,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/update", data);
-                    console.log('res', res.data);                   
+                    console.log('res', res.data);
                     set({ user: res.data.user });
                     return true;
                 } catch (err: any) {
@@ -161,10 +161,33 @@ export const useAuthStore = create<AuthState>()(
                     set({ user: null, token: null });
                 }
             },
+            initializeAuthState: async () => {
+                try {
+                    await new Promise(resolve => setTimeout(resolve, 1000));
+
+
+                    // TODO: add verify token with backend
+
+                    set({ loading: false });
+                } catch (error) {
+                    console.error('Error initializing auth state:', error);
+                    set({ loading: false });
+                }
+            },
         }),
         {
             name: "auth-storage",
             storage: createJSONStorage(() => AsyncStorage),
+            partialize: (state) => ({
+                user: state.user,
+                token: state.token,
+                hasOnboarded: state.hasOnboarded,
+            }),
+            onRehydrateStorage: () => (state) => {
+                if (state) {
+                    state.loading = false;
+                }
+            },
         }
     )
 );

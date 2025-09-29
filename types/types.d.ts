@@ -69,6 +69,7 @@ interface AuthState {
   setOnboarded: () => void;
   setAuth: (payload: { user: any; token: string }) => void;
   setError: (error: { field: string | null, msg: string | null }) => void
+  initializeAuthState: () => Promise<void>;
 }
 
 interface EditModalProps {
