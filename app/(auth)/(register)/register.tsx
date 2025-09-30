@@ -59,14 +59,14 @@ const RegisterScreen = () => {
         const email = form.email.trim()
         const fullName = form.fullName.trim()
         const phone = form.phone.trim()
-        const pass = form.password
-        const formData = { email, fullName, phone, pass }
+        const password = form.password
+        const formData = { email, fullName, phone, password }
         try {
             if (form.email.length <= 0) {
                 setError({ field: 'email', msg: 'Invalid Email Address' })
             }
             const ok = await register(formData)
-            if (ok) router.replace('/(auth)/(register)/register2')
+            if (ok) router.push('/(auth)/(register)/register2')
         } catch (error) {
             console.log('err', error)
         }

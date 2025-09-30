@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Tabs } from 'expo-router';
+import { router, Tabs } from 'expo-router';
 import { useTheme } from '@/context/ThemeContext';
 import CustomIcon from '@/components/CustomIcon';
 import ActivityIcon from '@/assets/activityIcon.svg'
@@ -13,14 +13,16 @@ import { View } from 'react-native';
 import LineChartComponent from '@/components/LineChart';
 import LinearGradientComponent from '@/components/linearGradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { useAuthStore } from '@/store/useAuthStore';
 
 
 export default function TabLayout() {
   const { theme, gradients } = useTheme();
   const insets = useSafeAreaInsets();
   const bg = theme === 'dark' ? '#22242E' : '#FFFFFF';
-  return (
 
+ 
+  return (
     <Tabs
       screenOptions={{
         tabBarShowLabel: false,

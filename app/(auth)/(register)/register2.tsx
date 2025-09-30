@@ -22,6 +22,8 @@ import { Dropdown } from 'react-native-element-dropdown'
 import { Gender } from '@/types/types'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router'
+import api from '@/lib/axios'
+import { useAuthStore } from "@/store/useAuthStore";
 
 const OPTIONS = [
     { label: 'Male', value: 'male' },
@@ -31,19 +33,35 @@ const { width, height } = Dimensions.get('window')
 const RegisterScreen2 = () => {
     const { colors, theme, gradients } = useTheme();
     const { height } = useWindowDimensions()
+    const dark = theme === 'dark'
+    const [gender, setGender] = useState(null);
+    const { user, updateUser } = useAuthStore()
+
 
     const [form, setForm] = useState({
         gender: null,
         dob: '',
-        weight: '',
-        height: ''
+        weight: "",
+        height: ""
     })
 
     const handleChange = (field: string, value: string) => {
         setForm({ ...form, [field]: value });
     };
 
-    const dark = theme === 'dark'
+    const handleSubmit = async () => {
+        if(!form) return;
+        try {
+            const data = { ...form, userId: user?.id }
+            const ok = await updateUser(data)
+            if (ok) router.push('/goals')
+        } catch (error) {
+            console.log('err', error)
+        }
+    }
+
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [dateOfBirth, setDateOfBirth] = useState(new Date(2000, 0, 1));
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -95,7 +113,11 @@ const RegisterScreen2 = () => {
                                     labelField="label"
                                     valueField="value"
                                     placeholder="Choose Gender"
-                                    onChange={item => { handleChange('gender', item); }}
+                                    value={gender}
+                                    onChange={item => {
+                                        setGender(item.value);
+                                        handleChange('gender', item.value);
+                                    }}
                                 />
                             </View>
                             {/* Use a date picker */}
@@ -128,7 +150,7 @@ const RegisterScreen2 = () => {
                         </View>
 
                         {/* Button */}
-                        <TouchableOpacity onPress={() => router.push('/goals')} style={styles.buttonContainer}>
+                        <TouchableOpacity onPress={handleSubmit} style={styles.buttonContainer}>
                             <Button text='Next' />
                         </TouchableOpacity>
                     </View>
