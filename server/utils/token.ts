@@ -37,8 +37,11 @@ export const createRefreshToken = async (userId: mongoose.Types.ObjectId | strin
 // Verify access token
 export const verifyAccessToken = (token: string) => {
     try {
+        console.log('acc', ACCESS_SECRET)
+        console.log('TOKWN', token)
         return jwt.verify(token, ACCESS_SECRET) as { sub: string; iat: number; exp: number };
     } catch (err) {
+        console.log('err', err)
         return null;
     }
 };

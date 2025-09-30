@@ -8,16 +8,25 @@ export interface AuthRequest extends Request {
 
 export const requireAuth = async (req: AuthRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
+    console.log('auth header', authHeader)
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return res.status(401).json({ message: 'No token provided' });
     }
     const token = authHeader.split(' ')[1];
+    console.log('tk', token)
     const payload = verifyAccessToken(token!);
-    if (!payload) return res.status(401).json({ message: 'Invalid or expired token' });
+    console.log('pl', payload)
+    if (payload) {
+        const user = await User.findById(payload.sub).select('-password');
+        if (!user) return res.status(401).json({ message: 'User not found' });
+        console.log('use', user)
 
-    const user = await User.findById(payload.sub).select('-password');
-    if (!user) return res.status(401).json({ message: 'User not found' });
+        req.user = user;
+        return next();
+    }
 
-    req.user = user;
-    next();
+    return res.status(401).json({
+        message: 'Token expired',
+        code: 'TOKEN_EXPIRED' 
+    });
 };

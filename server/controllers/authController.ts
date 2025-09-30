@@ -1,15 +1,11 @@
-// src/controllers/authController.ts
+
+
 import { Request, Response } from 'express';
-import { body } from 'express-validator';
-import mongoose from 'mongoose';
 import User from '../model/User';
 import { createAccessToken, createRefreshToken, findRefreshTokenDocument, revokeRefreshToken } from '../utils/token';
-import { validateRequest } from '../middlewares/validateRequest';
 import { OAuth2Client } from "google-auth-library";
 import crypto from 'crypto';
 import { AuthRequest } from '../middlewares/authMiddleware';
-
-
 
 const clientId = process.env.CLIENT_ID || ''
 const client = new OAuth2Client(clientId);
@@ -31,7 +27,7 @@ export const register = async (req: Request, res: Response) => {
         const accessToken = createAccessToken(user._id);
         const refreshToken = await createRefreshToken(user._id);
         res.status(201).json({
-            user: { id: user._id, fullName: user.fullName, email: user.email },
+            user: { id: user._id, fullName: user.fullName, email: user.email, phone: user.phone },
             accessToken,
             refreshToken,
         });
@@ -57,8 +53,17 @@ export const login = async (req: Request, res: Response) => {
     const accessToken = createAccessToken(user._id);
     const refreshToken = await createRefreshToken(user._id);
 
+    const userData = {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email,
+        weight: user.weight,
+        height: user.height,
+        phone: user.phone
+    }
+
     res.json({
-        user: { id: user._id, fullName: user.fullName, email: user.email },
+        user: userData,
         accessToken,
         refreshToken,
     });
@@ -95,39 +100,52 @@ export const logout = async (req: Request, res: Response) => {
 
 
 export const updateUser = async (req: AuthRequest, res: Response) => {
+
     try {
         const userId = req.user?.id || req.body.userId;
-        console.log('rq', req)
-      
-        
-
+        console.log('e', req.user)
         if (!userId) {
             return res.status(400).json({ message: 'User ID required' });
         }
 
         // Allowed fields for update
-        const { fullName, weight, height, age, gender } = req.body;
-
+        const { fullName, weight, height, age, gender, phone, dob } = req.body;
+        console.log('upd', req.body)
+        console.log('er', dob)
         const updates: any = {};
         if (fullName) updates.fullName = fullName.trim();
         if (weight) updates.weight = weight;
         if (height) updates.height = height;
         if (age) updates.age = age;
         if (gender) updates.gender = gender;
+        if (phone) updates.phone = phone;
+        if (dob) updates.dateOfBirth = dob;
+
+        console.log('updates', updates)
 
         const user = await User.findByIdAndUpdate(
             userId,
             { $set: updates },
             { new: true, runValidators: true }
-        ).select('-password'); 
+        ).select('-password');
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
         }
-
+        const userData = {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            weight: user.weight,
+            height: user.height,
+            phone: user.phone,
+            dob: user.dateOfBirth,
+            gender: user.gender
+        }
+        console.log('is', user, userData)
         res.json({
             message: 'Profile updated successfully',
-            user,
+            user: userData,
         });
     } catch (error) {
         console.error('Error updating user:', error);
@@ -137,7 +155,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 
 export const verifyGoogleToken = async (req: Request, res: Response) => {
     const { token } = req.body;
-
     try {
         const ticket = await client.verifyIdToken({
             idToken: token,
@@ -148,7 +165,6 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
         if (!payload) {
             return res.status(401).json({ error: "Invalid Google token" });
         }
-        console.log('payload', payload)
         const { email, name, } = payload;
         const emailNorm = (email || "").toLowerCase().trim();
 
@@ -165,12 +181,18 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
         const accessToken = createAccessToken(user._id);
         const refreshToken = await createRefreshToken(user._id);
 
+        const userData = {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            weight: user.weight,
+            height: user.height,
+            phone: user.phone,
+            gender: user.gender
+        }
+
         res.json({
-            user: {
-                id: user._id,
-                fullName: user.fullName,
-                email: user.email,
-            },
+            user: userData,
             accessToken,
             refreshToken,
         });

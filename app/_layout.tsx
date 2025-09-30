@@ -1,29 +1,23 @@
 import { ThemeProvider } from '@/context/ThemeContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { Stack } from 'expo-router';
+import { router, Stack, useSegments, useRouter, useRootNavigationState } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
-import { StatusBar } from 'react-native';
+import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
-import { GoogleSignin } from '@react-native-google-signin/google-signin'
-
-
-
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -36,17 +30,10 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
 
-  useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-  
   useEffect(() => {
     GoogleSignin.configure({
       iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
@@ -63,20 +50,76 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { user, token, hasOnboarded } = useAuthStore();
+  const { user, initializeAuthState, hasOnboarded, initialized } = useAuthStore();
+  const segments = useSegments();
+  const router = useRouter();
+  const navigationState = useRootNavigationState();
+  const hasNavigated = useRef(false);
+
+  useEffect(() => {
+    initializeAuthState();
+  }, []);
 
 
+  useEffect(() => {
+    if (initialized) return;
+    if (!navigationState?.key) return;
 
-  console.log('hd', hasOnboarded)
-  console.log('tk', token)
-  console.log('user', user)
+    // Only navigate once
+    if (hasNavigated.current) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+    const inOnboardingGroup = segments[0] === '(onboarding)';
+    const inAppGroup = segments[0] === '(tabs)';
+
+    let targetRoute: any = null;
+
+    if (!user) {
+      if (!inAuthGroup) {
+        targetRoute = '/(auth)/login';
+      }
+    } else if (!hasOnboarded) {
+      if (!inOnboardingGroup) {
+        targetRoute = '/(onboarding)';
+      }
+    } else {
+      if (!inAppGroup) {
+        targetRoute = '/(tabs)';
+      }
+    }
+
+    hasNavigated.current = true;
+
+    if (targetRoute) {
+      setTimeout(() => {
+        router.replace(targetRoute);
+        setTimeout(() => {
+          SplashScreen.hideAsync();
+        }, 100);
+      }, 50);
+    } else {
+      setTimeout(() => {
+        SplashScreen.hideAsync();
+      }, 100);
+    }
+
+  }, [initialized, navigationState?.key, user, hasOnboarded, segments]);
+
+
+  if (initialized || !navigationState?.key || !hasNavigated.current) {
+    return (
+      <View>
+        <ActivityIndicator size={40} color={'white '} />
+      </View>
+    );
+  }
 
   return (
     <ThemeProvider>
-      <StatusBar backgroundColor={'black'} />
+      <StatusBar backgroundColor={'black'} barStyle="light-content" />
       <Stack screenOptions={{ headerShown: false }}>
-        {/* <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> */}
-        {/* <Stack.Screen name="(onboarding)" options={{ headerShown: false }} /> */}
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
       </Stack>
     </ThemeProvider>
