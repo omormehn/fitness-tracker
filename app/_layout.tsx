@@ -1,12 +1,12 @@
 import { ThemeProvider } from '@/context/ThemeContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { router, Stack, useSegments, useRouter } from 'expo-router';
+import { router, Stack, useSegments, useRouter, useRootNavigationState } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
-import { ActivityIndicator, StatusBar, View } from 'react-native';
+import { StatusBar } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
@@ -35,12 +35,6 @@ export default function RootLayout() {
   }, [error]);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  useEffect(() => {
     GoogleSignin.configure({
       iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
       webClientId: process.env.EXPO_PUBLIC_CLIENT_ID,
@@ -55,67 +49,65 @@ export default function RootLayout() {
   return <RootLayoutNav />;
 }
 
-function LoadingScreen() {
-  return (
-    <View style={{
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: '#000'
-    }}>
-      <ActivityIndicator size="large" color={'#fff'} />
-    </View>
-  );
-}
-
 function RootLayoutNav() {
-  const { user, initializeAuthState, hasOnboarded, loading } = useAuthStore();
+  const { user, initializeAuthState, hasOnboarded, initialized } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
-  const navigationAttempted = useRef(false);
+  const navigationState = useRootNavigationState();
+  const hasNavigated = useRef(false);
 
+  // Initialize auth state once on mount
   useEffect(() => {
     initializeAuthState();
   }, []);
 
+
   useEffect(() => {
+    if (initialized) return;
+    if (!navigationState?.key) return;
 
-    if (loading) return;
-
-    // Prevent multiple navigation attempts
-    if (navigationAttempted.current) return;
+    // Only navigate once
+    if (hasNavigated.current) return;
 
     const inAuthGroup = segments[0] === '(auth)';
     const inOnboardingGroup = segments[0] === '(onboarding)';
     const inAppGroup = segments[0] === '(tabs)';
 
-    let shouldNavigate = false;
-    let targetRoute: any = '';
+    let targetRoute: any = null;
 
-    if (!user && !inAuthGroup) {
-      shouldNavigate = true;
-      targetRoute = '/(auth)/login';
-    } else if (user && !hasOnboarded && !inOnboardingGroup) {
-      shouldNavigate = true;
-      targetRoute = '/(onboarding)';
-    } else if (user && hasOnboarded && (inAuthGroup || inOnboardingGroup)) {
-      shouldNavigate = true;
-      targetRoute = '/(tabs)';
+    if (!user) {
+      if (!inAuthGroup) {
+        targetRoute = '/(auth)/login';
+      }
+    } else if (!hasOnboarded) {
+      if (!inOnboardingGroup) {
+        targetRoute = '/(onboarding)';
+      }
+    } else {
+      if (!inAppGroup) {
+        targetRoute = '/(tabs)';
+      }
     }
 
-    navigationAttempted.current = true;
+    hasNavigated.current = true;
 
-    if (shouldNavigate) {
-      router.replace(targetRoute);
+    if (targetRoute) {
+      setTimeout(() => {
+        router.replace(targetRoute);
+        setTimeout(() => {
+          SplashScreen.hideAsync();
+        }, 100);
+      }, 50);
+    } else {
+      setTimeout(() => {
+        SplashScreen.hideAsync();
+      }, 100);
     }
-    setTimeout(() => {
-      SplashScreen.hideAsync();
-    }, 100);
 
-  }, [loading, user, hasOnboarded, segments]);
+  }, [initialized, navigationState?.key, user, hasOnboarded, segments]);
 
 
-  if (loading || !navigationAttempted.current) {
+  if (initialized || !navigationState?.key || !hasNavigated.current) {
     return null;
   }
 

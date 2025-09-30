@@ -21,9 +21,7 @@ export default function TabLayout() {
   const insets = useSafeAreaInsets();
   const bg = theme === 'dark' ? '#22242E' : '#FFFFFF';
 
-  const { user, hasOnboarded } = useAuthStore();
-
-  
+ 
   return (
     <Tabs
       screenOptions={{

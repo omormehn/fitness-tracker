@@ -32,9 +32,10 @@ const LoginScreen = () => {
         setIsLoading(true)
         try {
             const ok = await googleSignIn();
-            if (ok) {
-                router.replace('/(tabs)')
-            }
+            console.log('ok', ok)
+            // if (ok) {
+            //     router.replace('/(tabs)')
+            // }
         } catch (error) {
             console.log('err in goog', error)
         } finally {

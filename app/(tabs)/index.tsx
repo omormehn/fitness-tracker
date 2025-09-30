@@ -42,6 +42,8 @@ const HomeScreen = () => {
   const notificationColor = theme === 'dark' ? '#FFFFFF' : '#000000';
 
 
+
+
   // Initialize Health Connect and fetch data
   const fetchHealthData = useCallback(async () => {
     try {
