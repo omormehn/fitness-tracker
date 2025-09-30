@@ -13,6 +13,7 @@ import { workouts } from "@/data/workout";
 import { router } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
 import healthconnectService from "@/services/healthconnect.service";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 
@@ -47,6 +48,9 @@ const HomeScreen = () => {
   // Initialize Health Connect and fetch data
   const fetchHealthData = useCallback(async () => {
     try {
+      const token = await AsyncStorage.getItem("refreshToken");
+      console.log('tk', token)
+
       // Fetch today's activity data
       const activityData = await healthconnectService.getTodayActivity();
       setTodaySteps(activityData.steps);
@@ -120,7 +124,7 @@ const HomeScreen = () => {
         </Pressable>
       </View>
 
-      
+
 
       <ScrollView showsVerticalScrollIndicator={false}>
 

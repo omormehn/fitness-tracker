@@ -19,7 +19,7 @@ import FullPageLoader from '@/components/PageLoader';
 
 const LoginScreen = () => {
     const { colors, theme } = useTheme();
-    const { loading, error, login, setAuth, setError, googleSignIn } = useAuthStore();
+    const { loading, error, login, user, setError, googleSignIn } = useAuthStore();
     const [form, setForm] = useState({
         email: "",
         password: "",
@@ -33,9 +33,12 @@ const LoginScreen = () => {
         try {
             const ok = await googleSignIn();
             console.log('ok', ok)
-            // if (ok) {
-            //     router.replace('/(tabs)')
-            // }
+            if (!user?.weight || !user?.height && ok) {
+                console.log('comaa')
+                router.push('/(auth)/(register)/register2')
+            } else {
+                router.push('/(tabs)')
+            }
         } catch (error) {
             console.log('err in goog', error)
         } finally {

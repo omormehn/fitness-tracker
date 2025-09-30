@@ -1,4 +1,4 @@
-import { StyleSheet, Switch, Text, View, ScrollView } from 'react-native'
+import { StyleSheet, Switch, Text, View, ScrollView, TouchableOpacity } from 'react-native'
 import React, { useState } from 'react'
 import CustomHeader from '@/components/CustomHeader'
 import { useTheme } from '@/context/ThemeContext'
@@ -9,6 +9,7 @@ import AccountOptions from '@/components/AccountOptions'
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import { useAuthStore } from '@/store/useAuthStore'
+import { router } from 'expo-router'
 
 
 const ProfileScreen = () => {
@@ -31,14 +32,23 @@ const ProfileScreen = () => {
             </View>
           </View>
           <LinearGradientComponent style={{ paddingVertical: 10, paddingHorizontal: 30, borderRadius: 20 }} gradient={gradients.button}>
-            <Text style={{ color: colors.text }}>Edit</Text>
+            <TouchableOpacity onPress={() => router.push('/(profile)/PersonalData')}>
+              <Text style={{ color: colors.text }}>Edit</Text>
+            </TouchableOpacity>
           </LinearGradientComponent>
         </View>
 
         <View style={{ gap: 40 }}>
           <View style={styles.header}>
-            <ProfileCard text={`${user?.height?.toString()!}cm`} type='Height' />
-            <ProfileCard text={`${user?.weight?.toString()!}kg`} type='Weight' />
+            <ProfileCard
+              text={user?.height != null ? `${user.height}cm` : '--'}
+              type='Height'
+            />
+            <ProfileCard
+              text={user?.weight != null ? `${user.weight}kg` : '--'}
+              type='Weight'
+            />
+
             <ProfileCard text='22yo' type='Age' />
           </View>
 

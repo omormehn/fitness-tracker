@@ -1,4 +1,4 @@
-import { updateUser } from './../server/controllers/authController';
+import { updateUser, refreshToken } from './../server/controllers/authController';
 import { TextInputProps, TextStyle } from 'react-native';
 
 import React, { ComponentType, ReactElement } from 'react';
@@ -50,13 +50,15 @@ interface User {
   email: string;
   phone?: string;
   height?: number;
-  weight?: number
-  dob?: Date 
+  weight?: number;
+  dob?: Date;
+  gender?: string
 }
 
 interface AuthState {
   user: null | User;
   token: string | null;
+  refreshToken: string | null;
   loading: boolean;
   initialized: boolean;
   googleSignIn: () => Promise<boolean>;

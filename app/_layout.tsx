@@ -6,7 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
-import { StatusBar } from 'react-native';
+import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
@@ -56,7 +56,6 @@ function RootLayoutNav() {
   const navigationState = useRootNavigationState();
   const hasNavigated = useRef(false);
 
-  // Initialize auth state once on mount
   useEffect(() => {
     initializeAuthState();
   }, []);
@@ -108,7 +107,11 @@ function RootLayoutNav() {
 
 
   if (initialized || !navigationState?.key || !hasNavigated.current) {
-    return null;
+    return (
+      <View>
+        <ActivityIndicator size={40} color={'white '} />
+      </View>
+    );
   }
 
   return (
