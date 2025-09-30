@@ -23,15 +23,6 @@ export default function TabLayout() {
 
   const { user, hasOnboarded } = useAuthStore();
 
-  useEffect(() => {
-    if (!user) {
-      router.replace('/(auth)/login');
-      return;
-    }
-    if (!hasOnboarded) {
-      router.replace('/(onboarding)');
-    }
-  }, [user, hasOnboarded]);
   
   return (
     <Tabs

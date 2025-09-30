@@ -1,31 +1,23 @@
 import { ThemeProvider } from '@/context/ThemeContext';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { useFonts } from 'expo-font';
-import { router, Stack, useSegments } from 'expo-router';
+import { router, Stack, useSegments, useRouter } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import 'react-native-reanimated';
 import '../global.css';
 import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
-import { ToastAndroid } from 'react-native';
-
-
-
-
 
 export {
-  // Catch any errors thrown by the Layout component.
   ErrorBoundary,
 } from 'expo-router';
 
 export const unstable_settings = {
-  // Ensure that reloading on `/modal` keeps a back button present.
   initialRouteName: '(tabs)',
 };
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -38,7 +30,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -65,16 +56,14 @@ export default function RootLayout() {
 }
 
 function LoadingScreen() {
-  // const { colors } = useTheme();
-
   return (
     <View style={{
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: 'brown'
+      backgroundColor: '#000'
     }}>
-      <ActivityIndicator size="large" color={'yellow'} />
+      <ActivityIndicator size="large" color={'#fff'} />
     </View>
   );
 }
@@ -82,63 +71,57 @@ function LoadingScreen() {
 function RootLayoutNav() {
   const { user, initializeAuthState, hasOnboarded, loading } = useAuthStore();
   const segments = useSegments();
-
-  const [appIsReady, setAppIsReady] = useState(false);
+  const router = useRouter();
+  const navigationAttempted = useRef(false);
 
   useEffect(() => {
-    async function prepare() {
-      try {
-        await initializeAuthState();
-        console.log('doen')
-      } catch (e) {
-        console.warn(e);
-      } finally {
-        setAppIsReady(true);
-        await SplashScreen.hideAsync();
-      }
-    }
-
-    prepare();
+    initializeAuthState();
   }, []);
 
   useEffect(() => {
-    if (appIsReady && !loading) {
-      SplashScreen.hideAsync();
 
-      const inAuthGroup = segments[0] === '(auth)';
-      const inOnboardingGroup = segments[0] === '(onboarding)';
-      const inAppGroup = segments[0] === '(tabs)';
+    if (loading) return;
 
+    // Prevent multiple navigation attempts
+    if (navigationAttempted.current) return;
 
-      if (!user && !inAuthGroup && !inOnboardingGroup) {
-        router.replace('/(auth)/login');
-        return;
-      }
+    const inAuthGroup = segments[0] === '(auth)';
+    const inOnboardingGroup = segments[0] === '(onboarding)';
+    const inAppGroup = segments[0] === '(tabs)';
 
+    let shouldNavigate = false;
+    let targetRoute: any = '';
 
-      if (user && !hasOnboarded && !inOnboardingGroup && !inAuthGroup) {
-        router.replace('/(onboarding)');
-        return;
-      }
-
-      if (user && hasOnboarded && (inAuthGroup || inOnboardingGroup)) {
-        router.replace('/(tabs)');
-        return;
-      }
+    if (!user && !inAuthGroup) {
+      shouldNavigate = true;
+      targetRoute = '/(auth)/login';
+    } else if (user && !hasOnboarded && !inOnboardingGroup) {
+      shouldNavigate = true;
+      targetRoute = '/(onboarding)';
+    } else if (user && hasOnboarded && (inAuthGroup || inOnboardingGroup)) {
+      shouldNavigate = true;
+      targetRoute = '/(tabs)';
     }
-  }, [appIsReady, loading, user, hasOnboarded, segments]);
+
+    navigationAttempted.current = true;
+
+    if (shouldNavigate) {
+      router.replace(targetRoute);
+    }
+    setTimeout(() => {
+      SplashScreen.hideAsync();
+    }, 100);
+
+  }, [loading, user, hasOnboarded, segments]);
 
 
-   if (!appIsReady || loading) {
+  if (loading || !navigationAttempted.current) {
     return null;
   }
 
-
-
-
   return (
     <ThemeProvider>
-      <StatusBar backgroundColor={'black'} />
+      <StatusBar backgroundColor={'black'} barStyle="light-content" />
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="(onboarding)" options={{ headerShown: false }} />
