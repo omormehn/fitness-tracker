@@ -1,6 +1,8 @@
+import dotenv from 'dotenv'
+dotenv.config()
+
 import express, { Request, Response } from "express";
 import { connectDB } from "./model/db";
-import dotenv from 'dotenv'
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
@@ -8,7 +10,6 @@ import cors from 'cors';
 import authRoutes from './routes/auth'
 import { errorHandler } from "./middlewares/errorHandler";
 
-dotenv.config()
 const app = express();
 const PORT = process.env.PORT || 5000;
 const MONGO_URI = process.env.MONGO_URI || '';

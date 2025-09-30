@@ -1,15 +1,11 @@
-// src/controllers/authController.ts
+
+
 import { Request, Response } from 'express';
-import { body } from 'express-validator';
-import mongoose from 'mongoose';
 import User from '../model/User';
 import { createAccessToken, createRefreshToken, findRefreshTokenDocument, revokeRefreshToken } from '../utils/token';
-import { validateRequest } from '../middlewares/validateRequest';
 import { OAuth2Client } from "google-auth-library";
 import crypto from 'crypto';
 import { AuthRequest } from '../middlewares/authMiddleware';
-
-
 
 const clientId = process.env.CLIENT_ID || ''
 const client = new OAuth2Client(clientId);
@@ -104,12 +100,10 @@ export const logout = async (req: Request, res: Response) => {
 
 
 export const updateUser = async (req: AuthRequest, res: Response) => {
-    console.log('clickedddd')
 
     try {
         const userId = req.user?.id || req.body.userId;
         if (!userId) {
-            console.log('no id')
             return res.status(400).json({ message: 'User ID required' });
         }
 
@@ -159,7 +153,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 
 export const verifyGoogleToken = async (req: Request, res: Response) => {
     const { token } = req.body;
-
     try {
         const ticket = await client.verifyIdToken({
             idToken: token,
@@ -170,7 +163,6 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
         if (!payload) {
             return res.status(401).json({ error: "Invalid Google token" });
         }
-        console.log('payload', payload)
         const { email, name, } = payload;
         const emailNorm = (email || "").toLowerCase().trim();
 
@@ -187,12 +179,17 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
         const accessToken = createAccessToken(user._id);
         const refreshToken = await createRefreshToken(user._id);
 
+        const userData = {
+            id: user._id,
+            fullName: user.fullName,
+            email: user.email,
+            weight: user.weight,
+            height: user.height,
+            phone: user.phone
+        }
+
         res.json({
-            user: {
-                id: user._id,
-                fullName: user.fullName,
-                email: user.email,
-            },
+            user: userData,
             accessToken,
             refreshToken,
         });

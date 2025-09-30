@@ -11,6 +11,7 @@ export const useAuthStore = create<AuthState>()(
         (set, get) => ({
             user: null,
             token: null,
+            initialized: false,
             loading: false,
             error: { field: '', msg: '' },
             hasOnboarded: false,
@@ -21,7 +22,7 @@ export const useAuthStore = create<AuthState>()(
 
             login: async (data) => {
                 try {
-                    set({ loading: true, error: { field: null, msg: null } });
+                    set({ loading: true,  error: { field: null, msg: null } });
                     const res = await api.post("/auth/login", data);
                     const token = res.data.accessToken ?? res.data.token;
 
@@ -40,7 +41,7 @@ export const useAuthStore = create<AuthState>()(
                     }
                     return false;
                 } finally {
-                    set({ loading: false });
+                    set({ loading: false, });
                 }
             },
 
@@ -75,7 +76,6 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/update", data);
-                    console.log('res', res.data);
                     set({ user: res.data.user });
                     return true;
                 } catch (err: any) {
@@ -104,8 +104,9 @@ export const useAuthStore = create<AuthState>()(
                         const serverResponse = await api.post('/auth/google', {
                             token: idToken,
                         })
+                        console.log('ser', serverResponse.data)
                         const { user, accessToken } = serverResponse.data;
-
+                        console.log('usr', user)
                         await AsyncStorage.setItem("token", accessToken);
                         set({ user, token: accessToken });
                         set({ error: { field: null, msg: null } })
@@ -166,12 +167,11 @@ export const useAuthStore = create<AuthState>()(
                     await new Promise(resolve => setTimeout(resolve, 1000));
 
 
-                    // TODO: add verify token with backend
 
-                    set({ loading: false });
+                    set({ initialized: false });
                 } catch (error) {
                     console.error('Error initializing auth state:', error);
-                    set({ loading: false });
+                    set({ initialized: false, });
                 }
             },
         }),

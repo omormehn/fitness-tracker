@@ -46,19 +46,19 @@ interface CarouselProps {
 
 interface User {
   id: string;
-  _id?: string;
   fullName: string;
   email: string;
   phone?: string;
-  height: number;
-  weight: number
-  dob: Date
+  height?: number;
+  weight?: number
+  dob?: Date 
 }
 
 interface AuthState {
   user: null | User;
   token: string | null;
   loading: boolean;
+  initialized: boolean;
   googleSignIn: () => Promise<boolean>;
   login: (data) => Promise<boolean>;
   register: (data) => Promise<boolean>;
