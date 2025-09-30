@@ -1,7 +1,7 @@
 import { useTheme } from "@/context/ThemeContext";
 import { EditModalProps } from "@/types/types";
 import { LinearGradient } from "expo-linear-gradient";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Modal, StyleSheet, TextInput, TouchableOpacity, View, Text } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
@@ -16,14 +16,19 @@ const EditModal: React.FC<EditModalProps> = ({
 }) => {
     const { colors, gradients, theme } = useTheme();
     const [inputValue, setInputValue] = useState(value || '');
-    const [gender, setGender] = useState(value || null); // Initialize with current value
+    const [gender, setGender] = useState(value || null);
+
+    useEffect(() => {
+        setInputValue(value || '');
+        setGender(value || null);
+    }, [value, visible]);
 
     const handleSave = () => {
-        const saveValue = gender !== undefined ? gender : inputValue;
+        const saveValue = field.toLowerCase() === 'gender' ? gender : inputValue
         onSave(saveValue!);
         onClose();
     };
-
+  
     const OPTIONS = [
         { label: 'Male', value: 'male' },
         { label: 'Female', value: 'female' }
@@ -43,33 +48,17 @@ const EditModal: React.FC<EditModalProps> = ({
 
                     {field.toLowerCase() === 'gender' ? (
                         <Dropdown
-                            style={[
-                                styles.dropdown,
-                                {
-                                    borderColor: colors.tintText3,
-                                }
+                            style={[styles.dropdown, { borderColor: colors.tintText3, }]}
+                            placeholderStyle={[styles.placeholderStyle, { color: theme === 'dark' ? '#ACA3A5' : '#A5A3B0' }
                             ]}
-                            placeholderStyle={[
-                                styles.placeholderStyle,
-                                { color: theme === 'dark' ? '#ACA3A5' : '#A5A3B0' }
-                            ]}
-                            selectedTextStyle={[
-                                styles.selectedTextStyle,
-                                { color: colors.text }
+                            selectedTextStyle={[styles.selectedTextStyle, { color: colors.text }
                             ]}
                             inputSearchStyle={styles.inputSearchStyle}
-                            iconStyle={[
-                                styles.iconStyle,
-                                { tintColor: colors.text }
+                            iconStyle={[styles.iconStyle, { tintColor: colors.text }
                             ]}
-                            itemTextStyle={[
-                                styles.itemTextStyle,
-                                { color: colors.text }
+                            itemTextStyle={[styles.itemTextStyle, { color: colors.text }
                             ]}
-                            itemContainerStyle={[
-                                styles.itemContainerStyle,
-                                // { backgroundColor: theme === 'dark' ? '#161818' : '#F7F8F8' }
-                            ]}
+                            itemContainerStyle={[styles.itemContainerStyle]}
                             data={OPTIONS}
                             maxHeight={300}
                             labelField="label"
@@ -96,13 +85,7 @@ const EditModal: React.FC<EditModalProps> = ({
                     ) : (
                         <View style={styles.inputContainer}>
                             <TextInput
-                                style={[
-                                    styles.modalInput,
-                                    {
-                                        color: colors.text,
-                                        borderColor: colors.tintText3
-                                    }
-                                ]}
+                                style={[styles.modalInput, { color: colors.text, borderColor: colors.tintText3 }]}
                                 value={inputValue}
                                 onChangeText={setInputValue}
                                 autoFocus
@@ -203,8 +186,6 @@ const styles = StyleSheet.create({
     },
     itemContainerStyle: {
         borderRadius: 8,
-        marginHorizontal: 5,
-        marginVertical: 2,
     },
     item: {
         padding: 17,

@@ -15,12 +15,16 @@ const PersonalDataInfo = ({
     const IconComponent = iconComponent;
     const { colors } = useTheme();
 
-    
+
     return (
         <TouchableOpacity
             style={[styles.infoRow, { backgroundColor: colors.card }]}
-            onPress={() => editable && handleEdit(label, value, unit)}
-            disabled={!editable}
+            onPress={() => {
+                if (editable && typeof handleEdit === 'function') {
+                    handleEdit(label, value, unit);
+                }
+            }}
+            disabled={!editable || typeof handleEdit !== 'function'}
         >
             <View style={styles.infoLeft}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>

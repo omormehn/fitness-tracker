@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     StyleSheet,
     Text,
@@ -36,12 +36,17 @@ interface EditModalProps {
 
 
 const PersonalDataScreen = () => {
-    const { theme, colors, gradients } = useTheme();
+    const { colors, gradients } = useTheme();
     const { user, updateUser } = useAuthStore();
     const [editModal, setEditModal] = useState({ visible: false, field: '', value: '', unit: '' });
     const [showDatePicker, setShowDatePicker] = useState(false);
-    const [dateOfBirth, setDateOfBirth] = useState(new Date(2000, 0, 1));
+    const [dateOfBirth, setDateOfBirth] = useState(user?.dob ? new Date(user.dob) : new Date(2000, 0, 1));
 
+    useEffect(() => {
+        if (user?.dob) {
+            setDateOfBirth(new Date(user.dob));
+        }
+    }, [user?.dob]);
     const handleEdit = (field: string, value: string, unit?: string) => {
         if (field === 'Date of Birth') {
             setShowDatePicker(true)
@@ -49,22 +54,26 @@ const PersonalDataScreen = () => {
             setEditModal({ visible: true, field, value, unit: unit || '' });
         }
     };
-
     const handleSave = async (value: string) => {
         const fieldMap: { [key: string]: string } = {
             'Full Name': 'fullName',
             'Email': 'email',
             'Height': 'height',
             'Weight': 'weight',
-            'Phone': 'phone'
+            'Phone': 'phone',
+            'Gender': 'gender'
         };
 
         const fieldKey = fieldMap[editModal.field];
-        if (fieldKey) {
-            await updateUser({ [fieldKey]: value, userId: user?.id });
+        if (!fieldKey) return;
+        const success = await updateUser({ [fieldKey]: value, userId: user?.id });
+        if (success) {
             Alert.alert('Success', `${editModal.field} updated successfully`);
+            setEditModal((prev) => ({ ...prev, visible: false }));
+        } else {
+            Alert.alert('Update failed', 'Please try again.');
         }
-    };
+    }
 
     const calculateAge = (birthDate: Date) => {
         const today = new Date();
@@ -135,7 +144,7 @@ const PersonalDataScreen = () => {
 
                     />
                     <PersonalDataInfo
-                        handleEdit={handleEdit}
+                        editable={false}
                         icon="email-outline"
                         label="Email"
                         value={user?.email || 'Not set'}
@@ -150,15 +159,16 @@ const PersonalDataScreen = () => {
                         handleEdit={handleEdit}
                         icon="calendar-outline"
                         label="Date of Birth"
-                        value={formatDate(user?.dob!) || dateOfBirth.toLocaleDateString()}
-                        editable={true}
+                        value={user?.dob
+                            ? formatDate(user.dob)
+                            : 'Not set'}
                     />
                     {/* gender */}
                     <PersonalDataInfo
                         handleEdit={handleEdit}
                         icon="gender-male-female"
                         label="Gender"
-                        value={'Not specified'}
+                        value={user?.gender ? user?.gender?.charAt(0).toUpperCase() + user?.gender.slice(1) : 'Not specified'}
                     />
                 </View>
 
@@ -278,23 +288,23 @@ const PersonalDataScreen = () => {
             />
 
             {showDatePicker && (
-            <DateTimePicker
-    value={dateOfBirth}
-    mode="date"
-    display="default"
-    onChange={async (event: any, selectedDate: any) => {
-        setShowDatePicker(false);
-        
-        if (event.type === 'set' && selectedDate) {
-            console.log('Date selected:', selectedDate);
-            await updateUser({ dob: selectedDate, userId: user?.id });
-            setDateOfBirth(selectedDate);
-        } else {
-            console.log('Date picker dismissed without selection');
-         
-        }
-    }}
-/>
+                <DateTimePicker
+                    value={dateOfBirth}
+                    mode="date"
+                    display="default"
+                    onChange={async (event: any, selectedDate: any) => {
+                        setShowDatePicker(false);
+
+                        if (event.type === 'set' && selectedDate) {
+                            console.log('Date selected:', selectedDate);
+                            await updateUser({ dob: selectedDate, userId: user?.id });
+                            setDateOfBirth(selectedDate);
+                        } else {
+                            console.log('Date picker dismissed without selection');
+
+                        }
+                    }}
+                />
             )}
         </KeyboardAvoidingView>
     );

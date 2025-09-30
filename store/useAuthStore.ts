@@ -1,3 +1,4 @@
+import { refreshToken } from './../server/controllers/authController';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -5,12 +6,14 @@ import api from '@/lib/axios';
 import { AuthState } from '@/types/types';
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
 import { ToastAndroid } from 'react-native';
+import { router } from 'expo-router';
 
 export const useAuthStore = create<AuthState>()(
     persist(
         (set, get) => ({
             user: null,
             token: null,
+            refreshToken: null,
             initialized: false,
             loading: false,
             error: { field: '', msg: '' },
@@ -22,14 +25,14 @@ export const useAuthStore = create<AuthState>()(
 
             login: async (data) => {
                 try {
-                    set({ loading: true,  error: { field: null, msg: null } });
+                    set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/login", data);
-                    const token = res.data.accessToken ?? res.data.token;
+                    const { refreshToken, accessToken, user } = res.data
 
-                    if (token) {
-                        api.defaults.headers.common.Authorization = `Bearer ${token}`;
-                    }
-                    set({ user: res.data.user, token });
+                    await AsyncStorage.setItem('refreshToken', refreshToken)
+                    await AsyncStorage.setItem("token", accessToken);
+
+                    set({ user: user || null, token: accessToken, refreshToken: refreshToken });
                     return true;
                 } catch (err: any) {
                     const errors = err.response?.data?.errors;
@@ -49,13 +52,10 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/register", data);
-                    console.log('res', res.data);
-                    const token = res.data.accessToken;
-                    console.log('tkk', token);
-                    if (token) {
-                        api.defaults.headers.common.Authorization = `Bearer ${token}`;
-                    }
-                    set({ user: res.data.user, token });
+                    const { refreshToken, accessToken, user } = res.data;
+                    await AsyncStorage.setItem('refreshToken', refreshToken);
+                    await AsyncStorage.setItem("token", accessToken);
+                    set({ user: user || null, token: accessToken });
                     return true;
                 } catch (err: any) {
                     console.log('err', err)
@@ -104,10 +104,13 @@ export const useAuthStore = create<AuthState>()(
                         const serverResponse = await api.post('/auth/google', {
                             token: idToken,
                         })
-                        console.log('ser', serverResponse.data)
+                       
                         const { user, accessToken } = serverResponse.data;
-                        console.log('usr', user)
-                        await AsyncStorage.setItem("token", accessToken);
+                        console.log('us', user)
+                        if(!user?.weight || !user?.height) {
+                            console.log('com')
+                            router.push('/(auth)/(register)/register2')
+                        }
                         set({ user, token: accessToken });
                         set({ error: { field: null, msg: null } })
                         return true
@@ -157,9 +160,10 @@ export const useAuthStore = create<AuthState>()(
 
             logout: async () => {
                 try {
+                    await AsyncStorage.multiRemove(['token', 'refreshToken']);
                     delete (api.defaults.headers.common as any).Authorization;
                 } finally {
-                    set({ user: null, token: null });
+                    set({ user: null, token: null, refreshToken: null });
                 }
             },
             initializeAuthState: async () => {
@@ -181,6 +185,7 @@ export const useAuthStore = create<AuthState>()(
             partialize: (state) => ({
                 user: state.user,
                 token: state.token,
+                refreshToken: state.refreshToken,
                 hasOnboarded: state.hasOnboarded,
             }),
             onRehydrateStorage: () => (state) => {

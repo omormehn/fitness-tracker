@@ -103,6 +103,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 
     try {
         const userId = req.user?.id || req.body.userId;
+        console.log('e', req.user)
         if (!userId) {
             return res.status(400).json({ message: 'User ID required' });
         }
@@ -138,7 +139,8 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
             weight: user.weight,
             height: user.height,
             phone: user.phone,
-            dob: user.dateOfBirth
+            dob: user.dateOfBirth,
+            gender: user.gender
         }
         console.log('is', user, userData)
         res.json({
@@ -185,7 +187,8 @@ export const verifyGoogleToken = async (req: Request, res: Response) => {
             email: user.email,
             weight: user.weight,
             height: user.height,
-            phone: user.phone
+            phone: user.phone,
+            gender: user.gender
         }
 
         res.json({
