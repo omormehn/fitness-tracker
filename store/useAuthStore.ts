@@ -1,4 +1,3 @@
-import { refreshToken } from './../server/controllers/authController';
 import { create } from 'zustand';
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -104,11 +103,9 @@ export const useAuthStore = create<AuthState>()(
                         const serverResponse = await api.post('/auth/google', {
                             token: idToken,
                         })
-                       
+
                         const { user, accessToken } = serverResponse.data;
-                        console.log('us', user)
-                        if(!user?.weight || !user?.height) {
-                            console.log('com')
+                        if (!user?.weight || !user?.height) {
                             router.push('/(auth)/(register)/register2')
                         }
                         set({ user, token: accessToken });
@@ -185,12 +182,14 @@ export const useAuthStore = create<AuthState>()(
             partialize: (state) => ({
                 user: state.user,
                 token: state.token,
+
                 refreshToken: state.refreshToken,
                 hasOnboarded: state.hasOnboarded,
             }),
             onRehydrateStorage: () => (state) => {
                 if (state) {
                     state.loading = false;
+                    state.initialized = false;
                 }
             },
         }

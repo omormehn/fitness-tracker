@@ -1,5 +1,3 @@
-
-
 import { Request, Response } from 'express';
 import User from '../model/User';
 import { createAccessToken, createRefreshToken, findRefreshTokenDocument, revokeRefreshToken } from '../utils/token';
@@ -103,15 +101,12 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 
     try {
         const userId = req.user?.id || req.body.userId;
-        console.log('e', req.user)
         if (!userId) {
             return res.status(400).json({ message: 'User ID required' });
         }
 
         // Allowed fields for update
         const { fullName, weight, height, age, gender, phone, dob } = req.body;
-        console.log('upd', req.body)
-        console.log('er', dob)
         const updates: any = {};
         if (fullName) updates.fullName = fullName.trim();
         if (weight) updates.weight = weight;
@@ -120,8 +115,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
         if (gender) updates.gender = gender;
         if (phone) updates.phone = phone;
         if (dob) updates.dateOfBirth = dob;
-
-        console.log('updates', updates)
 
         const user = await User.findByIdAndUpdate(
             userId,
@@ -142,7 +135,6 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
             dob: user.dateOfBirth,
             gender: user.gender
         }
-        console.log('is', user, userData)
         res.json({
             message: 'Profile updated successfully',
             user: userData,

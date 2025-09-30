@@ -25,7 +25,7 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [isInitialized, setIsInitialize] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Activity data states
   const [todaySteps, setTodaySteps] = useState(0);
@@ -48,9 +48,6 @@ const HomeScreen = () => {
   // Initialize Health Connect and fetch data
   const fetchHealthData = useCallback(async () => {
     try {
-      const token = await AsyncStorage.getItem("refreshToken");
-      console.log('tk', token)
-
       // Fetch today's activity data
       const activityData = await healthconnectService.getTodayActivity();
       setTodaySteps(activityData.steps);
@@ -71,7 +68,7 @@ const HomeScreen = () => {
     if (Platform.OS === 'android') {
       const initialized = await healthconnectService.initialize();
       if (initialized) {
-        setIsInitialize(true)
+        setIsInitialized(true)
         const hasPermissions = await healthconnectService.requestPermissions();
         if (hasPermissions) {
           await fetchHealthData();
@@ -84,7 +81,7 @@ const HomeScreen = () => {
   useEffect(() => {
     void initializeHealthTracking();
     calculateBMI();
-  }, [initializeHealthTracking]);
+  }, [initializeHealthTracking, user]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -95,11 +92,11 @@ const HomeScreen = () => {
     if (user?.weight && user?.height) {
       const heightInMeters = user.height / 100;
       const bmi = user.weight / (heightInMeters * heightInMeters);
-      console.log('bmt', bmi)
       setBmi(bmi)
-      return bmi.toFixed(1);
+    } else {
+      setBmi(undefined)
     }
-    return '0';
+
   };
   const getBMIStatus = (bmi: number) => {
     if (bmi < 18.5) return 'Underweight';
@@ -136,7 +133,7 @@ const HomeScreen = () => {
           style={styles.card}
         >
           <Text style={styles.cardTitle}>BMI (Body Mass Index)</Text>
-          <Text style={styles.cardSubtitle}>You have a status: {getBMIStatus(bmi!)}</Text>
+          <Text style={styles.cardSubtitle}>You have a status: {bmi ? getBMIStatus(bmi) : 'N/A'}</Text>
           <View style={styles.bmiRow}>
             <Text style={styles.bmiValue}>{bmi?.toFixed(1)}</Text>
             <TouchableOpacity >

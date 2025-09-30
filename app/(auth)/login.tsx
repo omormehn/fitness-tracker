@@ -33,8 +33,7 @@ const LoginScreen = () => {
         try {
             const ok = await googleSignIn();
             console.log('ok', ok)
-            if (!user?.weight || !user?.height && ok) {
-                console.log('comaa')
+            if ((!user?.weight || !user?.height) && ok) {
                 router.push('/(auth)/(register)/register2')
             } else {
                 router.push('/(tabs)')

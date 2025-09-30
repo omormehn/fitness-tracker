@@ -1,4 +1,4 @@
-import { updateUser, refreshToken } from './../server/controllers/authController';
+
 import { TextInputProps, TextStyle } from 'react-native';
 
 import React, { ComponentType, ReactElement } from 'react';
