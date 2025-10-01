@@ -86,6 +86,10 @@ const HomeScreen = () => {
     calculateBMI();
   }, [initializeHealthTracking]);
 
+  useEffect(() => {
+    getBMIStatus(bmi!)
+  }, [user])
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchHealthData();
@@ -136,7 +140,7 @@ const HomeScreen = () => {
           style={styles.card}
         >
           <Text style={styles.cardTitle}>BMI (Body Mass Index)</Text>
-          <Text style={styles.cardSubtitle}>You have a status: {getBMIStatus(bmi!)}</Text>
+          <Text  style={styles.cardSubtitle}>You have a status: {getBMIStatus(bmi!)}</Text>
           <View style={styles.bmiRow}>
             <Text style={styles.bmiValue}>{bmi?.toFixed(1)}</Text>
             <TouchableOpacity >
@@ -226,7 +230,7 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {/* TODO: FIX THIS GUYS INLINE PADDING ISSUES ✅✅✅*/}
+       
         {/* Latest Workout */}
         <View style={{ margin: 20 }}>
           <View style={styles.workoutHeader}>

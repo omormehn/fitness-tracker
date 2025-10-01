@@ -23,16 +23,6 @@ import PersonalDataInfo from '@/components/PersonalDataInfo';
 import EditModal from '@/components/EditModal';
 
 
-interface EditModalProps {
-    visible: boolean;
-    onClose: () => void;
-    field: string;
-    value: string;
-    onSave: (value: string) => void;
-    inputType?: 'text' | 'numeric' | 'email-address';
-    unit?: string;
-}
-
 
 
 const PersonalDataScreen = () => {
@@ -76,6 +66,7 @@ const PersonalDataScreen = () => {
     }
 
     const calculateAge = (birthDate: Date) => {
+        console.log('b', typeof birthDate)
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
