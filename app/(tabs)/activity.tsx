@@ -9,9 +9,8 @@ import Glass from '@/assets/glass1.svg'
 import Boot from '@/assets/boots1.svg'
 import { Colors } from '@/theme/Colors'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
-import LineChartComponent from '@/components/LineChart'
 import ActivityBarChart from '@/components/ActivityBarChart'
-import WorkoutCard from '@/components/WorkoutCard'
+
 
 const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
