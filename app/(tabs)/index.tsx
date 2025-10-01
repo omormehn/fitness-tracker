@@ -86,6 +86,16 @@ const HomeScreen = () => {
     calculateBMI();
   }, [initializeHealthTracking]);
 
+  useEffect(() => {
+    if (user?.weight && user?.height) {
+      const heightInMeters = user.height / 100;
+      const nextBmi = user.weight / (heightInMeters * heightInMeters);
+      setBmi(nextBmi);
+    } else {
+      setBmi(undefined);
+    }
+  }, [user?.weight, user?.height]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchHealthData();
@@ -226,7 +236,7 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {/* TODO: FIX THIS GUYS INLINE PADDING ISSUES ✅✅✅*/}
+
         {/* Latest Workout */}
         <View style={{ margin: 20 }}>
           <View style={styles.workoutHeader}>
