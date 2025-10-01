@@ -8,23 +8,20 @@ import Animated, {
     withSpring,
     withDelay,
 } from 'react-native-reanimated';
+import { BarItemProps, ChartBarData } from '@/types/types';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 60;
 const CHART_HEIGHT = 200;
 const BAR_WIDTH = 28;
 
-interface ActivityData {
-    day: string;
-    value: number;
-    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
-}
+
 
 const ActivityBarChart = () => {
     const { colors, gradients, theme } = useTheme();
 
-    // Sample data - replace with your actual data
-    const activityData: ActivityData[] = [
+    //Mock data
+    const activityData: ChartBarData[] = [
         { day: 'Sun', value: 60, gradient: gradients.greenLinear },
         { day: 'Mon', value: 85, gradient: gradients.button },
         { day: 'Tue', value: 45, gradient: gradients.greenLinear },
@@ -55,14 +52,6 @@ const ActivityBarChart = () => {
     );
 };
 
-interface BarItemProps {
-    day: string;
-    value: number;
-    maxValue: number;
-    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
-    delay: number;
-    bgColor: string;
-}
 
 const BarItem: React.FC<BarItemProps> = ({
     day,
@@ -83,7 +72,7 @@ const BarItem: React.FC<BarItemProps> = ({
                 stiffness: 90,
             })
         );
-    }, [value]);
+    }, [value, delay, maxValue]);
 
     const animatedStyle = useAnimatedStyle(() => ({
         height: height.value,

@@ -83,3 +83,18 @@ interface EditModalProps {
   inputType?: 'text' | 'numeric' | 'email-address';
   unit?: string;
 }
+
+interface ChartBarData {
+    day: string;
+    value: number;
+    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
+}
+
+interface BarItemProps {
+    day: string;
+    value: number;
+    maxValue: number;
+    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
+    delay: number;
+    bgColor: string;
+}
