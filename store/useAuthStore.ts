@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -104,11 +105,15 @@ export const useAuthStore = create<AuthState>()(
                             token: idToken,
                         })
 
-                        const { user, accessToken } = serverResponse.data;
+                        const { user, accessToken, refreshToken } = serverResponse.data;
+                        console.log('us', user)
+                        await AsyncStorage.setItem('refreshToken', refreshToken);
+                        await AsyncStorage.setItem("token", accessToken);
                         if (!user?.weight || !user?.height) {
+                            console.log('com')
                             router.push('/(auth)/(register)/register2')
                         }
-                        set({ user, token: accessToken });
+                        set({ user, token: accessToken, refreshToken: refreshToken });
                         set({ error: { field: null, msg: null } })
                         return true
 

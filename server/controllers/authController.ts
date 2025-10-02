@@ -101,6 +101,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
 
     try {
         const userId = req.user?.id || req.body.userId;
+        console.log('e', req.user.id)
         if (!userId) {
             return res.status(400).json({ message: 'User ID required' });
         }

@@ -22,6 +22,9 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import PersonalDataInfo from '@/components/PersonalDataInfo';
 import EditModal from '@/components/EditModal';
 
+
+
+
 const PersonalDataScreen = () => {
     const { colors, gradients } = useTheme();
     const { user, updateUser } = useAuthStore();
@@ -63,6 +66,7 @@ const PersonalDataScreen = () => {
     }
 
     const calculateAge = (birthDate: Date) => {
+        console.log('b', typeof birthDate)
         const today = new Date();
         let age = today.getFullYear() - birthDate.getFullYear();
         const monthDiff = today.getMonth() - birthDate.getMonth();
