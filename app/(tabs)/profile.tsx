@@ -22,7 +22,7 @@ const ProfileScreen = () => {
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <CustomHeader title='Profile' />
 
-      <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingTop: 20 }} showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 40, paddingTop: 20, paddingHorizontal: 30 }} showsVerticalScrollIndicator={false}>
         <View style={styles.header}>
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 20 }}>
             <View style={{ width: 70, height: 70, backgroundColor: 'black', borderRadius: 40 }} />
@@ -100,7 +100,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingTop: 50,
-    paddingHorizontal: 20,
     gap: 10
   },
   header: {

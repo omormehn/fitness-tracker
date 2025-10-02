@@ -10,10 +10,13 @@ interface LineChartProps {
     graphTo: string;
     data?: number[];
     labels?: string[];
+    activeIndex?: number;
+    curve?: boolean
+    gradientOpacity?: number | undefined
 }
 const screenWidth = Dimensions.get("window").width;
 
-const LineChartComponent = ({ theme, width, graphFrom, graphTo, data, labels }: LineChartProps) => {
+const LineChartComponent = ({ theme, width, graphFrom, graphTo, data, labels, curve = false, gradientOpacity = undefined }: LineChartProps) => {
 
     const chartWidth = width ?? screenWidth;
 
@@ -30,20 +33,24 @@ const LineChartComponent = ({ theme, width, graphFrom, graphTo, data, labels }: 
                 }}
                 width={chartWidth}
                 height={180}
+
                 chartConfig={{
                     backgroundGradientFrom: graphFrom,
                     backgroundGradientTo: graphTo,
+                    backgroundGradientToOpacity: gradientOpacity,
                     decimalPlaces: 0,
                     color: (opacity = 1) => `rgba(138, 43, 226, ${opacity})`,
                     labelColor: () => "#aaa",
                     propsForDots: {
-                        r: "4",
+                        r: "5",
                         strokeWidth: "1",
                         stroke: "#fff",
                     },
-                }}
 
-                style={{ marginVertical: 10, borderRadius: 12 }}
+                }}
+                bezier={curve}
+
+                style={{ marginVertical: 10, borderRadius: 12, alignItems: 'center' }}
             />
         </View>
     )

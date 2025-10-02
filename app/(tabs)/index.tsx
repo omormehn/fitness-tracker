@@ -243,7 +243,7 @@ const HomeScreen = () => {
               accessibilityLabel="See more workouts"
               hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
               onPress={() => {
-                // TODO: navigate to workout history
+                router.push('/(workout)')
               }}
             >
               <View
@@ -313,7 +313,7 @@ const styles = StyleSheet.create({
 
 
   workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
-  workoutGraph: { borderRadius: 16, right: 20 },
+  workoutGraph: { borderRadius: 16,  },
   workoutCardContainer: { flexDirection: 'column', },
 });
 

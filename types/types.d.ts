@@ -98,3 +98,26 @@ interface BarItemProps {
     delay: number;
     bgColor: string;
 }
+
+// WORKOUT
+interface WorkoutData {
+  day: string;
+  value: number;
+  isActive?: boolean;
+}
+
+interface UpcomingWorkout {
+  id: string;
+  title: string;
+  time: string;
+  icon: string;
+  enabled: boolean;
+}
+
+interface WorkoutProgram {
+  id: string;
+  title: string;
+  exercises: number;
+  duration: string;
+  image: string;
+}
