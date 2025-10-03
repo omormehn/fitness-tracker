@@ -17,7 +17,6 @@ export default NotificationScreen
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        paddingHorizontal: 30,
         paddingTop: 50,
         alignItems: 'center'
     }

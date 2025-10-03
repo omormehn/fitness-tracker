@@ -1,6 +1,5 @@
-import React, { useEffect } from 'react';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { router, Tabs } from 'expo-router';
+import React from 'react';
+import { Tabs } from 'expo-router';
 import { useTheme } from '@/context/ThemeContext';
 import CustomIcon from '@/components/CustomIcon';
 import ActivityIcon from '@/assets/activityIcon.svg'
@@ -8,12 +7,8 @@ import CameraIcon from '@/assets/cameraIcon.svg'
 import SearchIcon from '@/assets/SearchIcon.svg'
 import HomeIcon from '@/assets/HomeIcon.svg'
 import ProfileIcon from '@/assets/ProfileIcon.svg'
-import { BottomTabsProps } from 'react-native-screens';
-import { View } from 'react-native';
-import LineChartComponent from '@/components/LineChart';
 import LinearGradientComponent from '@/components/linearGradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { useAuthStore } from '@/store/useAuthStore';
 
 
 export default function TabLayout() {

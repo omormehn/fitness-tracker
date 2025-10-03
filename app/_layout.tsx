@@ -58,7 +58,7 @@ function RootLayoutNav() {
 
   useEffect(() => {
     initializeAuthState();
-  }, []);
+  }, [initializeAuthState]);
 
 
   useEffect(() => {
@@ -108,9 +108,16 @@ function RootLayoutNav() {
 
   if (initialized || !navigationState?.key || !hasNavigated.current) {
     return (
-      <View>
-        <ActivityIndicator size={40} color={'white '} />
-      </View>
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: '#000'
+        }}
+      >
+        <ActivityIndicator size={40} color={'white'} />
+      </View >
     );
   }
 
