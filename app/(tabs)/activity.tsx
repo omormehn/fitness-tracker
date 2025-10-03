@@ -1,5 +1,5 @@
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import CustomHeader from '@/components/CustomHeader'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -10,20 +10,56 @@ import Boot from '@/assets/boots1.svg'
 import { Colors } from '@/theme/Colors'
 import MaterialIcons from '@expo/vector-icons/MaterialIcons'
 import ActivityBarChart from '@/components/ActivityBarChart'
+import healthconnectService from '@/services/healthconnect.service'
+import AddTargetModal from '@/components/AddTargetModal'
+import api from '@/lib/axios'
+import { useHealthStore } from '@/store/useHealthStore'
 
 
 const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
+  const { addTarget, targetSteps, targetWater, fetchTarget } = useHealthStore()
+
+
+  const [steps, setSteps] = useState<number>();
+  const [modalVisible, setModalVisible] = useState(false);
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
+
+  useEffect(() => {
+    async function init() {
+      const a = await fetchTarget()
+      console.log('a', a)
+    }
+    init()
+  }, [targetSteps, targetWater])
+
+  const handleSaveTargets = async (targets: any) => {
+    try {
+      const ok = await addTarget(targets)
+
+    } catch (error) {
+      console.log('err', error)
+    }
+  };
+
+  const handleSteps = async () => {
+    const { steps } = await healthconnectService.getTodayActivity()
+    setSteps(steps)
+  }
+
+  useEffect(() => {
+    handleSteps()
+  }, [steps])
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <CustomHeader title='Activity Tracker' />
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{paddingBottom: 30}}>
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 30 }}>
         {/* Target card */}
         <View style={[styles.targetCard, { opacity: 0.7, }, { backgroundColor: colors.card }]}>
           <View style={styles.targetCardTop}>
             <Text style={[styles.cardTitle, { color: colors.text }]}>Today Target</Text>
-            <TouchableOpacity >
+            <TouchableOpacity onPress={() => setModalVisible(true)} >
               <LinearGradientComponent style={styles.plusButton} gradient={gradients.button}>
                 <MaterialCommunityIcons name='plus' size={20} color={theme === 'dark' ? '#000' : '#fff'} />
               </LinearGradientComponent>
@@ -34,14 +70,14 @@ const ActivityScreen = () => {
             <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
               <Glass />
               <View className='flex-col'>
-                <Text style={{ color: Colors.linearText }}>8L</Text>
-                <Text style={{ color: colors.tintText3 }}>Water Intake</Text>
+                <Text style={{ color: Colors.linearText }}>{targetWater || '- -/ - - '}</Text>
+                <Text style={{ color: colors.tintText3 }}>Water Intake(L)</Text>
               </View>
             </View>
             <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
               <Boot />
               <View className='flex-col'>
-                <Text style={{ color: Colors.linearText }}>2400</Text>
+                <Text style={{ color: Colors.linearText }}>{targetSteps || '- -/ - -'}</Text>
                 <Text style={{ color: colors.tintText3 }}>Foot Steps</Text>
               </View>
             </View>
@@ -123,6 +159,12 @@ const ActivityScreen = () => {
           </View>
         </View>
       </ScrollView>
+
+      <AddTargetModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onSave={handleSaveTargets}
+      />
     </View>
   )
 }

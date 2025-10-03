@@ -85,18 +85,18 @@ interface EditModalProps {
 }
 
 interface ChartBarData {
-    day: string;
-    value: number;
-    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
+  day: string;
+  value: number;
+  gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
 }
 
 interface BarItemProps {
-    day: string;
-    value: number;
-    maxValue: number;
-    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
-    delay: number;
-    bgColor: string;
+  day: string;
+  value: number;
+  maxValue: number;
+  gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
+  delay: number;
+  bgColor: string;
 }
 
 // WORKOUT
@@ -120,4 +120,21 @@ interface WorkoutProgram {
   exercises: number;
   duration: string;
   image: string;
+}
+
+interface ViewTargetModalProps {
+  visible: boolean;
+  onClose: () => void;
+  targets: TargetProgress[];
+}
+
+interface TargetProgress {
+  id: string;
+  icon: any;
+  iconFamily: 'MaterialCommunity' | 'Material' | 'Ionicons';
+  label: string;
+  current: number | null;
+  target: number | null;
+  unit: string;
+  gradient: any;
 }

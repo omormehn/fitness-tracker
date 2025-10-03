@@ -3,12 +3,11 @@ import React, { useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import CustomHeader from '@/components/CustomHeader';
 import { LinearGradient } from 'expo-linear-gradient';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import Svg, { Path, Circle } from 'react-native-svg';
 import { UpcomingWorkout, WorkoutData, WorkoutProgram } from '@/types/types';
 import LineChartComponent from '@/components/LineChart';
 import LinearGradientComponent from '@/components/linearGradient';
 import { Colors } from '@/theme/Colors';
+import { useRouter } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 
@@ -16,7 +15,10 @@ const { width } = Dimensions.get('window');
 
 const WorkoutTrackerScreen = () => {
     const { colors, gradients, theme } = useTheme();
+    const router = useRouter()
+
     const swapColor = theme === 'dark' ? '#110D0E' : '#1D1617'
+
 
     const [upcomingWorkouts, setUpcomingWorkouts] = useState<UpcomingWorkout[]>([
         { id: '1', title: 'Fullbody Workout', time: 'Today, 03:00pm', icon: '💪', enabled: true },
@@ -49,6 +51,11 @@ const WorkoutTrackerScreen = () => {
 
     const maxValue = Math.max(...workoutData.map(d => d.value));
     const chartHeight = 180;
+
+
+
+
+
 
     return (
         <LinearGradientComponent gradient={gradients.onboarding} style={[styles.container]}>
@@ -88,7 +95,10 @@ const WorkoutTrackerScreen = () => {
                             <Text style={[styles.scheduleText, { color: colors.text }]}>
                                 Daily Workout Schedule
                             </Text>
-                            <TouchableOpacity>
+
+                            <TouchableOpacity onPress={() =>
+                                router.push('/workoutschedule')
+                            }>
                                 <LinearGradient
                                     colors={gradients.button}
                                     style={styles.checkButton}
@@ -160,8 +170,8 @@ const WorkoutTrackerScreen = () => {
                                     </Text>
                                     <TouchableOpacity>
                                         <View
-                                            
-                                            style={[styles.viewMoreButton, {backgroundColor: colors.background}]}
+
+                                            style={[styles.viewMoreButton, { backgroundColor: colors.background }]}
                                         >
                                             <Text style={styles.viewMoreText}>View more</Text>
                                         </View>

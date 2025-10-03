@@ -68,21 +68,25 @@ export const login = async (req: Request, res: Response) => {
 };
 
 export const refreshToken = async (req: Request, res: Response) => {
-    const { refreshToken: tokenPlain } = req.body;
-    if (!tokenPlain) return res.status(400).json({ message: 'Refresh token required' });
+    try {
+        const { refreshToken: tokenPlain } = req.body;
+        if (!tokenPlain) return res.status(400).json({ message: 'Refresh token required' });
 
-    const tokenDoc = await findRefreshTokenDocument(tokenPlain);
-    if (!tokenDoc) return res.status(401).json({ message: 'Invalid or expired refresh token' });
+        const tokenDoc = await findRefreshTokenDocument(tokenPlain);
+        if (!tokenDoc) return res.status(401).json({ message: 'Invalid or expired refresh token' });
 
-    // rotate: issue new token, then revoke old and link to the new token
-    const newRefreshToken = await createRefreshToken(tokenDoc.user._id);
-    await revokeRefreshToken(tokenDoc, newRefreshToken); // mark old as revoked
-    const newAccessToken = createAccessToken(tokenDoc.user._id);
+        // rotate: issue new token, then revoke old and link to the new token
+        const newRefreshToken = await createRefreshToken(tokenDoc.user._id);
+        await revokeRefreshToken(tokenDoc, newRefreshToken); // mark old as revoked
+        const newAccessToken = createAccessToken(tokenDoc.user._id);
 
-    res.json({
-        accessToken: newAccessToken,
-        refreshToken: newRefreshToken,
-    });
+        res.json({
+            accessToken: newAccessToken,
+            refreshToken: newRefreshToken,
+        });
+    } catch (err) {
+        console.log('err in refresh', err)
+    }
 };
 
 export const logout = async (req: Request, res: Response) => {
