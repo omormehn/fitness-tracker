@@ -1,27 +1,9 @@
 import api from "@/lib/axios";
 import healthconnectService from "@/services/healthconnect.service";
-import { set } from "mongoose";
+import { HealthState } from "@/types/types";
 import { create } from "zustand";
 
-type TargetItems = {
-    water: number;
-    calories: number;
-    workoutMinutes: number;
-    steps: number;
-}
-interface HealthState {
-    targetSteps: number | null,
-    targetWater: number | null,
-    targetCalories: number | null,
-    targetWorkoutMinutes: number | null,
-    todaysWater: number | null,
-    todaysCalories: number | null,
-    todaysWorkoutMinutes: number | null,
-    todaysSteps: number | null,
-    fetchHealthData: () => void
-    addTarget: (data: any) => Promise<boolean>
-    fetchTarget: () => Promise<TargetItems>
-}
+
 
 export const useHealthStore = create<HealthState>((set) => ({
     targetSteps: null,

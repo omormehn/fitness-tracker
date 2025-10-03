@@ -36,6 +36,7 @@ const LoginScreen = () => {
                 console.log('ok', ok)
                 if (!user?.weight || !user?.height) {
                     router.push('/(auth)/(register)/register2')
+                    return;
                 }
                 router.push('/(tabs)')
             }

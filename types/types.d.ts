@@ -138,3 +138,24 @@ interface TargetProgress {
   unit: string;
   gradient: any;
 }
+
+
+type TargetItems = {
+  water: number;
+  calories: number;
+  workoutMinutes: number;
+  steps: number;
+}
+interface HealthState {
+  targetSteps: number | null,
+  targetWater: number | null,
+  targetCalories: number | null,
+  targetWorkoutMinutes: number | null,
+  todaysWater: number | null,
+  todaysCalories: number | null,
+  todaysWorkoutMinutes: number | null,
+  todaysSteps: number | null,
+  fetchHealthData: () => Promise<void>
+  addTarget: (data: any) => Promise<boolean>
+  fetchTarget: () => Promise<TargetItems>
+}

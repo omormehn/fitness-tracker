@@ -102,7 +102,8 @@ const ViewTargetModal: React.FC<ViewTargetModalProps> = ({ visible, onClose, tar
                     >
                         <View style={styles.targetsGrid}>
                             {targets.map((item) => {
-                                const progress = Math.min((item.current! / item.target!) * 100, 100);
+                                const { current, target } = item;
+                                const progress = current != null && target != null ? Math.min((item.current! / item.target!) * 100, 100) : 0;
 
                                 return (
                                     <View key={item.id} style={[styles.targetCard, { backgroundColor: colors.background }]}>
@@ -121,10 +122,10 @@ const ViewTargetModal: React.FC<ViewTargetModalProps> = ({ visible, onClose, tar
 
                                         <View style={styles.statsContainer}>
                                             <Text style={[styles.currentValue, { color: colors.text }]}>
-                                                {item.current?.toLocaleString()}
+                                                {current != null ? current.toLocaleString() : '--'}
                                             </Text>
                                             <Text style={[styles.targetValue, { color: colors.tintText3 }]}>
-                                                / {item.target?.toLocaleString()} {item.unit}
+                                                / {target != null ? target.toLocaleString() : '--'} {item.unit}
                                             </Text>
                                         </View>
 
