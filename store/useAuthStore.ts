@@ -104,9 +104,7 @@ export const useAuthStore = create<AuthState>()(
                         const serverResponse = await api.post('/auth/google', {
                             token: idToken,
                         })
-
                         const { user, accessToken, refreshToken } = serverResponse.data;
-                        console.log('us', user)
                         await AsyncStorage.setItem('refreshToken', refreshToken);
                         await AsyncStorage.setItem("token", accessToken);
                         if (!user?.weight || !user?.height) {
@@ -149,6 +147,13 @@ export const useAuthStore = create<AuthState>()(
                                 );
                                 break;
                             default:
+                                ToastAndroid.showWithGravityAndOffset(
+                                    'Network Error, Please try again',
+                                    ToastAndroid.LONG,
+                                    ToastAndroid.BOTTOM,
+                                    25,
+                                    50,
+                                );
                                 console.log('err', error.code)
                         }
                     } else {
@@ -187,12 +192,14 @@ export const useAuthStore = create<AuthState>()(
             partialize: (state) => ({
                 user: state.user,
                 token: state.token,
+
                 refreshToken: state.refreshToken,
                 hasOnboarded: state.hasOnboarded,
             }),
             onRehydrateStorage: () => (state) => {
                 if (state) {
                     state.loading = false;
+                    state.initialized = false;
                 }
             },
         }

@@ -1,4 +1,4 @@
-import { updateUser, refreshToken } from './../server/controllers/authController';
+
 import { TextInputProps, TextStyle } from 'react-native';
 
 import React, { ComponentType, ReactElement } from 'react';
@@ -85,16 +85,56 @@ interface EditModalProps {
 }
 
 interface ChartBarData {
-    day: string;
-    value: number;
-    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
+  day: string;
+  value: number;
+  gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
 }
 
 interface BarItemProps {
-    day: string;
-    value: number;
-    maxValue: number;
-    gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
-    delay: number;
-    bgColor: string;
+  day: string;
+  value: number;
+  maxValue: number;
+  gradient: readonly [ColorValue, ColorValue, ...ColorValue[]];
+  delay: number;
+  bgColor: string;
+}
+
+// WORKOUT
+interface WorkoutData {
+  day: string;
+  value: number;
+  isActive?: boolean;
+}
+
+interface UpcomingWorkout {
+  id: string;
+  title: string;
+  time: string;
+  icon: string;
+  enabled: boolean;
+}
+
+interface WorkoutProgram {
+  id: string;
+  title: string;
+  exercises: number;
+  duration: string;
+  image: string;
+}
+
+interface ViewTargetModalProps {
+  visible: boolean;
+  onClose: () => void;
+  targets: TargetProgress[];
+}
+
+interface TargetProgress {
+  id: string;
+  icon: any;
+  iconFamily: 'MaterialCommunity' | 'Material' | 'Ionicons';
+  label: string;
+  current: number | null;
+  target: number | null;
+  unit: string;
+  gradient: any;
 }

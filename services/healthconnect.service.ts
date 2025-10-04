@@ -168,7 +168,7 @@ class HealthConnectService {
             const { records: stepsRecords } = await readRecords('Steps', {
                 timeRangeFilter: {
                     operator: 'between',
-                    startTime: new Date('2024-01-01').toISOString(),
+                    startTime: startTime.toISOString(),
                     endTime: endTime.toISOString(),
                 },
             });

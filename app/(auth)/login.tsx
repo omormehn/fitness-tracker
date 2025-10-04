@@ -32,13 +32,15 @@ const LoginScreen = () => {
         setIsLoading(true)
         try {
             const ok = await googleSignIn();
-            console.log('ok', ok)
-            if (!user?.weight || !user?.height && ok) {
-                console.log('comaa')
-                router.push('/(auth)/(register)/register2')
-            } else {
+            if (ok) {
+                console.log('ok', ok)
+                if (!user?.weight || !user?.height) {
+                    router.push('/(auth)/(register)/register2')
+                }
                 router.push('/(tabs)')
             }
+
+
         } catch (error) {
             console.log('err in goog', error)
         } finally {

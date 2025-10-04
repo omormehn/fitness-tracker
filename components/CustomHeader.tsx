@@ -35,7 +35,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        gap: 30
+        gap: 30,
+        paddingBottom: 15,
+        paddingHorizontal: 30
     },
     iconBg: { borderRadius: 10, paddingHorizontal: 4, paddingVertical: 4 }
 })

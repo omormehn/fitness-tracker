@@ -8,6 +8,8 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import cors from 'cors';
 import authRoutes from './routes/auth'
+import healthRoutes from './routes/health'
+import goalRoutes from './routes/goalRoutes'
 import { errorHandler } from "./middlewares/errorHandler";
 
 const app = express();
@@ -38,6 +40,8 @@ connectDB(MONGO_URI);
 
 
 app.use('/api/auth', authRoutes);
+app.use('/api/health', healthRoutes);
+app.use('/api/goals', goalRoutes);
 
 app.use(errorHandler);
 

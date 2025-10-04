@@ -10,10 +10,13 @@ import SleepGraphLight from '@/assets/images/light/sleepgraph.svg';
 import LineChartComponent from "@/components/LineChart";
 import WorkoutCard from "@/components/WorkoutCard";
 import { workouts } from "@/data/workout";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { useAuthStore } from "@/store/useAuthStore";
 import healthconnectService from "@/services/healthconnect.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useHealthStore } from "@/store/useHealthStore";
+import ViewTargetModal from "@/components/ViewTargetModal";
+import { TargetProgress } from "@/types/types";
 
 
 
@@ -22,18 +25,18 @@ const { width, height } = Dimensions.get("window");
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
   const { user } = useAuthStore();
+  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories } = useHealthStore()
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [isInitialized, setIsInitialize] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Activity data states
-  const [todaySteps, setTodaySteps] = useState(0);
-  const [todayDistance, setTodayDistance] = useState(0);
-  const [todayCalories, setTodayCalories] = useState(0);
+
   const [heartRate, setHeartRate] = useState<{ bpm: number; timeAgo: string } | null>(null);
   const [stepGoal] = useState(10000); // Default goal, would be customized later
   const [bmi, setBmi] = useState<number>();
+  const [targetModalVisible, setTargetModalVisible] = useState(false);
 
   const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
@@ -46,45 +49,29 @@ const HomeScreen = () => {
 
 
   // Initialize Health Connect and fetch data
-  const fetchHealthData = useCallback(async () => {
-    try {
-      const token = await AsyncStorage.getItem("refreshToken");
-      console.log('tk', token)
-
-      // Fetch today's activity data
-      const activityData = await healthconnectService.getTodayActivity();
-      setTodaySteps(activityData.steps);
-      setTodayDistance(activityData.distance);
-      setTodayCalories(activityData.calories);
-
-      // Fetch heart rate
-      const hrData = await healthconnectService.getHeartRate();
-      if (hrData) {
-        setHeartRate(hrData);
-      }
-    } catch (error) {
-      console.error('Error fetching health data:', error);
-    }
+  const fetchHealth = useCallback(async () => {
+    await fetchHealthData();
+    await fetchTarget();
   }, [])
 
   const initializeHealthTracking = useCallback(async () => {
     if (Platform.OS === 'android') {
       const initialized = await healthconnectService.initialize();
       if (initialized) {
-        setIsInitialize(true)
+        setIsInitialized(true)
         const hasPermissions = await healthconnectService.requestPermissions();
         if (hasPermissions) {
-          await fetchHealthData();
+          await fetchHealth();
         }
       }
     }
     setLoading(false);
-  }, [fetchHealthData])
+  }, [fetchHealth])
 
   useEffect(() => {
     void initializeHealthTracking();
     calculateBMI();
-  }, [initializeHealthTracking]);
+  }, [initializeHealthTracking, user]);
 
   useEffect(() => {
     if (user?.weight && user?.height) {
@@ -98,18 +85,18 @@ const HomeScreen = () => {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchHealthData();
+    await fetchHealth();
     setRefreshing(false);
   };
   const calculateBMI = () => {
     if (user?.weight && user?.height) {
       const heightInMeters = user.height / 100;
       const bmi = user.weight / (heightInMeters * heightInMeters);
-      console.log('bmt', bmi)
       setBmi(bmi)
-      return bmi.toFixed(1);
+    } else {
+      setBmi(undefined)
     }
-    return '0';
+
   };
   const getBMIStatus = (bmi: number) => {
     if (bmi < 18.5) return 'Underweight';
@@ -118,7 +105,51 @@ const HomeScreen = () => {
     return 'Obese';
   };
 
-  const stepProgress = (todaySteps / stepGoal) * 100;
+  const stepProgress = (todaysSteps! / stepGoal) * 100;
+  console.log('st', todaysSteps)
+
+  const todayTargets: TargetProgress[] = [
+    {
+      id: 'steps',
+      icon: 'shoe-print',
+      iconFamily: 'MaterialCommunity' as const,
+      label: 'Steps',
+      current: todaysSteps,
+      target: targetSteps,
+      unit: 'steps',
+      gradient: gradients.button,
+    },
+    {
+      id: 'water',
+      icon: 'water',
+      iconFamily: 'Ionicons' as const,
+      label: 'Water',
+      current: 4,
+      target: targetWater,
+      unit: 'L',
+      gradient: gradients.greenLinear,
+    },
+    {
+      id: 'calories',
+      icon: 'local-fire-department',
+      iconFamily: 'Material' as const,
+      label: 'Calories',
+      current: todaysCalories,
+      target: targetCalories,
+      unit: 'kcal',
+      gradient: ['#FF6B6B', '#FF4757'],
+    },
+    {
+      id: 'workout',
+      icon: 'timer-outline',
+      iconFamily: 'Ionicons' as const,
+      label: 'Workout',
+      current: 45,
+      target: targetWorkoutMinutes,
+      unit: 'mins',
+      gradient: ['#FFA726', '#FB8C00'],
+    },
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -146,7 +177,7 @@ const HomeScreen = () => {
           style={styles.card}
         >
           <Text style={styles.cardTitle}>BMI (Body Mass Index)</Text>
-          <Text style={styles.cardSubtitle}>You have a status: {getBMIStatus(bmi!)}</Text>
+          <Text style={styles.cardSubtitle}>You have a status: {bmi ? getBMIStatus(bmi) : 'N/A'}</Text>
           <View style={styles.bmiRow}>
             <Text style={styles.bmiValue}>{bmi?.toFixed(1)}</Text>
             <TouchableOpacity >
@@ -165,7 +196,7 @@ const HomeScreen = () => {
         {/* Today Target */}
         <View style={[styles.targetCard, { opacity: 0.7, }, { backgroundColor: colors.card }]}>
           <Text style={[styles.cardTitle, { color: colors.text }]}>Today Target</Text>
-          <TouchableOpacity >
+          <TouchableOpacity onPress={() => setTargetModalVisible(true)} >
             <LinearGradient
               colors={gradients.button}
               start={{ x: 1, y: 0 }}
@@ -246,7 +277,7 @@ const HomeScreen = () => {
               accessibilityLabel="See more workouts"
               hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
               onPress={() => {
-                // TODO: navigate to workout history
+                router.push('/(workout)')
               }}
             >
               <View
@@ -268,6 +299,12 @@ const HomeScreen = () => {
           </View>
         </View>
       </ScrollView >
+
+      <ViewTargetModal
+        visible={targetModalVisible}
+        onClose={() => setTargetModalVisible(false)}
+        targets={todayTargets}
+      />
     </View >
   );
 };
@@ -316,7 +353,7 @@ const styles = StyleSheet.create({
 
 
   workoutHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
-  workoutGraph: { borderRadius: 16, right: 20 },
+  workoutGraph: { borderRadius: 16, },
   workoutCardContainer: { flexDirection: 'column', },
 });
 

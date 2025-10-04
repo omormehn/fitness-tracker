@@ -307,11 +307,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         paddingTop: 50,
-        paddingHorizontal: 20
     },
     scrollContent: {
         paddingBottom: 40,
         paddingTop: 20,
+        paddingHorizontal: 30
     },
     profileSection: {
         alignItems: 'center',
