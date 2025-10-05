@@ -14,11 +14,12 @@ import healthconnectService from '@/services/healthconnect.service'
 import AddTargetModal from '@/components/AddTargetModal'
 import api from '@/lib/axios'
 import { useHealthStore } from '@/store/useHealthStore'
+import Ionicons from '@expo/vector-icons/Ionicons'
 
 
 const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
-  const { addTarget, targetSteps, targetWater, fetchTarget } = useHealthStore()
+  const { addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes } = useHealthStore()
 
 
   const [steps, setSteps] = useState<number>();
@@ -70,8 +71,8 @@ const ActivityScreen = () => {
             <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
               <Glass />
               <View className='flex-col'>
-                <Text style={{ color: Colors.linearText }}>{targetWater || '- -/ - - '}</Text>
-                <Text style={{ color: colors.tintText3 }}>Water Intake(L)</Text>
+                <Text style={{ color: Colors.linearText }}>{targetWater || '- -/ - - '} <Text style={{ fontSize: 10 }}>L</Text></Text>
+                <Text style={{ color: colors.tintText3 }}>Water Intake</Text>
               </View>
             </View>
             <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
@@ -79,6 +80,20 @@ const ActivityScreen = () => {
               <View className='flex-col'>
                 <Text style={{ color: Colors.linearText }}>{targetSteps || '- -/ - -'}</Text>
                 <Text style={{ color: colors.tintText3 }}>Foot Steps</Text>
+              </View>
+            </View>
+            <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
+              <Ionicons name='timer-outline' color={'white'} size={30} />
+              <View className='flex-col'>
+                <Text style={{ color: Colors.linearText }}>{targetWorkoutMinutes || '- -/ - -'}</Text>
+                <Text style={{ color: colors.tintText3 }}>Workout Min</Text>
+              </View>
+            </View>
+            <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
+              <MaterialIcons name='local-fire-department' color={'white'} size={30} />
+              <View className='flex-col'>
+                <Text style={{ color: Colors.linearText }}>{targetCalories || '- -/ - -'} <Text style={{ fontSize: 10 }}>kcal</Text></Text>
+                <Text style={{ color: colors.tintText3 }}>Calories</Text>
               </View>
             </View>
           </View>
@@ -198,9 +213,12 @@ const styles = StyleSheet.create({
   },
   targetSubCardContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 20,
+    gap: 10,
+
   },
   targetSubCard: {
     flexDirection: 'row',
@@ -208,6 +226,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 15,
     borderRadius: 15,
+    minWidth: 150,
   },
   activityHeader: {
     flexDirection: "row",

@@ -19,19 +19,25 @@ const Carousel = () => {
     return (
         <PagerView style={styles.pager} initialPage={0}>
             {/* Page 1 */}
-            <View key="1" style={styles.page}>
+            {/* <View key="1" style={styles.page}>
                 <GoalCard lightImage={Goal1Light} darkImage={Goal1Dark} title={GOALS.goal1.title} description={GOALS.goal1.description} />
-            </View>
+            </View> */}
 
             {/* Page 2 */}
-            <View key="2" style={styles.page}>
+            {/* <View key="2" style={styles.page}>
                 <GoalCard lightImage={Goal2Light} darkImage={Goal2Dark} title={GOALS.goal2.title} description={GOALS.goal2.description} />
-            </View>
+            </View> */}
 
             {/* Page 3 */}
-            <View key="3" style={styles.page}>
+            {/* <View key="3" style={styles.page}>
                 <GoalCard lightImage={Goal3Light} darkImage={Goal3Dark} title={GOALS.goal3.title} description={GOALS.goal3.description} />
-            </View>
+            </View> */}
+
+            {GOALS.map((goals) => (
+                <View key={goals.id} style={styles.page}>
+                    <GoalCard lightImage={goals.lightImage} darkImage={goals.darkImage} title={goals.title} description={goals.description} />
+                </View>
+            ))}
         </PagerView>
     );
 };

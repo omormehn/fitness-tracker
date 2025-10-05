@@ -115,11 +115,14 @@ interface UpcomingWorkout {
 }
 
 interface WorkoutProgram {
-  id: string;
-  title: string;
-  exercises: number;
-  duration: string;
-  image: string;
+  exerciseId: string;
+  name: string;
+  equipments: string[];
+  gifUrl: string;
+  instructions: string[];
+  secondaryMuscles: string[];
+  targetMuscles: string[];
+  bodyParts: string[];
 }
 
 interface ViewTargetModalProps {

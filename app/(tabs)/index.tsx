@@ -46,8 +46,6 @@ const HomeScreen = () => {
   const notificationColor = theme === 'dark' ? '#FFFFFF' : '#000000';
 
 
-
-
   // Initialize Health Connect and fetch data
   const fetchHealth = useCallback(async () => {
     await fetchHealthData();
@@ -103,10 +101,7 @@ const HomeScreen = () => {
     if (bmi < 25) return 'Normal weight';
     if (bmi < 30) return 'Overweight';
     return 'Obese';
-  };
-
-  const stepProgress = (todaysSteps! / stepGoal) * 100;
-  console.log('st', todaysSteps)
+  }; 
 
   const todayTargets: TargetProgress[] = [
     {

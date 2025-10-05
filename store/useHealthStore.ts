@@ -40,7 +40,6 @@ export const useHealthStore = create<HealthState>((set) => ({
         try {
             // Fetch today's activity data
             const { steps, calories } = await healthconnectService.getTodayActivity();
-            console.log('steps', calories)
             set({ todaysSteps: steps, todaysCalories: calories, })
 
             // Fetch heart rate

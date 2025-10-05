@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions, Switch } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Dimensions, Switch, Image } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import CustomHeader from '@/components/CustomHeader';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,6 +8,7 @@ import LineChartComponent from '@/components/LineChart';
 import LinearGradientComponent from '@/components/linearGradient';
 import { Colors } from '@/theme/Colors';
 import { useRouter } from 'expo-router';
+import axios from 'axios';
 
 const { width } = Dimensions.get('window');
 
@@ -15,9 +16,24 @@ const { width } = Dimensions.get('window');
 
 const WorkoutTrackerScreen = () => {
     const { colors, gradients, theme } = useTheme();
+    const [exercises, setExercises] = useState<WorkoutProgram[]>([])
     const router = useRouter()
 
     const swapColor = theme === 'dark' ? '#110D0E' : '#1D1617'
+
+    useEffect(() => {
+        async function init() {
+            const options = { method: 'GET', url: 'https://v1.exercisedb.dev/api/v1/exercises', params: { limit: 10, offset: 20 } };
+
+            try {
+                const { data } = await axios.request(options);
+                setExercises(data.data)
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        init()
+    }, [])
 
 
     const [upcomingWorkouts, setUpcomingWorkouts] = useState<UpcomingWorkout[]>([
@@ -35,11 +51,15 @@ const WorkoutTrackerScreen = () => {
         { day: 'Sat', value: 25 },
     ];
 
-    const workoutPrograms: WorkoutProgram[] = [
-        { id: '1', title: 'Fullbody Workout', exercises: 11, duration: '32mins', image: '🏃‍♀️' },
-        { id: '2', title: 'Lowerbody Workout', exercises: 12, duration: '40mins', image: '🦵' },
-        { id: '3', title: 'AB Workout', exercises: 14, duration: '20mins', image: '🤸‍♀️' },
-    ];
+    function estimateDuration(instructions: string[], sets: number = 3, reps: number = 12): number {
+        const avgStepTime = 5;
+        const timePerRep = instructions.length * avgStepTime;
+        const totalTime = timePerRep * reps * sets;
+
+
+        return Math.ceil(totalTime / 60);
+    }
+
 
     const toggleWorkout = (id: string) => {
         setUpcomingWorkouts(prev =>
@@ -52,7 +72,24 @@ const WorkoutTrackerScreen = () => {
     const maxValue = Math.max(...workoutData.map(d => d.value));
     const chartHeight = 180;
 
+    function categorizeWorkout(workout: WorkoutProgram): string {
+        if (workout.bodyParts.includes("back")) return "Back Day";
+        if (workout.bodyParts.includes("chest")) return "Chest Day";
+        if (workout.bodyParts.includes("legs")) return "Leg Day";
+        if (workout.bodyParts.includes("shoulders")) return "Shoulder Day";
+        if (workout.bodyParts.includes("arms")) return "Arm Day";
+        return "Full Body";
+    }
 
+    const routeToDetail = (id: string) => {
+        if (!id) return;
+        router.push({
+            pathname: '/[id]',
+            params: {
+                id
+            }
+        })
+    }
 
 
 
@@ -111,6 +148,7 @@ const WorkoutTrackerScreen = () => {
 
                     {/* Upcoming Workout */}
                     <View style={styles.section}>
+
                         <View style={styles.sectionHeader}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
                                 Upcoming Workout
@@ -155,33 +193,25 @@ const WorkoutTrackerScreen = () => {
                         <Text style={[styles.sectionTitle, { color: colors.text }]}>
                             What Do You Want to Train
                         </Text>
+                        {exercises.map((workout) => {
+                            const duration = estimateDuration(workout.instructions);
+                            const category = categorizeWorkout(workout);
+                            const id = workout.exerciseId
 
-                        {workoutPrograms.map((program) => (
-                            <View
-                                key={program.id}
-                                style={[styles.programCard, { backgroundColor: colors.card }]}
-                            >
-                                <View style={styles.programContent}>
-                                    <Text style={[styles.programTitle, { color: colors.text }]}>
-                                        {program.title}
-                                    </Text>
-                                    <Text style={[styles.programDetails, { color: colors.tintText3 }]}>
-                                        {program.exercises} Exercises | {program.duration}
-                                    </Text>
-                                    <TouchableOpacity>
-                                        <View
+                            return (
+                                <TouchableOpacity onPress={() => routeToDetail(id)} key={workout.exerciseId} style={[styles.programCard, { backgroundColor: colors.card }]}>
+                                    <View style={styles.programContent}>
+                                        <Text style={[styles.programTitle, { color: colors.text }]}>
+                                            {workout.name.charAt(0).toUpperCase() + workout.name.slice(1)}
+                                        </Text>
+                                        <Text style={[styles.programDetails, { color: colors.tintText3 }]}>
+                                            {workout.instructions.length} steps | ~{duration} min | {category}
+                                        </Text>
+                                    </View>
+                                </TouchableOpacity>
+                            );
+                        })}
 
-                                            style={[styles.viewMoreButton, { backgroundColor: colors.background }]}
-                                        >
-                                            <Text style={styles.viewMoreText}>View more</Text>
-                                        </View>
-                                    </TouchableOpacity>
-                                </View>
-                                <View style={styles.programImage}>
-                                    <Text style={styles.programEmoji}>{program.image}</Text>
-                                </View>
-                            </View>
-                        ))}
                     </View>
                 </View>
             </ScrollView>
@@ -245,6 +275,7 @@ const styles = StyleSheet.create({
     },
     section: {
         marginBottom: 20,
+        gap: 10,
     },
     sectionHeader: {
         flexDirection: 'row',

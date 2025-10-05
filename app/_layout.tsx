@@ -108,7 +108,7 @@ function RootLayoutNav() {
 
   if (initialized || !navigationState?.key || !hasNavigated.current) {
     return (
-      <View
+      <View   
         style={{
           flex: 1,
           justifyContent: 'center',
