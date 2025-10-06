@@ -161,4 +161,7 @@ interface HealthState {
   fetchHealthData: () => Promise<void>
   addTarget: (data: any) => Promise<boolean>
   fetchTarget: () => Promise<TargetItems>
+  fetchTodaySummary: () => Promise<void>;
+  fetchWeeklySummary: () => Promise<any>;
+  updateActivitySummary: (data: any) => Promise<void>;
 }

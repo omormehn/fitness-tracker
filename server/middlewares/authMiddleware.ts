@@ -12,6 +12,7 @@ export const requireAuth = async (req: AuthRequest, res: Response, next: NextFun
         return res.status(401).json({ message: 'No token provided' });
     }
     const token = authHeader.split(' ')[1];
+    console.log('token', token)
     const payload = verifyAccessToken(token!);
     if (payload) {
         const user = await User.findById(payload.sub).select('-password');

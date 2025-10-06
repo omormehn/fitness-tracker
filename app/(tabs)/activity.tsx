@@ -19,7 +19,7 @@ import Ionicons from '@expo/vector-icons/Ionicons'
 
 const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
-  const { addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes } = useHealthStore()
+  const { addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes, fetchWeeklySummary } = useHealthStore()
 
 
   const [steps, setSteps] = useState<number>();
@@ -28,11 +28,11 @@ const ActivityScreen = () => {
 
   useEffect(() => {
     async function init() {
-      const a = await fetchTarget()
-      console.log('a', a)
+      await fetchTarget()
     }
     init()
-  }, [targetSteps, targetWater])
+  }, [targetSteps, targetWater]);
+
 
   const handleSaveTargets = async (targets: any) => {
     try {
@@ -48,9 +48,12 @@ const ActivityScreen = () => {
     setSteps(steps)
   }
 
+
   useEffect(() => {
     handleSteps()
   }, [steps])
+
+  
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

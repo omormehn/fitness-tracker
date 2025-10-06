@@ -5,7 +5,8 @@ import { create } from "zustand";
 
 
 
-export const useHealthStore = create<HealthState>((set) => ({
+
+export const useHealthStore = create<HealthState>((set, get) => ({
     targetSteps: null,
     targetWater: null,
     targetCalories: null,
@@ -50,6 +51,52 @@ export const useHealthStore = create<HealthState>((set) => ({
         } catch (error) {
             console.error('Error fetching health data:', error);
         }
-    }
+    },
+    fetchTodaySummary: async () => {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const { data } = await api.get('/health/daily-activity', {
+                params: { date: today }
+            });
+            set({
+                todaysSteps: data.steps || 0,
+                todaysWater: data.water || 0,
+                todaysCalories: data.calories || 0,
+                todaysWorkoutMinutes: data.workoutMinutes || 0,
+            });
+        } catch (error) {
+            console.error('Error fetching summary:', error);
+        }
+    },
+    fetchWeeklySummary: async () => {
+        try {
+            const { data } = await api.get('/health/weekly-activity');
+            console.log('data', data)
+            console.log('data type', typeof data)
+            return data;
+        } catch (error) {
+            console.error('Error fetching summary:', error);
+        }
+    },
+    updateActivitySummary: async (updates) => {
+        try {
+            const current = get()
+            const payload = {
+                steps: updates.steps ?? current.todaysSteps,
+                water: updates.water ?? current.todaysWater,
+                calories: updates.calories ?? current.todaysCalories,
+                workoutMinutes: updates.workoutMinutes ?? current.todaysWorkoutMinutes,
+            };
+            const { data } = await api.post('/health/add-activity', payload);
+            set({
+                todaysSteps: data.steps,
+                todaysWater: data.water,
+                todaysCalories: data.calories,
+                todaysWorkoutMinutes: data.workoutMinutes,
+            });
+        } catch (error) {
+            console.error('Error updating activity:', error);
+        }
+    },
 }))
 
