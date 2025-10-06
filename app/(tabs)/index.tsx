@@ -25,11 +25,13 @@ const { width, height } = Dimensions.get("window");
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
   const { user } = useAuthStore();
-  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories } = useHealthStore()
+  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories, fetchTodaySummary, todaysWater } = useHealthStore()
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [isInitialized, setIsInitialized] = useState(false)
+
+  console.log('tod', todaysWater)
 
   // Activity data states
 
@@ -50,6 +52,7 @@ const HomeScreen = () => {
   const fetchHealth = useCallback(async () => {
     await fetchHealthData();
     await fetchTarget();
+    await fetchTodaySummary()
   }, [])
 
   const initializeHealthTracking = useCallback(async () => {
@@ -101,7 +104,7 @@ const HomeScreen = () => {
     if (bmi < 25) return 'Normal weight';
     if (bmi < 30) return 'Overweight';
     return 'Obese';
-  }; 
+  };
 
   const todayTargets: TargetProgress[] = [
     {
@@ -119,7 +122,7 @@ const HomeScreen = () => {
       icon: 'water',
       iconFamily: 'Ionicons' as const,
       label: 'Water',
-      current: 4,
+      current: todaysWater,
       target: targetWater,
       unit: 'L',
       gradient: gradients.greenLinear,

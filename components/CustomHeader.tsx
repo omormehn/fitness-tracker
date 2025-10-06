@@ -20,9 +20,9 @@ const CustomHeader = ({ title }: { title: string }) => {
                 <Text style={[{ fontFamily: 'PoppinsBold', fontSize: 16 }, { color: colors.text }]}>{title}</Text>
             </View>
             {/* Icon 3 */}
-            <View style={[styles.iconBg, { backgroundColor: colors.iconBg, }]}>
+            <TouchableOpacity onPress={() => router.push('/(tabs)')} style={[styles.iconBg, { backgroundColor: colors.iconBg, }]}>
                 <Entypo name="dots-two-horizontal" size={24} color={color} />
-            </View>
+            </TouchableOpacity>
         </View>
     )
 }

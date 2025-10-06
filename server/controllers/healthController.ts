@@ -86,21 +86,40 @@ export const getTargetHistory = async (req: AuthRequest, res: Response) => {
 export const upsertActivitySummary = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user?.id;
-        const { steps, water, calories, workoutMinutes } = req.body;
+        const { water, workoutMinutes } = req.body;
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const existingSummary = await ActivitySummary.findOne({ userId, date: today });
 
-        const summary = await ActivitySummary.findOneAndUpdate(
-            { userId, date: today },
-            { steps, water, calories, workoutMinutes },
-            { new: true, upsert: true }
-        );
+        let updatedSummary;
 
-        res.json(summary);
+        if (existingSummary) {
+            updatedSummary = await ActivitySummary.findOneAndUpdate(
+                { userId, date: today },
+                {
+                    $set: {
+                        water: water !== undefined ? water + (existingSummary.water || 0) : existingSummary.water,
+                        workoutMinutes:
+                            workoutMinutes !== undefined
+                                ? workoutMinutes + (existingSummary.workoutMinutes || 0)
+                                : existingSummary.workoutMinutes,
+                    },
+                },
+                { new: true }
+            );
+        } else {
+            updatedSummary = await ActivitySummary.create({
+                userId,
+                date: today,
+                water: water || 0,
+                workoutMinutes: workoutMinutes || 0,
+            });
+        }
+        res.json(updatedSummary);
     } catch (err) {
         res.status(500).json({ message: "Failed to save activity summary", error: err });
     }

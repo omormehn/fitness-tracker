@@ -15,6 +15,7 @@ import AddTargetModal from '@/components/AddTargetModal'
 import api from '@/lib/axios'
 import { useHealthStore } from '@/store/useHealthStore'
 import Ionicons from '@expo/vector-icons/Ionicons'
+import { router } from 'expo-router'
 
 
 const ActivityScreen = () => {
@@ -53,7 +54,7 @@ const ActivityScreen = () => {
     handleSteps()
   }, [steps])
 
-  
+
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -140,7 +141,7 @@ const ActivityScreen = () => {
             </TouchableOpacity>
           </View>
           {/* Activity details */}
-          <View style={styles.activityDetailsContainer}>
+          <TouchableOpacity onPress={() => router.push('/(activity)')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
               <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
@@ -149,16 +150,16 @@ const ActivityScreen = () => {
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
-                <Text style={[styles.title, { color: colors.text }]}>Eat snacks</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Sleep Tracker</Text>
                 <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 10 minutes ago</Text>
               </View>
 
               {/* 3rd col */}
               <View style={styles.circle} />
             </View>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.activityDetailsContainer}>
+          <TouchableOpacity onPress={() => router.push('/(activity)/waterintake')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
               <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
@@ -167,14 +168,14 @@ const ActivityScreen = () => {
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
-                <Text style={[styles.title, { color: colors.text }]}>Drinking 300ml of water</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Water Intake</Text>
                 <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 3 minutes ago</Text>
               </View>
 
               {/* 3rd col */}
               <View style={styles.circle} />
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 

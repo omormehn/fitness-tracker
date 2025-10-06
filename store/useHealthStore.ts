@@ -71,8 +71,6 @@ export const useHealthStore = create<HealthState>((set, get) => ({
     fetchWeeklySummary: async () => {
         try {
             const { data } = await api.get('/health/weekly-activity');
-            console.log('data', data)
-            console.log('data type', typeof data)
             return data;
         } catch (error) {
             console.error('Error fetching summary:', error);
@@ -82,18 +80,15 @@ export const useHealthStore = create<HealthState>((set, get) => ({
         try {
             const current = get()
             const payload = {
-                steps: updates.steps ?? current.todaysSteps,
                 water: updates.water ?? current.todaysWater,
-                calories: updates.calories ?? current.todaysCalories,
                 workoutMinutes: updates.workoutMinutes ?? current.todaysWorkoutMinutes,
             };
             const { data } = await api.post('/health/add-activity', payload);
             set({
-                todaysSteps: data.steps,
                 todaysWater: data.water,
-                todaysCalories: data.calories,
                 todaysWorkoutMinutes: data.workoutMinutes,
             });
+            return data;
         } catch (error) {
             console.error('Error updating activity:', error);
         }

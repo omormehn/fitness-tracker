@@ -165,3 +165,8 @@ interface HealthState {
   fetchWeeklySummary: () => Promise<any>;
   updateActivitySummary: (data: any) => Promise<void>;
 }
+
+interface CalendarDaysProps {
+  selectedDate: Date;
+  onDateSelect: (date: Date) => void;
+}
