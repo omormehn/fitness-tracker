@@ -49,6 +49,12 @@ const ActivityBarChart = () => {
     }, [loadWeeklyData]);
 
 
+    const loadWeeklyData = async () => {
+       
+        const data = await fetchWeeklySummary();
+        console.log('week', data)
+        setWeeklyData(data);
+    };
 
     const activityData: ChartBarData[] = weeklyData?.map((day, index) => ({
         day: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }),

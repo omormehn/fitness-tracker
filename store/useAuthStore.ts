@@ -146,6 +146,7 @@ export const useAuthStore = create<AuthState>()(
                                 );
                                 break;
                             default:
+                                console.log('erro', error)
                                 ToastAndroid.showWithGravityAndOffset(
                                     'Network Error, Please try again',
                                     ToastAndroid.LONG,
