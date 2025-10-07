@@ -47,7 +47,10 @@ export const saveTarget = async (req: AuthRequest, res: Response) => {
 // Get today's target
 export const getTodayTarget = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req?.user?.id;
+        const userId = req.user?.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const today = new Date();
         today.setHours(0, 0, 0, 0);
 
@@ -62,6 +65,9 @@ export const getTodayTarget = async (req: AuthRequest, res: Response) => {
 export const getTargetHistory = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user.id;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
         const { from, to } = req.query;
 
         const filter: any = { userId };
@@ -79,29 +85,64 @@ export const getTargetHistory = async (req: AuthRequest, res: Response) => {
 // Add or update today's summary
 export const upsertActivitySummary = async (req: AuthRequest, res: Response) => {
     try {
-        const { userId, steps, water, calories, workoutMinutes } = req.body;
+        const userId = req.user?.id;
+        const { water, workoutMinutes } = req.body;
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
+        const existingSummary = await ActivitySummary.findOne({ userId, date: today });
 
-        const summary = await ActivitySummary.findOneAndUpdate(
-            { userId, date: today },
-            { steps, water, calories, workoutMinutes },
-            { new: true, upsert: true }
-        );
+        let updatedSummary;
 
-        res.json(summary);
+        if (existingSummary) {
+            updatedSummary = await ActivitySummary.findOneAndUpdate(
+                { userId, date: today },
+                {
+                    $set: {
+                        water: water !== undefined ? water + (existingSummary.water || 0) : existingSummary.water,
+                        workoutMinutes:
+                            workoutMinutes !== undefined
+                                ? workoutMinutes + (existingSummary.workoutMinutes || 0)
+                                : existingSummary.workoutMinutes,
+                    },
+                },
+                { new: true }
+            );
+        } else {
+            updatedSummary = await ActivitySummary.create({
+                userId,
+                date: today,
+                water: water || 0,
+                workoutMinutes: workoutMinutes || 0,
+            });
+        }
+        res.json(updatedSummary);
     } catch (err) {
         res.status(500).json({ message: "Failed to save activity summary", error: err });
     }
 };
 
 // Get summary for a specific day
-export const getDailySummary = async (req: Request, res: Response) => {
+export const getDailySummary = async (req: AuthRequest, res: Response) => {
     try {
-        const { userId, date } = req.query;
+        const { date } = req.query;
+        const userId = req.user?.id
+
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        if (!date) {
+            return res.status(400).json({ message: "Date parameter required" });
+        }
 
         const day = new Date(date as string);
+        if (isNaN(day.getTime())) {
+            return res.status(400).json({ message: "Invalid date format" });
+        }
         day.setHours(0, 0, 0, 0);
 
         const summary = await ActivitySummary.findOne({ userId, date: day });
@@ -114,7 +155,11 @@ export const getDailySummary = async (req: Request, res: Response) => {
 // Get weekly summary (for charts)
 export const getWeeklySummary = async (req: AuthRequest, res: Response) => {
     try {
-        const { userId } = req.query;
+        const userId = req.user?.id
+
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
 
         const today = new Date();
         today.setHours(0, 0, 0, 0);

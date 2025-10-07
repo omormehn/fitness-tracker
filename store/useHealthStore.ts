@@ -1,29 +1,12 @@
 import api from "@/lib/axios";
 import healthconnectService from "@/services/healthconnect.service";
-import { set } from "mongoose";
+import { HealthState } from "@/types/types";
 import { create } from "zustand";
 
-type TargetItems = {
-    water: number;
-    calories: number;
-    workoutMinutes: number;
-    steps: number;
-}
-interface HealthState {
-    targetSteps: number | null,
-    targetWater: number | null,
-    targetCalories: number | null,
-    targetWorkoutMinutes: number | null,
-    todaysWater: number | null,
-    todaysCalories: number | null,
-    todaysWorkoutMinutes: number | null,
-    todaysSteps: number | null,
-    fetchHealthData: () => void
-    addTarget: (data: any) => Promise<boolean>
-    fetchTarget: () => Promise<TargetItems>
-}
 
-export const useHealthStore = create<HealthState>((set) => ({
+
+
+export const useHealthStore = create<HealthState>((set, get) => ({
     targetSteps: null,
     targetWater: null,
     targetCalories: null,
@@ -58,7 +41,6 @@ export const useHealthStore = create<HealthState>((set) => ({
         try {
             // Fetch today's activity data
             const { steps, calories } = await healthconnectService.getTodayActivity();
-            console.log('steps', calories)
             set({ todaysSteps: steps, todaysCalories: calories, })
 
             // Fetch heart rate
@@ -69,6 +51,47 @@ export const useHealthStore = create<HealthState>((set) => ({
         } catch (error) {
             console.error('Error fetching health data:', error);
         }
-    }
+    },
+    fetchTodaySummary: async () => {
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const { data } = await api.get('/health/daily-activity', {
+                params: { date: today }
+            });
+            set({
+                todaysSteps: data.steps || 0,
+                todaysWater: data.water || 0,
+                todaysCalories: data.calories || 0,
+                todaysWorkoutMinutes: data.workoutMinutes || 0,
+            });
+        } catch (error) {
+            console.error('Error fetching summary:', error);
+        }
+    },
+    fetchWeeklySummary: async () => {
+        try {
+            const { data } = await api.get('/health/weekly-activity');
+            return data;
+        } catch (error) {
+            console.error('Error fetching summary:', error);
+        }
+    },
+    updateActivitySummary: async (updates) => {
+        try {
+            const current = get()
+            const payload = {
+                water: updates.water ?? current.todaysWater,
+                workoutMinutes: updates.workoutMinutes ?? current.todaysWorkoutMinutes,
+            };
+            const { data } = await api.post('/health/add-activity', payload);
+            set({
+                todaysWater: data.water,
+                todaysWorkoutMinutes: data.workoutMinutes,
+            });
+            return data;
+        } catch (error) {
+            console.error('Error updating activity:', error);
+        }
+    },
 }))
 

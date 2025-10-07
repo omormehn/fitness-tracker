@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Dimensions, ColorValue } from 'react-native';
-import React, { useEffect, useRef } from 'react';
+import { StyleSheet, Text, View, Dimensions, ColorValue, ActivityIndicator } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -9,6 +9,7 @@ import Animated, {
     withDelay,
 } from 'react-native-reanimated';
 import { BarItemProps, ChartBarData } from '@/types/types';
+import { useHealthStore } from '@/store/useHealthStore';
 
 const { width } = Dimensions.get('window');
 const CHART_WIDTH = width - 60;
@@ -19,19 +20,51 @@ const BAR_WIDTH = 28;
 
 const ActivityBarChart = () => {
     const { colors, gradients, theme } = useTheme();
+    const { todaysSteps, targetSteps, targetWater, todaysWater, fetchWeeklySummary } = useHealthStore();
 
-    //Mock data
-    const activityData: ChartBarData[] = [
-        { day: 'Sun', value: 60, gradient: gradients.greenLinear },
-        { day: 'Mon', value: 85, gradient: gradients.button },
-        { day: 'Tue', value: 45, gradient: gradients.greenLinear },
-        { day: 'Wed', value: 75, gradient: gradients.button },
-        { day: 'Thu', value: 95, gradient: gradients.greenLinear },
-        { day: 'Fri', value: 50, gradient: gradients.button },
-        { day: 'Sat', value: 80, gradient: gradients.greenLinear },
-    ];
+    const stepsProgress = (todaysSteps! / (targetSteps || 1)) * 100;
+    const waterProgress = (todaysWater! / (targetWater || 1)) * 100;
 
-    const maxValue = 100;
+    // //Mock data
+    // const activityData: ChartBarData[] = [
+    //     { day: 'Sun', value: stepsProgress, gradient: gradients.greenLinear },
+    //     { day: 'Mon', value: 85, gradient: gradients.button },
+    //     { day: 'Tue', value: 45, gradient: gradients.greenLinear },
+    //     { day: 'Wed', value: 75, gradient: gradients.button },
+    //     { day: 'Thu', value: 95, gradient: gradients.greenLinear },
+    //     { day: 'Fri', value: 50, gradient: gradients.button },
+    //     { day: 'Sat', value: 80, gradient: gradients.greenLinear },
+    // ];
+
+    // const maxValue = 100;
+    const [weeklyData, setWeeklyData] = useState<any[]>([]);
+
+
+    useEffect(() => {
+        loadWeeklyData();
+    }, []);
+
+    const loadWeeklyData = async () => {
+        const data = await fetchWeeklySummary();
+        console.log('week', data)
+        setWeeklyData(data);
+    };
+
+    const activityData: ChartBarData[] = weeklyData.map((day, index) => ({
+        day: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }),
+        value: day.steps || 0, // or day.calories, day.workoutMinutes,
+        gradient: index % 2 === 0 ? gradients.greenLinear : gradients.button,
+    }));
+
+
+    if (activityData.length === 0) {
+        return (
+            <Text style={{ color: colors.text, textAlign: 'center' }}>No Activity</Text>
+        );
+    }
+
+    // Calculate max for the week
+    const maxValue = Math.max(...activityData.map(d => d.value), 100);
 
     return (
         <View style={[styles.chartContainer, { backgroundColor: colors.card }]}>

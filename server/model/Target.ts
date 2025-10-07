@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
 
 export interface ITarget extends Document {
     userId: mongoose.Types.ObjectId;
@@ -7,7 +7,8 @@ export interface ITarget extends Document {
     calories?: number,
     workoutMinutes?: number,
     effectiveDate: Date,
-    createdAt: Date
+    createdAt: Date,
+    expiresAt: Date
 }
 
 const dailyTargetSchema = new mongoose.Schema({

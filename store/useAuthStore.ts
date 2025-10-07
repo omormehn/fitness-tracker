@@ -28,10 +28,8 @@ export const useAuthStore = create<AuthState>()(
                     set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/login", data);
                     const { refreshToken, accessToken, user } = res.data
-
-                    await AsyncStorage.setItem('refreshToken', refreshToken)
                     await AsyncStorage.setItem("token", accessToken);
-
+                    await AsyncStorage.setItem("refreshToken", refreshToken);
                     set({ user: user || null, token: accessToken, refreshToken: refreshToken });
                     return true;
                 } catch (err: any) {
@@ -53,8 +51,8 @@ export const useAuthStore = create<AuthState>()(
                     set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/register", data);
                     const { refreshToken, accessToken, user } = res.data;
-                    await AsyncStorage.setItem('refreshToken', refreshToken);
                     await AsyncStorage.setItem("token", accessToken);
+                    await AsyncStorage.setItem("refreshToken", refreshToken);
                     set({ user: user || null, token: accessToken });
                     return true;
                 } catch (err: any) {
@@ -105,8 +103,8 @@ export const useAuthStore = create<AuthState>()(
                             token: idToken,
                         })
                         const { user, accessToken, refreshToken } = serverResponse.data;
-                        await AsyncStorage.setItem('refreshToken', refreshToken);
                         await AsyncStorage.setItem("token", accessToken);
+                        await AsyncStorage.setItem("refreshToken", refreshToken);
                         if (!user?.weight || !user?.height) {
                             console.log('com')
                             router.push('/(auth)/(register)/register2')
@@ -192,7 +190,6 @@ export const useAuthStore = create<AuthState>()(
             partialize: (state) => ({
                 user: state.user,
                 token: state.token,
-
                 refreshToken: state.refreshToken,
                 hasOnboarded: state.hasOnboarded,
             }),

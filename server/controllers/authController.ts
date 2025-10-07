@@ -77,7 +77,7 @@ export const refreshToken = async (req: Request, res: Response) => {
 
         // rotate: issue new token, then revoke old and link to the new token
         const newRefreshToken = await createRefreshToken(tokenDoc.user._id);
-        await revokeRefreshToken(tokenDoc, newRefreshToken); // mark old as revoked
+        await revokeRefreshToken(tokenDoc, newRefreshToken); 
         const newAccessToken = createAccessToken(tokenDoc.user._id);
 
         res.json({
@@ -86,6 +86,7 @@ export const refreshToken = async (req: Request, res: Response) => {
         });
     } catch (err) {
         console.log('err in refresh', err)
+        return res.status(500).json({ message: 'Failed to refresh token' });
     }
 };
 

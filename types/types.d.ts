@@ -115,11 +115,14 @@ interface UpcomingWorkout {
 }
 
 interface WorkoutProgram {
-  id: string;
-  title: string;
-  exercises: number;
-  duration: string;
-  image: string;
+  exerciseId: string;
+  name: string;
+  equipments: string[];
+  gifUrl: string;
+  instructions: string[];
+  secondaryMuscles: string[];
+  targetMuscles: string[];
+  bodyParts: string[];
 }
 
 interface ViewTargetModalProps {
@@ -137,4 +140,33 @@ interface TargetProgress {
   target: number | null;
   unit: string;
   gradient: any;
+}
+
+
+type TargetItems = {
+  water: number;
+  calories: number;
+  workoutMinutes: number;
+  steps: number;
+}
+interface HealthState {
+  targetSteps: number | null,
+  targetWater: number | null,
+  targetCalories: number | null,
+  targetWorkoutMinutes: number | null,
+  todaysWater: number | null,
+  todaysCalories: number | null,
+  todaysWorkoutMinutes: number | null,
+  todaysSteps: number | null,
+  fetchHealthData: () => Promise<void>
+  addTarget: (data: any) => Promise<boolean>
+  fetchTarget: () => Promise<TargetItems>
+  fetchTodaySummary: () => Promise<void>;
+  fetchWeeklySummary: () => Promise<any>;
+  updateActivitySummary: (data: any) => Promise<void>;
+}
+
+interface CalendarDaysProps {
+  selectedDate: Date;
+  onDateSelect: (date: Date) => void;
 }

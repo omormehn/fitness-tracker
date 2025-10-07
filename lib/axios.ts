@@ -29,7 +29,6 @@ api.interceptors.response.use(
 
             try {
                 const refreshToken = await AsyncStorage.getItem('refreshToken');
-                console.log('re', refreshToken)
                 if (!refreshToken) {
                     throw new Error(`No refresh token available ${refreshToken}`, );
                 }
@@ -38,7 +37,6 @@ api.interceptors.response.use(
                     `${process.env.EXPO_PUBLIC_SERVER_URI}/api/auth/refresh-token`,
                     { refreshToken }
                 );
-                console.log('dy', data)
                 const { accessToken, refreshToken: newRefreshToken } = data;
 
                 await AsyncStorage.setItem("token", accessToken);

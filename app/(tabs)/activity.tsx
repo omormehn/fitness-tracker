@@ -14,11 +14,13 @@ import healthconnectService from '@/services/healthconnect.service'
 import AddTargetModal from '@/components/AddTargetModal'
 import api from '@/lib/axios'
 import { useHealthStore } from '@/store/useHealthStore'
+import Ionicons from '@expo/vector-icons/Ionicons'
+import { router } from 'expo-router'
 
 
 const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
-  const { addTarget, targetSteps, targetWater, fetchTarget } = useHealthStore()
+  const { addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes, fetchWeeklySummary } = useHealthStore()
 
 
   const [steps, setSteps] = useState<number>();
@@ -27,11 +29,11 @@ const ActivityScreen = () => {
 
   useEffect(() => {
     async function init() {
-      const a = await fetchTarget()
-      console.log('a', a)
+      await fetchTarget()
     }
     init()
-  }, [targetSteps, targetWater])
+  }, [targetSteps, targetWater]);
+
 
   const handleSaveTargets = async (targets: any) => {
     try {
@@ -47,9 +49,12 @@ const ActivityScreen = () => {
     setSteps(steps)
   }
 
+
   useEffect(() => {
     handleSteps()
   }, [steps])
+
+
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -70,8 +75,8 @@ const ActivityScreen = () => {
             <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
               <Glass />
               <View className='flex-col'>
-                <Text style={{ color: Colors.linearText }}>{targetWater || '- -/ - - '}</Text>
-                <Text style={{ color: colors.tintText3 }}>Water Intake(L)</Text>
+                <Text style={{ color: Colors.linearText }}>{targetWater || '- -/ - - '} <Text style={{ fontSize: 10 }}>L</Text></Text>
+                <Text style={{ color: colors.tintText3 }}>Water Intake</Text>
               </View>
             </View>
             <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
@@ -79,6 +84,20 @@ const ActivityScreen = () => {
               <View className='flex-col'>
                 <Text style={{ color: Colors.linearText }}>{targetSteps || '- -/ - -'}</Text>
                 <Text style={{ color: colors.tintText3 }}>Foot Steps</Text>
+              </View>
+            </View>
+            <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
+              <Ionicons name='timer-outline' color={'white'} size={30} />
+              <View className='flex-col'>
+                <Text style={{ color: Colors.linearText }}>{targetWorkoutMinutes || '- -/ - -'}</Text>
+                <Text style={{ color: colors.tintText3 }}>Workout Min</Text>
+              </View>
+            </View>
+            <View style={[styles.targetSubCard, { backgroundColor: colors.background }]}>
+              <MaterialIcons name='local-fire-department' color={'white'} size={30} />
+              <View className='flex-col'>
+                <Text style={{ color: Colors.linearText }}>{targetCalories || '- -/ - -'} <Text style={{ fontSize: 10 }}>kcal</Text></Text>
+                <Text style={{ color: colors.tintText3 }}>Calories</Text>
               </View>
             </View>
           </View>
@@ -122,7 +141,7 @@ const ActivityScreen = () => {
             </TouchableOpacity>
           </View>
           {/* Activity details */}
-          <View style={styles.activityDetailsContainer}>
+          <TouchableOpacity onPress={() => router.push('/(activity)')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
               <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
@@ -131,16 +150,16 @@ const ActivityScreen = () => {
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
-                <Text style={[styles.title, { color: colors.text }]}>Eat snacks</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Sleep Tracker</Text>
                 <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 10 minutes ago</Text>
               </View>
 
               {/* 3rd col */}
               <View style={styles.circle} />
             </View>
-          </View>
+          </TouchableOpacity>
 
-          <View style={styles.activityDetailsContainer}>
+          <TouchableOpacity onPress={() => router.push('/(activity)/waterintake')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
               <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
@@ -149,14 +168,14 @@ const ActivityScreen = () => {
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
-                <Text style={[styles.title, { color: colors.text }]}>Drinking 300ml of water</Text>
+                <Text style={[styles.title, { color: colors.text }]}>Water Intake</Text>
                 <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 3 minutes ago</Text>
               </View>
 
               {/* 3rd col */}
               <View style={styles.circle} />
             </View>
-          </View>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -198,9 +217,12 @@ const styles = StyleSheet.create({
   },
   targetSubCardContainer: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingTop: 20,
+    gap: 10,
+
   },
   targetSubCard: {
     flexDirection: 'row',
@@ -208,6 +230,7 @@ const styles = StyleSheet.create({
     gap: 10,
     padding: 15,
     borderRadius: 15,
+    minWidth: 150,
   },
   activityHeader: {
     flexDirection: "row",

@@ -25,11 +25,13 @@ const { width, height } = Dimensions.get("window");
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
   const { user } = useAuthStore();
-  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories } = useHealthStore()
+  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories, fetchTodaySummary, todaysWater } = useHealthStore()
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [isInitialized, setIsInitialized] = useState(false)
+
+  console.log('tod', todaysWater)
 
   // Activity data states
 
@@ -46,12 +48,11 @@ const HomeScreen = () => {
   const notificationColor = theme === 'dark' ? '#FFFFFF' : '#000000';
 
 
-
-
   // Initialize Health Connect and fetch data
   const fetchHealth = useCallback(async () => {
     await fetchHealthData();
     await fetchTarget();
+    await fetchTodaySummary()
   }, [])
 
   const initializeHealthTracking = useCallback(async () => {
@@ -105,9 +106,6 @@ const HomeScreen = () => {
     return 'Obese';
   };
 
-  const stepProgress = (todaysSteps! / stepGoal) * 100;
-  console.log('st', todaysSteps)
-
   const todayTargets: TargetProgress[] = [
     {
       id: 'steps',
@@ -124,7 +122,7 @@ const HomeScreen = () => {
       icon: 'water',
       iconFamily: 'Ionicons' as const,
       label: 'Water',
-      current: 4,
+      current: todaysWater,
       target: targetWater,
       unit: 'L',
       gradient: gradients.greenLinear,

@@ -10,7 +10,6 @@ interface LineChartProps {
     graphTo: string;
     data?: number[];
     labels?: string[];
-    activeIndex?: number;
     curve?: boolean
     gradientOpacity?: number | undefined
 }

@@ -7,7 +7,7 @@ const router = Router();
 router.post("/add-target", requireAuth, saveTarget);
 router.get("/today-target", requireAuth, getTodayTarget);
 router.get("/target-history", requireAuth, getTargetHistory);
-router.get("/add-activity", requireAuth, upsertActivitySummary);
+router.post("/add-activity", requireAuth, upsertActivitySummary);
 router.get("/daily-activity", requireAuth, getDailySummary);
 router.get("/weekly-activity", requireAuth, getWeeklySummary);
 
