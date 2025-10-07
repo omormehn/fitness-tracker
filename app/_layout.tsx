@@ -71,21 +71,6 @@ export default function RootLayout() {
     }
   }
 
-  async function scheduleSleepAlarm(time: string, message: string) {
-    const date = new Date(time);
-    await Notifications.scheduleNotificationAsync({
-      content: {
-        title: 'Sleep Reminder 😴',
-        body: message,
-        sound: 'default',
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DATE,
-        date
-      },
-    });
-  }
-
   useEffect(() => {
     if (error) throw error;
   }, [error]);

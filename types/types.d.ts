@@ -183,5 +183,14 @@ interface ScheduleItem {
   countdown?: string;
   enabled: boolean;
   sleepHours?: number;
-  date?: Date
+  date?: Date;
+  notificationIds?: string[]; 
+  bedtimeAlarm?: Date;
+  wakeUpTime?: Date;
+}
+interface SleepSchedule {
+    id: string;
+    date: Date;
+    bedTime: string;
+    sleepHours: number;
 }

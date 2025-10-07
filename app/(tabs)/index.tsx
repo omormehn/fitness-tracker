@@ -53,7 +53,7 @@ const HomeScreen = () => {
     if(!user) return;
     await fetchHealthData();
     await fetchTarget();
-    await fetchTodaySummary()
+    await fetchTodaySummary();
   }, [])
 
   const initializeHealthTracking = useCallback(async () => {
@@ -107,7 +107,8 @@ const HomeScreen = () => {
     if (bmi < 30) return 'Overweight';
     return 'Obese';
   };
-
+console.log(todaysSteps, 'steps')
+console.log(todaysCalories, 'cl')
   const todayTargets: TargetProgress[] = [
     {
       id: 'steps',

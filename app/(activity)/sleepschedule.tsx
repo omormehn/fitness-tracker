@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, TextInput, Switch } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, TextInput, Switch, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
@@ -10,13 +10,25 @@ import CustomHeader from '@/components/CustomHeader';
 import CalendarDays from '@/components/CalendarDays';
 import MoonSvg from '@/assets/moon.svg'
 import { Colors } from '@/theme/Colors';
-import { ScheduleItem } from '@/types/types';
+import { ScheduleItem, SleepSchedule } from '@/types/types';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface SleepSchedule {
-    id: string;
-    date: Date;
-    bedTime: string;
-    sleepHours: number;
+
+
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+    }),
+});
+
+export const STORAGE_KEYS = {
+    SCHEDULES: 'sleep_schedules',
+    NOTIFICATION_IDS: 'schedule_notification_ids'
 }
 
 const SleepScheduleScreen = () => {
@@ -35,30 +47,106 @@ const SleepScheduleScreen = () => {
     const [repeatDays, setRepeatDays] = useState(['Mon', 'Tue', 'Wed']);
 
 
-
-
-    const [schedules, setSchedules] = useState<ScheduleItem[]>([
-        {
-            id: '1',
-            type: 'bedtime',
-            bedTime: '09:00pm',
-            countdown: 'in 6hours 22minutes',
-            enabled: true,
-        },
-        {
-            id: '2',
-            type: 'alarm',
-            bedTime: '05:10am',
-            countdown: 'in 14hours 30minutes',
-            enabled: true,
-        },
-    ]);
+    const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    useEffect(() => {
+        loadSchedules();
+        restoreNotifications();
+    }, []);
+
+    useEffect(() => {
+        saveSchedules();
+    }, [schedules]);
+
+    const loadSchedules = async () => {
+        try {
+            const storedSchedules = await AsyncStorage.getItem(STORAGE_KEYS.SCHEDULES);
+            if (storedSchedules) {
+                const parsedSchedules: ScheduleItem[] = JSON.parse(storedSchedules);
+                const schedulesWithDates = parsedSchedules.map((schedule: any) => ({
+                    ...schedule,
+                    bedtimeAlarm: schedule.bedtimeAlarm ? new Date(schedule.bedtimeAlarm) : undefined,
+                    wakeUpTime: schedule.wakeUpTime ? new Date(schedule.wakeUpTime) : undefined
+                }));
+                setSchedules(schedulesWithDates);
+            }
+        } catch (error) {
+            console.error('Error loading schedules:', error);
+        }
+    }
+    const saveSchedules = async () => {
+        try {
+            await AsyncStorage.setItem(STORAGE_KEYS.SCHEDULES, JSON.stringify(schedules));
+        } catch (error) {
+            console.error('Error saving schedules:', error);
+        }
+    };
+
+    const restoreNotifications = async () => {
+        try {
+            // Cancel all existing notifications
+            await Notifications.cancelAllScheduledNotificationsAsync();
+
+            const storedSchedules = await AsyncStorage.getItem(STORAGE_KEYS.SCHEDULES);
+            if (storedSchedules) {
+                const parsedSchedules = JSON.parse(storedSchedules);
+
+                for (const schedule of parsedSchedules) {
+                    if (schedule.enabled && schedule.bedtimeAlarm && schedule.wakeUpTime) {
+                        const bedtimeAlarm = new Date(schedule.bedtimeAlarm);
+                        const wakeUpTime = new Date(schedule.wakeUpTime);
+
+                        if (bedtimeAlarm > new Date()) {
+                            await scheduleBedtimeNotification(bedtimeAlarm);
+                        }
+                        if (wakeUpTime > new Date()) {
+                            await scheduleWakeUpNotification(wakeUpTime);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring notifications:', error);
+        }
+    };
+
+    const scheduleBedtimeNotification = async (bedtimeAlarm: Date) => {
+        return await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "🛏️ Time for Bed!",
+                body: `Your bedtime is set for ${bedtimeAlarm.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                sound: 'default',
+                priority: Notifications.AndroidNotificationPriority.HIGH,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: bedtimeAlarm
+            },
+        });
+    };
+
+    const scheduleWakeUpNotification = async (wakeUpTime: Date) => {
+        return await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "☀️ Good Morning!",
+                body: "It's time to wake up! Hope you slept well.",
+                sound: 'default',
+                priority: Notifications.AndroidNotificationPriority.HIGH,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: wakeUpTime
+            },
+        });
+    };
+
     const toggleDay = (day: any) => {
         setRepeatDays((prev) =>
             prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
         );
     };
+
 
 
     // Generate time slots
@@ -72,61 +160,106 @@ const SleepScheduleScreen = () => {
         return slots;
     };
 
-    const timeSlots = generateTimeSlots();
-
-    const handleDateSelect = (date: Date) => {
-        setSelectedDate(date);
-    };
-
-    const handleWorkoutClick = (workout: SleepSchedule) => {
-        setSelectedWorkout(workout);
-        setDetailModalVisible(true);
-    };
 
     const handleMarkAsDone = () => {
         // Implement mark as done logic
         setDetailModalVisible(false);
     };
+    const addSchedule = async () => {
+        try {
+            // Create bedtime alarm time
+            const bedtimeAlarm = new Date(selectedDate);
+            bedtimeAlarm.setHours(bedtime.getHours());
+            bedtimeAlarm.setMinutes(bedtime.getMinutes());
+            bedtimeAlarm.setSeconds(0);
 
-    const addSchedule = () => {
-        const newSchedule: SleepSchedule = {
-            id: Date.now().toString(), date: selectedDate,
-            bedTime: bedtime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            sleepHours: sleepDuration.hours + sleepDuration.minutes / 60,
-        };
-        // setSchedules([...schedules, newSchedule]);
-        setAddModalVisible(false);
+            // Create wake-up time (bedtime + sleep duration)
+            const wakeUpTime = new Date(bedtimeAlarm);
+            wakeUpTime.setHours(bedtimeAlarm.getHours() + sleepDuration.hours);
+            wakeUpTime.setMinutes(bedtimeAlarm.getMinutes() + sleepDuration.minutes);
+
+            // Schedule bedtime notification
+            const bedtimeNotificationId = await scheduleBedtimeNotification(bedtimeAlarm);
+            console.log('Bedtime notification scheduled with ID:', bedtimeNotificationId);
+
+            // Schedule wake-up notification
+            const wakeUpNotificationId = await scheduleWakeUpNotification(wakeUpTime);
+
+            // Create new schedule item
+            const newSchedule: ScheduleItem = {
+                id: Date.now().toString(),
+                type: 'bedtime',
+                bedTime: bedtime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                countdown: `Bedtime at ${bedtime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                enabled: true,
+                notificationIds: [bedtimeNotificationId, wakeUpNotificationId],
+                bedtimeAlarm: bedtimeAlarm,
+                wakeUpTime: wakeUpTime,
+
+            };
+
+            setSchedules(prev => [...prev, newSchedule]);
+            setAddModalVisible(false);
+
+            setBedtime(new Date());
+            setSleepDuration({ hours: 8, minutes: 30 });
+            setRepeatDays(['Mon', 'Tue', 'Wed']);
+
+
+        } catch (error) {
+            console.error('Error scheduling notifications:', error);
+            Alert.alert('Error', 'Failed to schedule notifications');
+        }
     };
 
-    const getWorkoutsForTimeSlot = (timeSlot: string) => {
-        return schedules.filter(schedule => {
-            const isSameDate = schedule.date?.toDateString() === selectedDate.toDateString();
-            const scheduleTime = schedule.bedTime?.toLowerCase().replace(/\s/g, '');
-            const slotTime = timeSlot.toLowerCase().replace(/\s/g, '');
-            return isSameDate && scheduleTime === slotTime;
-        });
+    // Function to cancel notifications when a schedule is disabled
+    const cancelScheduleNotifications = async (schedule: ScheduleItem) => {
+        if (schedule.notificationIds) {
+            for (const notificationId of schedule.notificationIds) {
+                await Notifications.cancelScheduledNotificationAsync(notificationId);
+            }
+        }
     };
 
-    const handlePrevMonth = () => {
-        const prevMonth = new Date(selectedDate);
-        prevMonth.setMonth(prevMonth.getMonth() - 1);
-        setSelectedDate(prevMonth);
-    };
-
-    const handleNextMonth = () => {
-        const nextMonth = new Date(selectedDate);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        setSelectedDate(nextMonth);
-    };
-
-    const toggleSchedule = (id: string) => {
+    const toggleSchedule = async (id: string) => {
         setSchedules(prev =>
-            prev.map(item =>
-                item.id === id ? { ...item, enabled: !item.enabled } : item
-            )
+            prev.map(item => {
+                if (item.id === id) {
+                    const updatedItem = { ...item, enabled: !item.enabled };
+
+                    // Cancel notifications if disabling
+                    if (!updatedItem.enabled && item.notificationIds) {
+                        cancelScheduleNotifications(item);
+                    }
+
+                    return updatedItem;
+                }
+                return item;
+            })
         );
     };
 
+    // Test notification function
+    const testNotification = async () => {
+        try {
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: "Test Alarm",
+                    body: "This is a test notification from Sleep Schedule",
+                    sound: 'default'
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: new Date(Date.now() + 5000)
+                },
+            });
+            Alert.alert('Test', 'Test notification scheduled for 5 seconds from now!');
+        } catch (error) {
+            console.error('Error scheduling test notification:', error);
+        }
+    };
+
+    console.log('schedules', schedules)
 
     console.log('ss', selectedDate)
     return (
@@ -162,6 +295,11 @@ const SleepScheduleScreen = () => {
             </View>
 
             <View style={styles.section}>
+                {schedules.length === 0 && (
+                    <Text style={[styles.sectionLabel, { color: colors.tintText3 }]}>
+                        No sleep schedules yet. Tap the + button to add one.
+                    </Text>
+                )}
                 {schedules.map((item) => (
                     <View key={item.id} style={[styles.scheduleItem, { backgroundColor: colors.card }]}>
                         <View style={styles.scheduleLeft}>
@@ -180,7 +318,7 @@ const SleepScheduleScreen = () => {
                                     <Text style={[styles.scheduleTime, { color: colors.text }]}>{item.bedTime}</Text>
                                 </View>
                                 <Text style={[styles.countdown, { color: colors.tintText3 }]}>
-                                    {item.countdown}
+                                    {item.countdown}nn{item.sleepHours}
                                 </Text>
                             </View>
                         </View>

@@ -20,9 +20,9 @@ import { router } from 'expo-router'
 
 const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
-  const { addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes, fetchWeeklySummary } = useHealthStore()
+  const { todaysSteps, addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes, fetchWeeklySummary } = useHealthStore()
 
-
+  console.log('ee', todaysSteps)
   const [steps, setSteps] = useState<number>();
   const [modalVisible, setModalVisible] = useState(false);
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Switch, Dimensions } from 'react-native';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import Ionicons from '@expo/vector-icons/Ionicons';
@@ -9,6 +9,8 @@ import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop } from 'react-nati
 import CustomHeader from '@/components/CustomHeader';
 import { ScheduleItem, SleepData } from '@/types/types';
 import { useAuthStore } from '@/store/useAuthStore';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from './sleepschedule';
 
 const { width } = Dimensions.get('window');
 
@@ -16,22 +18,28 @@ const { width } = Dimensions.get('window');
 const SleepTrackerScreen = () => {
   const { colors, gradients, theme } = useTheme();
 
-  const [schedules, setSchedules] = useState<ScheduleItem[]>([
-    {
-      id: '1',
-      type: 'bedtime',
-      bedTime: '09:00pm',
-      countdown: 'in 6hours 22minutes',
-      enabled: true,
-    },
-    {
-      id: '2',
-      type: 'alarm',
-      bedTime: '05:10am',
-      countdown: 'in 14hours 30minutes',
-      enabled: true,
-    },
-  ]);
+  const [schedules, setSchedules] = useState<ScheduleItem[]>();
+
+  useEffect(() => {
+    loadSchedules();
+  }, [])
+
+  const loadSchedules = async () => {
+    try {
+      const storedSchedules = await AsyncStorage.getItem(STORAGE_KEYS.SCHEDULES);
+      if (storedSchedules) {
+        const parsedSchedules: ScheduleItem[] = JSON.parse(storedSchedules);
+        const schedulesWithDates = parsedSchedules.map((schedule: any) => ({
+          ...schedule,
+          bedtimeAlarm: schedule.bedtimeAlarm ? new Date(schedule.bedtimeAlarm) : undefined,
+          wakeUpTime: schedule.wakeUpTime ? new Date(schedule.wakeUpTime) : undefined
+        }));
+        setSchedules(schedulesWithDates);
+      }
+    } catch (error) {
+      console.error('Error loading schedules:', error);
+    }
+  }
 
   const sleepData: SleepData[] = [
     { day: 'Sun', hours: 6.5 },
@@ -49,7 +57,7 @@ const SleepTrackerScreen = () => {
 
   const toggleSchedule = (id: string) => {
     setSchedules(prev =>
-      prev.map(item =>
+      prev?.map(item =>
         item.id === id ? { ...item, enabled: !item.enabled } : item
       )
     );
@@ -192,7 +200,7 @@ const SleepTrackerScreen = () => {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Today Schedule</Text>
 
-          {schedules.map((item) => (
+          {schedules?.map((item) => (
             <View key={item.id} style={[styles.scheduleItem, { backgroundColor: colors.card }]}>
               <View style={styles.scheduleLeft}>
                 <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
@@ -214,18 +222,7 @@ const SleepTrackerScreen = () => {
                   </Text>
                 </View>
               </View>
-
-              <View style={styles.scheduleRight}>
-                <TouchableOpacity>
-                  <MaterialCommunityIcons name="dots-vertical" size={20} color={colors.tintText3} />
-                </TouchableOpacity>
-                <Switch
-                  value={item.enabled}
-                  onValueChange={() => toggleSchedule(item.id)}
-                  trackColor={{ false: colors.tintText3, true: gradients.greenLinear[0] }}
-                  thumbColor={item.enabled ? '#fff' : '#f4f3f4'}
-                />
-              </View>
+              {/* TODO: ADD REMOVE SCHEDULE */}
             </View>
           ))}
         </View>
