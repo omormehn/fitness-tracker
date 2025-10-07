@@ -60,6 +60,7 @@ interface AuthState {
   token: string | null;
   refreshToken: string | null;
   loading: boolean;
+  initializing: boolean;
   initialized: boolean;
   googleSignIn: () => Promise<boolean>;
   login: (data) => Promise<boolean>;
@@ -169,4 +170,18 @@ interface HealthState {
 interface CalendarDaysProps {
   selectedDate: Date;
   onDateSelect: (date: Date) => void;
+}
+interface SleepData {
+  day: string;
+  hours: number;
+}
+
+interface ScheduleItem {
+  id: string;
+  type: 'bedtime' | 'alarm';
+  bedTime: string;
+  countdown?: string;
+  enabled: boolean;
+  sleepHours?: number;
+  date?: Date
 }

@@ -7,21 +7,11 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { router } from 'expo-router';
 import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import CustomHeader from '@/components/CustomHeader';
+import { ScheduleItem, SleepData } from '@/types/types';
+import { useAuthStore } from '@/store/useAuthStore';
 
 const { width } = Dimensions.get('window');
 
-interface SleepData {
-  day: string;
-  hours: number;
-}
-
-interface ScheduleItem {
-  id: string;
-  type: 'bedtime' | 'alarm';
-  time: string;
-  countdown: string;
-  enabled: boolean;
-}
 
 const SleepTrackerScreen = () => {
   const { colors, gradients, theme } = useTheme();
@@ -30,14 +20,14 @@ const SleepTrackerScreen = () => {
     {
       id: '1',
       type: 'bedtime',
-      time: '09:00pm',
+      bedTime: '09:00pm',
       countdown: 'in 6hours 22minutes',
       enabled: true,
     },
     {
       id: '2',
       type: 'alarm',
-      time: '05:10am',
+      bedTime: '05:10am',
       countdown: 'in 14hours 30minutes',
       enabled: true,
     },
@@ -217,7 +207,7 @@ const SleepTrackerScreen = () => {
                     <Text style={[styles.scheduleType, { color: colors.text }]}>
                       {item.type === 'bedtime' ? 'Bedtime' : 'Alarm'}
                     </Text>
-                    <Text style={[styles.scheduleTime, { color: colors.text }]}>{item.time}</Text>
+                    <Text style={[styles.scheduleTime, { color: colors.text }]}>{item.bedTime}</Text>
                   </View>
                   <Text style={[styles.countdown, { color: colors.tintText3 }]}>
                     {item.countdown}

@@ -26,13 +26,12 @@ const ActivityScreen = () => {
   const [steps, setSteps] = useState<number>();
   const [modalVisible, setModalVisible] = useState(false);
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
-
   useEffect(() => {
     async function init() {
-      await fetchTarget()
+      await fetchTarget();
     }
-    init()
-  }, [targetSteps, targetWater]);
+    init();
+  }, []);
 
 
   const handleSaveTargets = async (targets: any) => {
@@ -52,7 +51,7 @@ const ActivityScreen = () => {
 
   useEffect(() => {
     handleSteps()
-  }, [steps])
+  }, [])
 
 
 

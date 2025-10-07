@@ -50,7 +50,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { user, initializeAuthState, hasOnboarded, initialized } = useAuthStore();
+  const { user, initializeAuthState, hasOnboarded, initialized, initializing, token, refreshToken } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
   const navigationState = useRootNavigationState();
@@ -62,7 +62,7 @@ function RootLayoutNav() {
 
 
   useEffect(() => {
-    if (initialized) return;
+    if (initializing) return;
     if (!navigationState?.key) return;
 
     // Only navigate once
@@ -74,20 +74,13 @@ function RootLayoutNav() {
 
     let targetRoute: any = null;
 
-    if (!user) {
-      if (!inAuthGroup) {
-        targetRoute = '/(auth)/login';
-      }
-    } else if (!hasOnboarded) {
-      if (!inOnboardingGroup) {
-        targetRoute = '/(onboarding)';
-      }
+    if (!hasOnboarded) {
+      if (!inOnboardingGroup) targetRoute = '/(onboarding)';
+    } else if (!user || !token || !refreshToken) {
+      if (!inAuthGroup) targetRoute = '/(auth)/login';
     } else {
-      if (!inAppGroup) {
-        targetRoute = '/(tabs)';
-      }
+      if (!inAppGroup) targetRoute = '/(tabs)';
     }
-
     hasNavigated.current = true;
 
     if (targetRoute) {
@@ -103,12 +96,13 @@ function RootLayoutNav() {
       }, 100);
     }
 
-  }, [initialized, navigationState?.key, user, hasOnboarded, segments]);
+  }, [navigationState?.key, user, hasOnboarded, segments]);
+  console.log('ss', hasNavigated.current, navigationState?.key, initializing)
 
 
-  if (initialized || !navigationState?.key || !hasNavigated.current) {
+  if (initializing || !navigationState?.key || !hasNavigated.current) {
     return (
-      <View   
+      <View
         style={{
           flex: 1,
           justifyContent: 'center',
@@ -121,6 +115,7 @@ function RootLayoutNav() {
     );
   }
 
+  console.log('onboard', hasOnboarded)
   return (
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} barStyle="light-content" />

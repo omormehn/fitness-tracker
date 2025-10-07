@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "health-tracker",
+    "name": "Fitness Tracker",
     "slug": "health-tracker",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -63,7 +63,7 @@
       [
         "@react-native-google-signin/google-signin",
         {
-          "iosUrlScheme": "com.googleusercontent.apps.98467727321-hhptat4pkndun9qpq3b53o5j3cajrqr8"
+          "iosUrlScheme": "com.googleusercontent.apps.98467727321-m1iq635u0lrvbmvoq7nlfgm7o9h8hm4c"
         }
       ],
       "react-native-health-connect",

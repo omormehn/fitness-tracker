@@ -2,11 +2,13 @@ import api from "@/lib/axios";
 import healthconnectService from "@/services/healthconnect.service";
 import { HealthState } from "@/types/types";
 import { create } from "zustand";
+import { useAuthStore } from "./useAuthStore";
 
 
 
 
 export const useHealthStore = create<HealthState>((set, get) => ({
+
     targetSteps: null,
     targetWater: null,
     targetCalories: null,
@@ -53,6 +55,8 @@ export const useHealthStore = create<HealthState>((set, get) => ({
         }
     },
     fetchTodaySummary: async () => {
+        const { user } = useAuthStore.getState();
+        if (!user) return;
         try {
             const today = new Date().toISOString().split('T')[0];
             const { data } = await api.get('/health/daily-activity', {
@@ -65,7 +69,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
                 todaysWorkoutMinutes: data.workoutMinutes || 0,
             });
         } catch (error) {
-            console.error('Error fetching summary:', error);
+            console.error('Error fetching daily summary:', error);
         }
     },
     fetchWeeklySummary: async () => {
@@ -73,15 +77,15 @@ export const useHealthStore = create<HealthState>((set, get) => ({
             const { data } = await api.get('/health/weekly-activity');
             return data;
         } catch (error) {
-            console.error('Error fetching summary:', error);
+            console.error('Error fetching weekly summary:', error);
         }
     },
     updateActivitySummary: async (updates) => {
         try {
             const current = get()
             const payload = {
-                water: updates.water ?? current.todaysWater,
-                workoutMinutes: updates.workoutMinutes ?? current.todaysWorkoutMinutes,
+                water: updates.water,
+                workoutMinutes: updates.workoutMinutes,
             };
             const { data } = await api.post('/health/add-activity', payload);
             set({

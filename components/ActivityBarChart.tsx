@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, Dimensions, ColorValue, ActivityIndicator } from 'react-native';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, {
@@ -38,38 +38,38 @@ const ActivityBarChart = () => {
 
     // const maxValue = 100;
     const [weeklyData, setWeeklyData] = useState<any[]>([]);
-
+    const loadWeeklyData = useCallback(async () => {
+        const data = await fetchWeeklySummary();
+        console.log('week', data);
+        setWeeklyData(data);
+    }, [fetchWeeklySummary]);
 
     useEffect(() => {
         loadWeeklyData();
-    }, []);
+    }, [loadWeeklyData]);
 
-    const loadWeeklyData = async () => {
-        const data = await fetchWeeklySummary();
-        console.log('week', data)
-        setWeeklyData(data);
-    };
 
-    const activityData: ChartBarData[] = weeklyData.map((day, index) => ({
+
+    const activityData: ChartBarData[] = weeklyData?.map((day, index) => ({
         day: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }),
         value: day.steps || 0, // or day.calories, day.workoutMinutes,
         gradient: index % 2 === 0 ? gradients.greenLinear : gradients.button,
     }));
 
 
-    if (activityData.length === 0) {
+    if (activityData?.length === 0) {
         return (
             <Text style={{ color: colors.text, textAlign: 'center' }}>No Activity</Text>
         );
     }
 
     // Calculate max for the week
-    const maxValue = Math.max(...activityData.map(d => d.value), 100);
+    const maxValue = Math.max(...activityData?.map(d => d.value), 100);
 
     return (
         <View style={[styles.chartContainer, { backgroundColor: colors.card }]}>
             <View style={styles.barsContainer}>
-                {activityData.map((item, index) => (
+                {activityData?.map((item, index) => (
                     <BarItem
                         key={item.day}
                         day={item.day}

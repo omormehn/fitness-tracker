@@ -64,7 +64,7 @@ export const getTodayTarget = async (req: AuthRequest, res: Response) => {
 // Get history
 export const getTargetHistory = async (req: AuthRequest, res: Response) => {
     try {
-        const userId = req.user.id;
+        const userId = req.user?.id;
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized" });
         }
@@ -94,18 +94,23 @@ export const upsertActivitySummary = async (req: AuthRequest, res: Response) => 
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         const existingSummary = await ActivitySummary.findOne({ userId, date: today });
-
-        let updatedSummary;
+        const w = water === undefined ? undefined : Number(water);
+        const wm = workoutMinutes === undefined ? undefined : Number(workoutMinutes);
+        if ((w !== undefined && (!Number.isFinite(w) || w < 0)) ||
+            (wm !== undefined && (!Number.isFinite(wm) || wm < 0))) {
+            return res.status(400).json({ message: "Invalid values; must be non-negative numbers" });
+        }
+        let updatedSummary: any;
 
         if (existingSummary) {
             updatedSummary = await ActivitySummary.findOneAndUpdate(
                 { userId, date: today },
                 {
                     $set: {
-                        water: water !== undefined ? water + (existingSummary.water || 0) : existingSummary.water,
+                        water: w !== undefined ? w + (existingSummary.water || 0) : existingSummary.water,
                         workoutMinutes:
-                            workoutMinutes !== undefined
-                                ? workoutMinutes + (existingSummary.workoutMinutes || 0)
+                            wm !== undefined
+                                ? wm + (existingSummary.workoutMinutes || 0)
                                 : existingSummary.workoutMinutes,
                     },
                 },
@@ -115,8 +120,8 @@ export const upsertActivitySummary = async (req: AuthRequest, res: Response) => 
             updatedSummary = await ActivitySummary.create({
                 userId,
                 date: today,
-                water: water || 0,
-                workoutMinutes: workoutMinutes || 0,
+                water: w || 0,
+                workoutMinutes: wm || 0,
             });
         }
         res.json(updatedSummary);
@@ -148,6 +153,7 @@ export const getDailySummary = async (req: AuthRequest, res: Response) => {
         const summary = await ActivitySummary.findOne({ userId, date: day });
         res.json(summary || {});
     } catch (err) {
+        console.error('error', err)
         res.status(500).json({ message: "Failed to fetch summary", error: err });
     }
 };

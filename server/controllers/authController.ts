@@ -9,7 +9,6 @@ const clientId = process.env.CLIENT_ID || ''
 const client = new OAuth2Client(clientId);
 
 
-
 export const register = async (req: Request, res: Response) => {
     const { fullName, email, password, phone } = req.body;
     const emailNorm = (email || '').toLowerCase().trim();

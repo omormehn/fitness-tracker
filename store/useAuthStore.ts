@@ -14,6 +14,7 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             refreshToken: null,
+            initializing: false,
             initialized: false,
             loading: false,
             error: { field: '', msg: '' },
@@ -172,16 +173,30 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
             initializeAuthState: async () => {
-                try {
-                    await new Promise(resolve => setTimeout(resolve, 1000));
+                set({ initializing: true, });
+                const token = await AsyncStorage.getItem("token");
+                const refreshToken = await AsyncStorage.getItem("refreshToken");
 
 
 
-                    set({ initialized: false });
-                } catch (error) {
-                    console.error('Error initializing auth state:', error);
-                    set({ initialized: false, });
+                if (!token || !refreshToken) {
+                    set({ initializing: false });
+                    return;
                 }
+
+                // try {
+                //     const res = await api.get('/auth/me', {
+                //         headers: {
+                //             Authorization: `Bearer ${token}`
+                //         }
+                //     });
+                //     set({ user: res.data.user || null, token, refreshToken, });
+                // } catch (err) {
+                //     console.log('err in init', err)
+                //     await AsyncStorage.multiRemove(['token', 'refreshToken']);
+                //     set({ user: null, token: null, refreshToken: null, });
+                // }
+                set({ initializing: false, })
             },
         }),
         {
@@ -196,7 +211,7 @@ export const useAuthStore = create<AuthState>()(
             onRehydrateStorage: () => (state) => {
                 if (state) {
                     state.loading = false;
-                    state.initialized = false;
+                    state.initializing = false;
                 }
             },
         }

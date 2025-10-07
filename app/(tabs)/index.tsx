@@ -24,14 +24,14 @@ const { width, height } = Dimensions.get("window");
 
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
-  const { user } = useAuthStore();
+  const { user, refreshToken, token } = useAuthStore();
   const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories, fetchTodaySummary, todaysWater } = useHealthStore()
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const [isInitialized, setIsInitialized] = useState(false)
+  console.log(refreshToken, 'ref')
 
-  console.log('tod', todaysWater)
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Activity data states
 
@@ -50,6 +50,7 @@ const HomeScreen = () => {
 
   // Initialize Health Connect and fetch data
   const fetchHealth = useCallback(async () => {
+    if(!user) return;
     await fetchHealthData();
     await fetchTarget();
     await fetchTodaySummary()
@@ -99,6 +100,7 @@ const HomeScreen = () => {
     }
 
   };
+
   const getBMIStatus = (bmi: number) => {
     if (bmi < 18.5) return 'Underweight';
     if (bmi < 25) return 'Normal weight';

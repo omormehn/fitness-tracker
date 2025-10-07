@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, TextInput, Switch } from 'react-native';
 import React, { useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -8,13 +8,15 @@ import { router } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomHeader from '@/components/CustomHeader';
 import CalendarDays from '@/components/CalendarDays';
+import MoonSvg from '@/assets/moon.svg'
+import { Colors } from '@/theme/Colors';
+import { ScheduleItem } from '@/types/types';
 
-interface WorkoutSchedule {
+interface SleepSchedule {
     id: string;
-    title: string;
     date: Date;
-    time: string;
-    difficulty?: string;
+    bedTime: string;
+    sleepHours: number;
 }
 
 const SleepScheduleScreen = () => {
@@ -22,7 +24,7 @@ const SleepScheduleScreen = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
-    const [selectedWorkout, setSelectedWorkout] = useState<WorkoutSchedule | null>(null);
+    const [selectedWorkout, setSelectedWorkout] = useState<SleepSchedule | null>(null);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -33,18 +35,23 @@ const SleepScheduleScreen = () => {
     const [repeatDays, setRepeatDays] = useState(['Mon', 'Tue', 'Wed']);
 
 
-    // Add workout form state
-    const [newWorkout, setNewWorkout] = useState({
-        date: new Date(),
-        time: new Date(),
-        workout: 'Upperbody Workout',
-        difficulty: 'Beginner',
-    });
 
-    const [schedules, setSchedules] = useState<WorkoutSchedule[]>([
-        { id: '1', title: 'Ab Workout', date: new Date(2022, 4, 14), time: '7:30am', difficulty: 'Advanced' },
-        { id: '2', title: 'Upperbody Workout', date: new Date(2022, 4, 14), time: '9:00am', difficulty: 'Beginner' },
-        { id: '3', title: 'Lowerbody Workout', date: new Date(2022, 4, 14), time: '3:00pm', difficulty: 'Intermediate' },
+
+    const [schedules, setSchedules] = useState<ScheduleItem[]>([
+        {
+            id: '1',
+            type: 'bedtime',
+            bedTime: '09:00pm',
+            countdown: 'in 6hours 22minutes',
+            enabled: true,
+        },
+        {
+            id: '2',
+            type: 'alarm',
+            bedTime: '05:10am',
+            countdown: 'in 14hours 30minutes',
+            enabled: true,
+        },
     ]);
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const toggleDay = (day: any) => {
@@ -71,7 +78,7 @@ const SleepScheduleScreen = () => {
         setSelectedDate(date);
     };
 
-    const handleWorkoutClick = (workout: WorkoutSchedule) => {
+    const handleWorkoutClick = (workout: SleepSchedule) => {
         setSelectedWorkout(workout);
         setDetailModalVisible(true);
     };
@@ -81,22 +88,20 @@ const SleepScheduleScreen = () => {
         setDetailModalVisible(false);
     };
 
-    const handleSaveWorkout = () => {
-        const newSchedule: WorkoutSchedule = {
-            id: Date.now().toString(),
-            title: newWorkout.workout,
-            date: newWorkout.date,
-            time: newWorkout.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            difficulty: newWorkout.difficulty,
+    const addSchedule = () => {
+        const newSchedule: SleepSchedule = {
+            id: Date.now().toString(), date: selectedDate,
+            bedTime: bedtime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            sleepHours: sleepDuration.hours + sleepDuration.minutes / 60,
         };
-        setSchedules([...schedules, newSchedule]);
+        // setSchedules([...schedules, newSchedule]);
         setAddModalVisible(false);
     };
 
     const getWorkoutsForTimeSlot = (timeSlot: string) => {
         return schedules.filter(schedule => {
-            const isSameDate = schedule.date.toDateString() === selectedDate.toDateString();
-            const scheduleTime = schedule.time.toLowerCase().replace(/\s/g, '');
+            const isSameDate = schedule.date?.toDateString() === selectedDate.toDateString();
+            const scheduleTime = schedule.bedTime?.toLowerCase().replace(/\s/g, '');
             const slotTime = timeSlot.toLowerCase().replace(/\s/g, '');
             return isSameDate && scheduleTime === slotTime;
         });
@@ -114,6 +119,15 @@ const SleepScheduleScreen = () => {
         setSelectedDate(nextMonth);
     };
 
+    const toggleSchedule = (id: string) => {
+        setSchedules(prev =>
+            prev.map(item =>
+                item.id === id ? { ...item, enabled: !item.enabled } : item
+            )
+        );
+    };
+
+
     console.log('ss', selectedDate)
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -121,52 +135,71 @@ const SleepScheduleScreen = () => {
             <CustomHeader title='Sleep Schedule' />
 
             {/* Month Navigation */}
-            <View style={styles.monthNav}>
-                <TouchableOpacity onPress={handlePrevMonth}>
-                    <Ionicons name="chevron-back" size={24} color={colors.tintText3} />
-                </TouchableOpacity>
-                <Text style={[styles.monthText, { color: colors.tintText3 }]}>
-                    {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </Text>
-                <TouchableOpacity onPress={handleNextMonth}>
-                    <Ionicons name="chevron-forward" size={24} color={colors.tintText3} />
-                </TouchableOpacity>
+            <View style={[styles.targetCard, { opacity: 0.7, }, { backgroundColor: colors.card }]}>
+                <View style={{ flexDirection: 'column', gap: 6 }}>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: colors.text }}>Ideal Hours for Sleep</Text>
+                    <Text style={{ fontFamily: 'PoppinsMedium', fontSize: 14, color: Colors.linearText }}>8hrs 30minutes</Text>
+                    <TouchableOpacity onPress={() => { }} >
+                        <LinearGradient
+                            colors={gradients.button}
+                            start={{ x: 1, y: 0 }}
+                            end={{ x: 0, y: 0 }}
+                            style={[styles.checkBtn,]}
+                        >
+                            <Text style={[styles.checkText]}>Check</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+                <View>
+                    <MoonSvg />
+                </View>
             </View>
 
             {/* Calendar Days */}
-            <CalendarDays selectedDate={selectedDate}
-                onDateSelect={setSelectedDate} />
+            <View style={{ marginTop: 20, marginHorizontal: 20, gap: 12 }}>
+                <Text style={{ fontFamily: 'PoppinsSemiBold', fontSize: 16, color: colors.text }}>Your Schedule</Text>
+                <CalendarDays selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+            </View>
 
-            {/* Schedule Timeline */}
-            <ScrollView style={styles.timeline} showsVerticalScrollIndicator={false}>
-                {timeSlots.map((slot, index) => {
-                    const workouts = getWorkoutsForTimeSlot(slot);
-
-                    return (
-                        <View key={index} style={styles.timeSlotContainer}>
-                            <Text style={[styles.timeText, { color: colors.tintText3 }]}>{slot}haldhd</Text>
-                            <View style={styles.slotContent}>
-                                {workouts.map((workout) => (
-                                    <TouchableOpacity
-                                        key={workout.id}
-                                        onPress={() => handleWorkoutClick(workout)}
-                                        style={styles.workoutBubble}
-                                    >
-                                        <LinearGradient
-                                            colors={gradients.button}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 1, y: 1 }}
-                                            style={styles.workoutBubbleGradient}
-                                        >
-                                            <Text style={styles.workoutBubbleText}>d,sdjhdhkjmiuhi;{workout.title}, {workout.time}</Text>
-                                        </LinearGradient>
-                                    </TouchableOpacity>
-                                ))}
+            <View style={styles.section}>
+                {schedules.map((item) => (
+                    <View key={item.id} style={[styles.scheduleItem, { backgroundColor: colors.card }]}>
+                        <View style={styles.scheduleLeft}>
+                            <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
+                                {item.type === 'bedtime' ? (
+                                    <MaterialCommunityIcons name="moon-waning-crescent" size={24} color={gradients.button[0]} />
+                                ) : (
+                                    <MaterialCommunityIcons name="alarm" size={24} color="#FF6B6B" />
+                                )}
+                            </View>
+                            <View>
+                                <View style={styles.scheduleItemHeader}>
+                                    <Text style={[styles.scheduleType, { color: colors.text }]}>
+                                        {item.type === 'bedtime' ? 'Bedtime' : 'Alarm'}
+                                    </Text>
+                                    <Text style={[styles.scheduleTime, { color: colors.text }]}>{item.bedTime}</Text>
+                                </View>
+                                <Text style={[styles.countdown, { color: colors.tintText3 }]}>
+                                    {item.countdown}
+                                </Text>
                             </View>
                         </View>
-                    );
-                })}
-            </ScrollView>
+
+                        <View style={styles.scheduleRight}>
+                            <TouchableOpacity>
+                                <MaterialCommunityIcons name="dots-vertical" size={20} color={colors.tintText3} />
+                            </TouchableOpacity>
+                            <Switch
+                                value={item.enabled}
+                                onValueChange={() => toggleSchedule(item.id)}
+                                trackColor={{ false: colors.tintText3, true: gradients.greenLinear[0] }}
+                                thumbColor={item.enabled ? '#fff' : '#f4f3f4'}
+                            />
+                        </View>
+                    </View>
+                ))}
+            </View>
+
 
             {/* Add Button */}
             <TouchableOpacity
@@ -200,13 +233,13 @@ const SleepScheduleScreen = () => {
                         <View style={[styles.divider, { backgroundColor: colors.tintText3, opacity: 0.2 }]} />
 
                         <Text style={[styles.workoutDetailTitle, { color: colors.text }]}>
-                            {selectedWorkout?.title}
+                            Bedtime
                         </Text>
 
                         <View style={styles.workoutDetailTime}>
                             <Ionicons name="time-outline" size={20} color={colors.tintText3} />
                             <Text style={[styles.workoutDetailTimeText, { color: colors.tintText3 }]}>
-                                Today | {selectedWorkout?.time}
+                                Today | {selectedWorkout?.bedTime}
                             </Text>
                         </View>
 
@@ -373,7 +406,7 @@ const SleepScheduleScreen = () => {
                         </ScrollView>
 
                         {/* Add Button */}
-                        <TouchableOpacity onPress={handleSaveWorkout}>
+                        <TouchableOpacity onPress={addSchedule}>
                             <LinearGradient
                                 colors={gradients.button}
                                 style={styles.saveButton}
@@ -395,67 +428,82 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 50,
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+    targetCard: {
+        flexDirection: "row",
+        marginTop: 25,
+        padding: 20,
+        paddingVertical: 25,
+        borderRadius: 16,
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginHorizontal: 20,
+    },
+    checkBtn: {
+        backgroundColor: "#5e3fff",
+        paddingVertical: 6,
+        borderRadius: 20,
+        alignItems: 'center'
+    },
+    checkText: {
+        color: 'white',
+        fontFamily: "PoppinsRegular",
+        fontSize: 12, marginTop: 2,
+        textAlign: 'center'
+    },
+
+    section: {
+        marginTop: 40,
         paddingHorizontal: 20,
         marginBottom: 20,
     },
-    headerButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 10,
+    sectionTitle: {
+        fontSize: 16,
+        fontFamily: 'PoppinsSemiBold',
+        marginBottom: 16,
+    },
+    scheduleItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        borderRadius: 16,
+        marginBottom: 12,
+    },
+    scheduleLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    iconContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
+        marginRight: 12,
     },
-    headerTitle: {
-        fontSize: 18,
-        fontFamily: 'PoppinsSemiBold',
-    },
-    monthNav: {
+    scheduleItemHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 40,
-        marginBottom: 20,
+        gap: 8,
+        marginBottom: 4,
     },
-    monthText: {
-        fontSize: 16,
+    scheduleType: {
+        fontSize: 14,
+        fontFamily: 'PoppinsMedium',
+    },
+    scheduleTime: {
+        fontSize: 12,
         fontFamily: 'PoppinsRegular',
     },
-    timeline: {
-        flex: 1,
-        paddingHorizontal: 20,
+    countdown: {
+        fontSize: 12,
+        fontFamily: 'PoppinsRegular',
     },
-    timeSlotContainer: {
+    scheduleRight: {
         flexDirection: 'row',
-        marginBottom: 20,
-        minHeight: 40,
-    },
-    timeText: {
-        width: 80,
-        fontSize: 12,
-        fontFamily: 'PoppinsRegular',
-        paddingTop: 8,
-    },
-    slotContent: {
-        flex: 1,
-        marginLeft: 20,
-    },
-    workoutBubble: {
-        marginBottom: 8,
-        borderRadius: 16,
-        overflow: 'hidden',
-    },
-    workoutBubbleGradient: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    workoutBubbleText: {
-        color: '#fff',
-        fontSize: 12,
-        fontFamily: 'PoppinsRegular',
+        alignItems: 'center',
+        gap: 12,
     },
     addButton: {
         position: 'absolute',

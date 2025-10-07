@@ -60,7 +60,8 @@ const WorkoutScheduleScreen = () => {
     for (let hour = 6; hour <= 20; hour++) {
       const period = hour >= 12 ? 'PM' : 'AM';
       const displayHour = hour > 12 ? hour - 12 : hour;
-      slots.push(`${displayHour.toString().padStart(2, '0')}:00 ${period}`);
+      slots.push(`${displayHour}:00 ${period}`);
+
     }
     return slots;
   };
@@ -127,11 +128,11 @@ const WorkoutScheduleScreen = () => {
           showsHorizontalScrollIndicator={false}
           style={styles.calendarScroll}
         >
-          {calendarDays.map((date, index) => {
+          {calendarDays.map((date) => {
             const isSelected = date.toDateString() === selectedDate.toDateString();
             return (
               <TouchableOpacity
-                key={index}
+                key={date.toISOString()}
                 onPress={() => handleDateSelect(date)}
                 style={[
                   styles.dayCard,
@@ -171,12 +172,12 @@ const WorkoutScheduleScreen = () => {
 
       {/* Schedule Timeline */}
       <ScrollView style={styles.timeline} showsVerticalScrollIndicator={false}>
-        {timeSlots.map((slot, index) => {
+        {timeSlots.map((slot) => {
           const workouts = getWorkoutsForTimeSlot(slot);
 
           return (
-            <View key={index} style={styles.timeSlotContainer}>
-              <Text style={[styles.timeText, { color: colors.tintText3 }]}>{slot}haldhd</Text>
+            <View key={slot} style={styles.timeSlotContainer}>
+              <Text style={[styles.timeText, { color: colors.tintText3 }]}>{slot}</Text>
               <View style={styles.slotContent}>
                 {workouts.map((workout) => (
                   <TouchableOpacity
@@ -190,7 +191,7 @@ const WorkoutScheduleScreen = () => {
                       end={{ x: 1, y: 1 }}
                       style={styles.workoutBubbleGradient}
                     >
-                      <Text style={styles.workoutBubbleText}>d,sdjhdhkjmiuhi;{workout.title}, {workout.time}</Text>
+                      <Text style={styles.workoutBubbleText}>{`${workout.title}, ${workout.time}`}</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 ))}

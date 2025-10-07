@@ -106,7 +106,7 @@ const WorkoutDetailScreen = () => {
           <View style={styles.heroPlaceholder}>
             {exercise ?
               (
-                <Image source={{ uri: exercise?.gifUrl }} width={250} height={250} style={{ zIndex: 300 }} />) :
+                <Image source={{ uri: exercise?.gifUrl }} style={{ width: 250, height: 250, zIndex: 300 }} />) :
               (
                 <MaterialCommunityIcons name="human-handsup" size={120} color="rgba(255,255,255,0.3)" />
               )}
@@ -121,7 +121,9 @@ const WorkoutDetailScreen = () => {
         <View style={styles.content}>
           {/* Title & Stats */}
           <Text style={[styles.title, { color: colors.text }]}>
-            {exercise?.name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+            {exercise?.name
+              ? exercise.name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+              : ''}
           </Text>
 
           <Text style={[styles.subtitle, { color: colors.tintText3 }]}>
