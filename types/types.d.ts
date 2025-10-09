@@ -60,7 +60,6 @@ interface AuthState {
   token: string | null;
   refreshToken: string | null;
   loading: boolean;
-  initializing: boolean;
   initialized: boolean;
   googleSignIn: () => Promise<boolean>;
   login: (data) => Promise<boolean>;
