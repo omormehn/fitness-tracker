@@ -181,7 +181,7 @@ const WorkoutDetailScreen = () => {
           </View>
 
           {/* Custom Repetitions */}
-          <View style={styles.section}>
+          {/* <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Custom Repetitions</Text>
               <View style={styles.caloriesBadge}>
@@ -211,7 +211,7 @@ const WorkoutDetailScreen = () => {
                 </View>
               </View>
             ))}
-          </View>
+          </View> */}
 
           {/* Muscle Groups */}
           <View style={styles.section}>

@@ -106,6 +106,8 @@ interface WorkoutData {
   isActive?: boolean;
 }
 
+
+
 interface UpcomingWorkout {
   id: string;
   title: string;
@@ -192,4 +194,20 @@ interface SleepSchedule {
     date: Date;
     bedTime: string;
     sleepHours: number;
+}
+
+
+
+interface WorkoutScheduleItem {
+  id: string;
+  workoutType: string;
+  difficulty: string;
+  date: Date;
+  time: string;
+  workoutTime: Date;
+  duration: number;
+  enabled: boolean;
+  notificationId?: string;
+  repeatDays?: string[];
+  exerciseData?: WorkoutProgram;
 }

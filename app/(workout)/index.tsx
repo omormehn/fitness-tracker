@@ -3,12 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import CustomHeader from '@/components/CustomHeader';
 import { LinearGradient } from 'expo-linear-gradient';
-import { UpcomingWorkout, WorkoutData, WorkoutProgram } from '@/types/types';
+import { ScheduleItem, UpcomingWorkout, WorkoutData, WorkoutProgram, WorkoutScheduleItem } from '@/types/types';
 import LineChartComponent from '@/components/LineChart';
 import LinearGradientComponent from '@/components/linearGradient';
 import { Colors } from '@/theme/Colors';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from '../(activity)/sleepschedule';
+import { WORKOUT_STORAGE_KEYS } from './workoutschedule';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 const { width } = Dimensions.get('window');
 
@@ -36,6 +40,30 @@ const WorkoutTrackerScreen = () => {
     }, [])
 
 
+    const [schedules, setSchedules] = useState<WorkoutScheduleItem[]>();
+
+    useEffect(() => {
+        loadSchedules();
+    }, [])
+
+    const loadSchedules = async () => {
+        try {
+            const storedSchedules = await AsyncStorage.getItem(WORKOUT_STORAGE_KEYS.SCHEDULES);
+            if (storedSchedules) {
+                const parsedSchedules: WorkoutScheduleItem[] = JSON.parse(storedSchedules);
+                const schedulesWithDates = parsedSchedules.map((schedule: any) => ({
+                    ...schedule,
+                    date: new Date(schedule.date),
+                    workoutTime: new Date(schedule.workoutTime)
+                }));
+                setSchedules(schedulesWithDates);
+            }
+        } catch (error) {
+            console.error('Error loading schedules:', error);
+        }
+    }
+
+
     const [upcomingWorkouts, setUpcomingWorkouts] = useState<UpcomingWorkout[]>([
         { id: '1', title: 'Fullbody Workout', time: 'Today, 03:00pm', icon: '💪', enabled: true },
         { id: '2', title: 'Upperbody Workout', time: 'June 05, 02:00pm', icon: '🏋️', enabled: false },
@@ -61,13 +89,6 @@ const WorkoutTrackerScreen = () => {
     }
 
 
-    const toggleWorkout = (id: string) => {
-        setUpcomingWorkouts(prev =>
-            prev.map(workout =>
-                workout.id === id ? { ...workout, enabled: !workout.enabled } : workout
-            )
-        );
-    };
 
     const maxValue = Math.max(...workoutData.map(d => d.value));
     const chartHeight = 180;
@@ -147,7 +168,7 @@ const WorkoutTrackerScreen = () => {
                     </View>
 
                     {/* Upcoming Workout */}
-                    {/* <View style={styles.section}>
+                    <View style={styles.section}>
 
                         <View style={styles.sectionHeader}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
@@ -160,33 +181,28 @@ const WorkoutTrackerScreen = () => {
                             </TouchableOpacity>
                         </View>
 
-                        {upcomingWorkouts.map((workout) => (
+                        {schedules?.map((workout) => (
                             <View
                                 key={workout.id}
                                 style={[styles.workoutItem, { backgroundColor: colors.card }]}
                             >
                                 <View style={styles.workoutInfo}>
                                     <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
-                                        <Text style={styles.workoutIcon}>{workout.icon}</Text>
+                                        <MaterialCommunityIcons name="dumbbell" size={24} color={gradients.button[0]} />
                                     </View>
                                     <View>
                                         <Text style={[styles.workoutTitle, { color: colors.text }]}>
-                                            {workout.title}
+                                            {workout.workoutType}
                                         </Text>
                                         <Text style={[styles.workoutTime, { color: colors.tintText3 }]}>
                                             {workout.time}
                                         </Text>
                                     </View>
                                 </View>
-                                <Switch
-                                    value={workout.enabled}
-                                    onValueChange={() => toggleWorkout(workout.id)}
-                                    trackColor={{ false: colors.tintText3, true: gradients.greenLinear[0] }}
-                                    thumbColor={workout.enabled ? '#fff' : '#f4f3f4'}
-                                />
+
                             </View>
                         ))}
-                    </View> */}
+                    </View>
 
                     {/* What Do You Want to Train */}
                     <View style={styles.section}>
