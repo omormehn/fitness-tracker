@@ -193,7 +193,7 @@ class HealthConnectService {
 
             const steps = stepsRecords.reduce((sum, r) => sum + (r.count || 0), 0);
             const distance = distanceRecords.reduce((sum, r) => sum + (r.distance?.inMeters || 0), 0);
-            const calories = caloriesRecords.reduce((sum, r) => sum + (r.energy?.inCalories || 0), 0);
+            const calories = caloriesRecords.reduce((sum, r) => sum + (r.energy?.inKilocalories || 0), 0);
 
             // Calculate active minutes based on steps (rough estimate)
             const activeMinutes = Math.floor(steps / 100); // ~100 steps per minute
