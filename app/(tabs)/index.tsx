@@ -59,7 +59,7 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const initialize = async () => {
-      if (!user) return; 
+      if (!user) return;
 
       if (Platform.OS === 'android') {
         const initialized = await healthconnectService.initialize();
@@ -223,63 +223,35 @@ const HomeScreen = () => {
         <View style={{ margin: 20 }}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Activity Status</Text>
 
-          <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.heartRate, { color: colors.text }]}>Heart Rate</Text>
-            <Text style={[styles.heartRateValue, theme === 'dark' ? { color: '#C050F6' } : { color: '#C150F6' }]}>78 BPM</Text>
-            <LinearGradient
-              colors={['#983BCB', '#4023D7']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.timeAgo}
-            >
-              <Text style={styles.timeAgoText}>3 mins ago</Text>
-            </LinearGradient>
-
-            {/* Chart */}
-            <LineChartComponent theme={theme} graphFrom={lineChartBg} graphTo={lineChartBg} width={width * 0.80} />
-          </View>
         </View>
 
         {/* Water & Sleep */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
             <Text style={[styles.statTitle, { color: colors.text }]}>Water Intake</Text>
-            <Text style={styles.statWaterValue}>4 Liters</Text>
-            <Text style={styles.statSub}>Real-time updates</Text>
+            <Text style={styles.statWaterValue}>{todaysWater || 0} Liters</Text>
+            <Text style={styles.statSub}></Text>
           </View>
           <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
-            <Text style={[styles.statTitle, { color: colors.text }]}>Sleep</Text>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Steps</Text>
+            <Text style={styles.statWaterValue}>{todaysSteps || 0}</Text>
+            <Text style={styles.statSub}></Text>
+          </View>
+          <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Calories</Text>
+            <Text style={styles.statWaterValue}>{todaysCalories || 0}</Text>
+            <Text style={styles.statSub}></Text>
+          </View>
+          <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Sleep (Avg)</Text>
             <Text style={styles.statSleepValue}>9h 20m</Text>
             <View className="justify-center items-center">
               <ImageComponent />
             </View>
           </View>
-        </View>
+        </View>       
 
-        {/* Workout */}
-        <View style={{ margin: 20 }}>
-          <View style={styles.workoutHeader}>
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Workout Progress</Text>
-            <TouchableOpacity >
-              {/* Todo: add drop down for filter */}
-              <LinearGradient
-                colors={gradients.onboarding}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.checkBtn, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}
-              >
-                <Text style={[styles.checkText, { color: colors.text }]}>Weekly</Text>
-                <MaterialIcons size={23} name="keyboard-arrow-down" />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.workoutGraph}>
-            <LineChartComponent theme={theme} graphFrom={graphBg} graphTo={graphBg} />
-          </View>
-        </View>
-
-
-        {/* Latest Workout */}
+        {/* Latest Workouts */}
         <View style={{ margin: 20 }}>
           <View style={styles.workoutHeader}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Latest Workout</Text>
@@ -349,7 +321,9 @@ const styles = StyleSheet.create({
   timeAgoText: { textAlign: 'center', fontSize: 12, color: '#FFFFFF' },
 
 
-  statsRow: { flexDirection: "row", justifyContent: "space-between", marginHorizontal: 15, marginBottom: 20, gap: 0 },
+  statsRow: {
+    flexDirection: 'column', marginHorizontal: 15, marginBottom: 20, gap: 0
+  },
   statCard: {
     flex: 1, margin: 5, padding: 15, borderRadius: 16, backgroundColor: "#2a2940", shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },
