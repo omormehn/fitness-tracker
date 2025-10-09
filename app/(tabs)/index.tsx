@@ -1,6 +1,6 @@
 // HomeScreen.js
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable, Platform, ToastAndroid } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useTheme } from "@/context/ThemeContext";
@@ -16,7 +16,8 @@ import healthconnectService from "@/services/healthconnect.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useHealthStore } from "@/store/useHealthStore";
 import ViewTargetModal from "@/components/ViewTargetModal";
-import { TargetProgress } from "@/types/types";
+import { TargetProgress, WorkoutProgram } from "@/types/types";
+import axios from "axios";
 
 
 
@@ -37,6 +38,8 @@ const HomeScreen = () => {
   const [stepGoal] = useState(10000); // Default goal, would be customized later
   const [bmi, setBmi] = useState<number>();
   const [targetModalVisible, setTargetModalVisible] = useState(false);
+  const [exercises, setExercises] = useState<WorkoutProgram[]>([]);
+  const [loadingExercises, setLoadingExercises] = useState(false);
 
   const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
@@ -73,6 +76,8 @@ const HomeScreen = () => {
             await fetchTodaySummary();
           }
         }
+      } else {
+        ToastAndroid.show('Health Connect is not available on this device.', ToastAndroid.LONG);
       }
 
       setLoading(false);
@@ -117,8 +122,40 @@ const HomeScreen = () => {
     if (bmi < 30) return 'Overweight';
     return 'Obese';
   };
-  console.log(todaysSteps, 'steps')
-  console.log(todaysCalories, 'cl')
+
+  function estimateDuration(instructions: string[], sets: number = 3, reps: number = 12): number {
+    const avgStepTime = 5;
+    const timePerRep = instructions.length * avgStepTime;
+    const totalTime = timePerRep * reps * sets;
+
+
+    return Math.ceil(totalTime / 60);
+  }
+  // Fetch random exercises
+  const fetchRandomExercises = async () => {
+    setLoadingExercises(true);
+    const options = { method: 'GET', url: 'https://v1.exercisedb.dev/api/v1/exercises', params: { limit: 10, offset: 20 } };
+
+    try {
+
+      const { data } = await axios.request(options);
+
+      const { data: allExercises } = data;
+      const shuffled = allExercises.sort(() => 0.5 - Math.random());
+      const randomExercises = shuffled.slice(0, 8);
+
+      setExercises(randomExercises);
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+    } finally {
+      setLoadingExercises(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRandomExercises();
+  }, []);
+
   const todayTargets: TargetProgress[] = [
     {
       id: 'steps',
@@ -161,6 +198,16 @@ const HomeScreen = () => {
       gradient: ['#FFA726', '#FB8C00'],
     },
   ];
+
+  const routeToDetail = (id: string) => {
+    if (!id) return;
+    router.push({
+      pathname: '/[id]',
+      params: {
+        id
+      }
+    })
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -249,7 +296,7 @@ const HomeScreen = () => {
               <ImageComponent />
             </View>
           </View>
-        </View>       
+        </View>
 
         {/* Latest Workouts */}
         <View style={{ margin: 20 }}>
@@ -272,13 +319,19 @@ const HomeScreen = () => {
           </View>
 
           <View style={styles.workoutCardContainer}>
-            {workouts.map((workout, index) => (
-              <WorkoutCard
-                key={workout.title + index}
-                title={workout.title}
-                calories={workout.calories}
-                time={workout.time} />
-            ))}
+            {exercises.map((workout, index) => {
+              const duration = estimateDuration(workout.instructions);
+              const id = workout.exerciseId
+              return (
+                <WorkoutCard
+                  key={workout.exerciseId}
+                  title={workout.name}
+                  gif={workout.gifUrl}
+                  onpress={() => routeToDetail(id)}
+                  time={duration} />
+              )
+
+            })}
           </View>
         </View>
       </ScrollView >

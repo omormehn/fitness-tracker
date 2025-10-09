@@ -129,8 +129,9 @@ const ActivityScreen = () => {
           <TouchableOpacity onPress={() => router.push('/(activity)')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
-              <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
+              <LinearGradientComponent gradient={gradients.card} style={{ padding: 15, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
+                <Text style={{ fontSize: 25 }}>🛌</Text>
               </LinearGradientComponent>
 
               {/* 2nd col */}
@@ -147,9 +148,11 @@ const ActivityScreen = () => {
           <TouchableOpacity onPress={() => router.push('/(activity)/waterintake')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
-              <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
+              <LinearGradientComponent gradient={gradients.card} style={{ padding: 15, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
+                <Text style={{ fontSize: 25 }}>💧</Text>
               </LinearGradientComponent>
+
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
@@ -165,9 +168,11 @@ const ActivityScreen = () => {
           <TouchableOpacity onPress={() => router.push('/(workout)')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
-              <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
+              <LinearGradientComponent gradient={gradients.card} style={{ padding: 15, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
+                <Text style={{ fontSize: 25 }}>🦾</Text>
               </LinearGradientComponent>
+
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>

@@ -25,18 +25,7 @@ const ActivityBarChart = () => {
     const stepsProgress = (todaysSteps! / (targetSteps || 1)) * 100;
     const waterProgress = (todaysWater! / (targetWater || 1)) * 100;
 
-    // //Mock data
-    // const activityData: ChartBarData[] = [
-    //     { day: 'Sun', value: stepsProgress, gradient: gradients.greenLinear },
-    //     { day: 'Mon', value: 85, gradient: gradients.button },
-    //     { day: 'Tue', value: 45, gradient: gradients.greenLinear },
-    //     { day: 'Wed', value: 75, gradient: gradients.button },
-    //     { day: 'Thu', value: 95, gradient: gradients.greenLinear },
-    //     { day: 'Fri', value: 50, gradient: gradients.button },
-    //     { day: 'Sat', value: 80, gradient: gradients.greenLinear },
-    // ];
-
-    // const maxValue = 100;
+ console.log('pp, ' ,stepsProgress, waterProgress);
     const [weeklyData, setWeeklyData] = useState<any[]>([]);
     const loadWeeklyData = useCallback(async () => {
         const data = await fetchWeeklySummary();
@@ -72,7 +61,7 @@ const ActivityBarChart = () => {
                     <BarItem
                         key={item.day}
                         day={item.day}
-                        value={item.value}
+                        value={stepsProgress}
                         maxValue={maxValue}
                         gradient={item.gradient}
                         delay={index * 100}
