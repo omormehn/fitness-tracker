@@ -124,20 +124,6 @@ const ActivityScreen = () => {
         <View style={{ marginTop: 20, paddingHorizontal: 30 }}>
           <View style={styles.activityHeader}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Latest Activity</Text>
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="See more activity"
-              hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
-              onPress={() => {
-                // TODO: navigate to activity history
-              }}
-            >
-              <View
-                style={[{ flexDirection: 'row', alignItems: 'center', gap: 4 }]}
-              >
-                <Text style={{ fontFamily: 'PoppinsMedium', fontSize: 12, color: colors.tintText3 }}>See more</Text>
-              </View>
-            </TouchableOpacity>
           </View>
           {/* Activity details */}
           <TouchableOpacity onPress={() => router.push('/(activity)')} style={styles.activityDetailsContainer}>
@@ -150,7 +136,7 @@ const ActivityScreen = () => {
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
                 <Text style={[styles.title, { color: colors.text }]}>Sleep Tracker</Text>
-                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 10 minutes ago</Text>
+                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>Monitor sleep activity 😴</Text>
               </View>
 
               {/* 3rd col */}
@@ -168,7 +154,25 @@ const ActivityScreen = () => {
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
                 <Text style={[styles.title, { color: colors.text }]}>Water Intake</Text>
-                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 3 minutes ago</Text>
+                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>View water intake 💦 </Text>
+              </View>
+
+              {/* 3rd col */}
+              <View style={styles.circle} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/(workout)')} style={styles.activityDetailsContainer}>
+            <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
+              {/* First col */}
+              <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
+                {/* TODO: Add your card content here */}
+              </LinearGradientComponent>
+
+              {/* 2nd col */}
+              <View style={styles.activityDetailsContainer}>
+                <Text style={[styles.title, { color: colors.text }]}>Workout Tracker</Text>
+                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>Track your workout💪</Text>
               </View>
 
               {/* 3rd col */}

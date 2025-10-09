@@ -29,8 +29,6 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  console.log(refreshToken, 'ref')
-
   const [isInitialized, setIsInitialized] = useState(false)
 
   // Activity data states
@@ -50,30 +48,42 @@ const HomeScreen = () => {
 
   // Initialize Health Connect and fetch data
   const fetchHealth = useCallback(async () => {
-    if(!user) return;
+    if (!user) return;
+    console.log('fetching health data...');
     await fetchHealthData();
     await fetchTarget();
     await fetchTodaySummary();
-  }, [])
-
-  const initializeHealthTracking = useCallback(async () => {
-    if (Platform.OS === 'android') {
-      const initialized = await healthconnectService.initialize();
-      if (initialized) {
-        setIsInitialized(true)
-        const hasPermissions = await healthconnectService.requestPermissions();
-        if (hasPermissions) {
-          await fetchHealth();
-        }
-      }
-    }
-    setLoading(false);
-  }, [fetchHealth])
+    const { steps, calories } = await healthconnectService.getTodayActivity();
+    console.log(steps, calories, 'steps and cal')
+  }, [fetchHealthData, fetchTarget, fetchTodaySummary, user]);
 
   useEffect(() => {
-    void initializeHealthTracking();
+    const initialize = async () => {
+      if (!user) return; 
+
+      if (Platform.OS === 'android') {
+        const initialized = await healthconnectService.initialize();
+        if (initialized) {
+          setIsInitialized(true);
+          const hasPermissions = await healthconnectService.requestPermissions();
+          if (hasPermissions) {
+            console.log('Fetching health data...');
+            await fetchHealthData();
+            await fetchTarget();
+            await fetchTodaySummary();
+          }
+        }
+      }
+
+      setLoading(false);
+    };
+
+    initialize();
+  }, [user]);
+
+  useEffect(() => {
     calculateBMI();
-  }, [initializeHealthTracking, user]);
+  }, [user]);
 
   useEffect(() => {
     if (user?.weight && user?.height) {
@@ -107,8 +117,8 @@ const HomeScreen = () => {
     if (bmi < 30) return 'Overweight';
     return 'Obese';
   };
-console.log(todaysSteps, 'steps')
-console.log(todaysCalories, 'cl')
+  console.log(todaysSteps, 'steps')
+  console.log(todaysCalories, 'cl')
   const todayTargets: TargetProgress[] = [
     {
       id: 'steps',

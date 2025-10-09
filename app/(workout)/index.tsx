@@ -147,7 +147,7 @@ const WorkoutTrackerScreen = () => {
                     </View>
 
                     {/* Upcoming Workout */}
-                    <View style={styles.section}>
+                    {/* <View style={styles.section}>
 
                         <View style={styles.sectionHeader}>
                             <Text style={[styles.sectionTitle, { color: colors.text }]}>
@@ -186,7 +186,7 @@ const WorkoutTrackerScreen = () => {
                                 />
                             </View>
                         ))}
-                    </View>
+                    </View> */}
 
                     {/* What Do You Want to Train */}
                     <View style={styles.section}>
