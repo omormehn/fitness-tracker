@@ -119,10 +119,8 @@ function RootLayoutNav() {
 
     setTimeout(() => {
       router.replace(targetRoute as any);
-      setTimeout(() => {
-        SplashScreen.hideAsync();
-      }, 100);
-    }, 50);
+      SplashScreen.hideAsync();
+    }, 100);
 
   }, [navigationState?.key, user, hasOnboarded, initialized]);
 

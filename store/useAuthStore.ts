@@ -6,6 +6,7 @@ import { AuthState } from '@/types/types';
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
 import { ToastAndroid } from 'react-native';
 import { router } from 'expo-router';
+import { TokenService } from '@/lib/tokenService';
 
 export const useAuthStore = create<AuthState>()(
     persist(
@@ -28,13 +29,12 @@ export const useAuthStore = create<AuthState>()(
                     const res = await api.post("/auth/login", data);
                     const { refreshToken, accessToken, user } = res.data;
 
-                    await AsyncStorage.setItem("token", accessToken);
-                    await AsyncStorage.setItem("refreshToken", refreshToken);
+                    await TokenService.setTokens(accessToken, refreshToken);
 
                     set({
                         user: user || null,
                         token: accessToken,
-                        refreshToken: refreshToken
+                        refreshToken
                     });
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -59,13 +59,12 @@ export const useAuthStore = create<AuthState>()(
                     const res = await api.post("/auth/register", data);
                     const { refreshToken, accessToken, user } = res.data;
 
-                    await AsyncStorage.setItem("token", accessToken);
-                    await AsyncStorage.setItem("refreshToken", refreshToken);
+                    await TokenService.setTokens(accessToken, refreshToken);
 
                     set({
                         user: user || null,
                         token: accessToken,
-                        refreshToken: refreshToken
+                        refreshToken
                     });
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -118,13 +117,12 @@ export const useAuthStore = create<AuthState>()(
 
                         const { user, accessToken, refreshToken } = serverResponse.data;
 
-                        await AsyncStorage.setItem("token", accessToken);
-                        await AsyncStorage.setItem("refreshToken", refreshToken);
+                        await TokenService.setTokens(accessToken, refreshToken);
 
                         set({
                             user,
                             token: accessToken,
-                            refreshToken: refreshToken,
+                            refreshToken,
                             error: { field: null, msg: null }
                         });
 
@@ -168,6 +166,7 @@ export const useAuthStore = create<AuthState>()(
                                 );
                                 break;
                             default:
+                                console.error(error);  
                                 ToastAndroid.showWithGravityAndOffset(
                                     'Network Error, Please try again',
                                     ToastAndroid.LONG,
@@ -198,14 +197,16 @@ export const useAuthStore = create<AuthState>()(
 
             initializeAuthState: async () => {
                 try {
-                    const token = await AsyncStorage.getItem('token');
-                    const refreshToken = await AsyncStorage.getItem('refreshToken');
+                    const [refreshToken, token] = await Promise.all([
+                        AsyncStorage.getItem('refreshToken'),
+                        AsyncStorage.getItem('token')
+                    ])
 
                     if (token) {
                         api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
                     }
 
-                    set({ initialized: true });
+                    set({ refreshToken, token, initialized: true, });
                 } catch (error) {
                     console.error('Error initializing auth state:', error);
                     set({ initialized: true });

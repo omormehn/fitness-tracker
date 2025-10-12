@@ -62,7 +62,8 @@ const HomeScreen = () => {
 
   useEffect(() => {
     const initialize = async () => {
-      if (!user) return;
+      const rtk = await AsyncStorage.getItem('refreshToken');
+      if (!user || !rtk) return;
 
       if (Platform.OS === 'android') {
         const initialized = await healthconnectService.initialize();
