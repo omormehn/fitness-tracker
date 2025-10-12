@@ -25,7 +25,7 @@ const ActivityBarChart = () => {
     const stepsProgress = (todaysSteps! / (targetSteps || 1)) * 100;
     const waterProgress = (todaysWater! / (targetWater || 1)) * 100;
 
- console.log('pp, ' ,stepsProgress, waterProgress);
+    console.log('pp, ', stepsProgress, waterProgress);
     const [weeklyData, setWeeklyData] = useState<any[]>([]);
     const loadWeeklyData = useCallback(async () => {
         const data = await fetchWeeklySummary();
@@ -52,7 +52,11 @@ const ActivityBarChart = () => {
     }
 
     // Calculate max for the week
-    const maxValue = Math.max(...activityData?.map(d => d.value), 100);
+    const values = activityData && activityData.length > 0
+        ? activityData.map(d => d.value)
+        : [0];
+
+    const maxValue = Math.max(...values, 100);
 
     return (
         <View style={[styles.chartContainer, { backgroundColor: colors.card }]}>
