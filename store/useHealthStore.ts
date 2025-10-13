@@ -2,11 +2,13 @@ import api from "@/lib/axios";
 import healthconnectService from "@/services/healthconnect.service";
 import { HealthState } from "@/types/types";
 import { create } from "zustand";
+import { useAuthStore } from "./useAuthStore";
 
 
 
 
 export const useHealthStore = create<HealthState>((set, get) => ({
+
     targetSteps: null,
     targetWater: null,
     targetCalories: null,
@@ -42,7 +44,7 @@ export const useHealthStore = create<HealthState>((set, get) => ({
             // Fetch today's activity data
             const { steps, calories } = await healthconnectService.getTodayActivity();
             set({ todaysSteps: steps, todaysCalories: calories, })
-
+            console.log(steps, calories, 'steps and cal')
             // Fetch heart rate
             const hrData = await healthconnectService.getHeartRate();
             if (hrData) {
@@ -53,19 +55,19 @@ export const useHealthStore = create<HealthState>((set, get) => ({
         }
     },
     fetchTodaySummary: async () => {
+        const { user } = useAuthStore.getState();
+        if (!user) return;
         try {
             const today = new Date().toISOString().split('T')[0];
             const { data } = await api.get('/health/daily-activity', {
                 params: { date: today }
             });
             set({
-                todaysSteps: data.steps || 0,
                 todaysWater: data.water || 0,
-                todaysCalories: data.calories || 0,
                 todaysWorkoutMinutes: data.workoutMinutes || 0,
             });
         } catch (error) {
-            console.error('Error fetching summary:', error);
+            console.error('Error fetching daily summary:', error);
         }
     },
     fetchWeeklySummary: async () => {
@@ -73,15 +75,15 @@ export const useHealthStore = create<HealthState>((set, get) => ({
             const { data } = await api.get('/health/weekly-activity');
             return data;
         } catch (error) {
-            console.error('Error fetching summary:', error);
+            console.error('Error fetching weekly summary:', error);
         }
     },
     updateActivitySummary: async (updates) => {
         try {
             const current = get()
             const payload = {
-                water: updates.water ?? current.todaysWater,
-                workoutMinutes: updates.workoutMinutes ?? current.todaysWorkoutMinutes,
+                water: updates.water,
+                workoutMinutes: updates.workoutMinutes,
             };
             const { data } = await api.post('/health/add-activity', payload);
             set({

@@ -1,20 +1,33 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, TextInput, Switch, Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomHeader from '@/components/CustomHeader';
 import CalendarDays from '@/components/CalendarDays';
+import MoonSvg from '@/assets/moon.svg'
+import { Colors } from '@/theme/Colors';
+import { ScheduleItem, SleepSchedule } from '@/types/types';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-interface WorkoutSchedule {
-    id: string;
-    title: string;
-    date: Date;
-    time: string;
-    difficulty?: string;
+
+
+
+Notifications.setNotificationHandler({
+    handleNotification: async () => ({
+        shouldPlaySound: true,
+        shouldSetBadge: false,
+        shouldShowBanner: true,
+        shouldShowList: true,
+    }),
+});
+
+export const STORAGE_KEYS = {
+    SCHEDULES: 'sleep_schedules',
+    NOTIFICATION_IDS: 'schedule_notification_ids'
 }
 
 const SleepScheduleScreen = () => {
@@ -22,7 +35,7 @@ const SleepScheduleScreen = () => {
     const [selectedDate, setSelectedDate] = useState(new Date());
     const [detailModalVisible, setDetailModalVisible] = useState(false);
     const [addModalVisible, setAddModalVisible] = useState(false);
-    const [selectedWorkout, setSelectedWorkout] = useState<WorkoutSchedule | null>(null);
+    const [selectedWorkout, setSelectedWorkout] = useState<SleepSchedule | null>(null);
 
     const [showDatePicker, setShowDatePicker] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -33,25 +46,106 @@ const SleepScheduleScreen = () => {
     const [repeatDays, setRepeatDays] = useState(['Mon', 'Tue', 'Wed']);
 
 
-    // Add workout form state
-    const [newWorkout, setNewWorkout] = useState({
-        date: new Date(),
-        time: new Date(),
-        workout: 'Upperbody Workout',
-        difficulty: 'Beginner',
-    });
-
-    const [schedules, setSchedules] = useState<WorkoutSchedule[]>([
-        { id: '1', title: 'Ab Workout', date: new Date(2022, 4, 14), time: '7:30am', difficulty: 'Advanced' },
-        { id: '2', title: 'Upperbody Workout', date: new Date(2022, 4, 14), time: '9:00am', difficulty: 'Beginner' },
-        { id: '3', title: 'Lowerbody Workout', date: new Date(2022, 4, 14), time: '3:00pm', difficulty: 'Intermediate' },
-    ]);
+    const [schedules, setSchedules] = useState<ScheduleItem[]>([]);
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+    useEffect(() => {
+        loadSchedules();
+        restoreNotifications();
+    }, []);
+
+    useEffect(() => {
+        saveSchedules();
+    }, [schedules]);
+
+    const loadSchedules = async () => {
+        try {
+            const storedSchedules = await AsyncStorage.getItem(STORAGE_KEYS.SCHEDULES);
+            if (storedSchedules) {
+                const parsedSchedules: ScheduleItem[] = JSON.parse(storedSchedules);
+                const schedulesWithDates = parsedSchedules.map((schedule: any) => ({
+                    ...schedule,
+                    bedtimeAlarm: schedule.bedtimeAlarm ? new Date(schedule.bedtimeAlarm) : undefined,
+                    wakeUpTime: schedule.wakeUpTime ? new Date(schedule.wakeUpTime) : undefined
+                }));
+                setSchedules(schedulesWithDates);
+            }
+        } catch (error) {
+            console.error('Error loading schedules:', error);
+        }
+    }
+    const saveSchedules = async () => {
+        try {
+            await AsyncStorage.setItem(STORAGE_KEYS.SCHEDULES, JSON.stringify(schedules));
+        } catch (error) {
+            console.error('Error saving schedules:', error);
+        }
+    };
+
+    const restoreNotifications = async () => {
+        try {
+            // Cancel all existing notifications
+            await Notifications.cancelAllScheduledNotificationsAsync();
+
+            const storedSchedules = await AsyncStorage.getItem(STORAGE_KEYS.SCHEDULES);
+            if (storedSchedules) {
+                const parsedSchedules = JSON.parse(storedSchedules);
+
+                for (const schedule of parsedSchedules) {
+                    if (schedule.enabled && schedule.bedtimeAlarm && schedule.wakeUpTime) {
+                        const bedtimeAlarm = new Date(schedule.bedtimeAlarm);
+                        const wakeUpTime = new Date(schedule.wakeUpTime);
+
+                        if (bedtimeAlarm > new Date()) {
+                            await scheduleBedtimeNotification(bedtimeAlarm);
+                        }
+                        if (wakeUpTime > new Date()) {
+                            await scheduleWakeUpNotification(wakeUpTime);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error restoring notifications:', error);
+        }
+    };
+
+    const scheduleBedtimeNotification = async (bedtimeAlarm: Date) => {
+        return await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "🛏️ Time for Bed!",
+                body: `Your bedtime is set for ${bedtimeAlarm.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                sound: 'default',
+                priority: Notifications.AndroidNotificationPriority.HIGH,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: bedtimeAlarm
+            },
+        });
+    };
+
+    const scheduleWakeUpNotification = async (wakeUpTime: Date) => {
+        return await Notifications.scheduleNotificationAsync({
+            content: {
+                title: "☀️ Good Morning!",
+                body: "It's time to wake up! Hope you slept well.",
+                sound: 'default',
+                priority: Notifications.AndroidNotificationPriority.HIGH,
+            },
+            trigger: {
+                type: Notifications.SchedulableTriggerInputTypes.DATE,
+                date: wakeUpTime
+            },
+        });
+    };
+
     const toggleDay = (day: any) => {
         setRepeatDays((prev) =>
             prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
         );
     };
+
 
 
     // Generate time slots
@@ -65,54 +159,106 @@ const SleepScheduleScreen = () => {
         return slots;
     };
 
-    const timeSlots = generateTimeSlots();
-
-    const handleDateSelect = (date: Date) => {
-        setSelectedDate(date);
-    };
-
-    const handleWorkoutClick = (workout: WorkoutSchedule) => {
-        setSelectedWorkout(workout);
-        setDetailModalVisible(true);
-    };
 
     const handleMarkAsDone = () => {
         // Implement mark as done logic
         setDetailModalVisible(false);
     };
+    const addSchedule = async () => {
+        try {
+            // Create bedtime alarm time
+            const bedtimeAlarm = new Date(selectedDate);
+            bedtimeAlarm.setHours(bedtime.getHours());
+            bedtimeAlarm.setMinutes(bedtime.getMinutes());
+            bedtimeAlarm.setSeconds(0);
 
-    const handleSaveWorkout = () => {
-        const newSchedule: WorkoutSchedule = {
-            id: Date.now().toString(),
-            title: newWorkout.workout,
-            date: newWorkout.date,
-            time: newWorkout.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-            difficulty: newWorkout.difficulty,
-        };
-        setSchedules([...schedules, newSchedule]);
-        setAddModalVisible(false);
+            // Create wake-up time (bedtime + sleep duration)
+            const wakeUpTime = new Date(bedtimeAlarm);
+            wakeUpTime.setHours(bedtimeAlarm.getHours() + sleepDuration.hours);
+            wakeUpTime.setMinutes(bedtimeAlarm.getMinutes() + sleepDuration.minutes);
+
+            // Schedule bedtime notification
+            const bedtimeNotificationId = await scheduleBedtimeNotification(bedtimeAlarm);
+            console.log('Bedtime notification scheduled with ID:', bedtimeNotificationId);
+
+            // Schedule wake-up notification
+            const wakeUpNotificationId = await scheduleWakeUpNotification(wakeUpTime);
+
+            // Create new schedule item
+            const newSchedule: ScheduleItem = {
+                id: Date.now().toString(),
+                type: 'bedtime',
+                bedTime: bedtime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+                countdown: `Bedtime at ${bedtime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`,
+                enabled: true,
+                notificationIds: [bedtimeNotificationId, wakeUpNotificationId],
+                bedtimeAlarm: bedtimeAlarm,
+                wakeUpTime: wakeUpTime,
+
+            };
+
+            setSchedules(prev => [...prev, newSchedule]);
+            setAddModalVisible(false);
+
+            setBedtime(new Date());
+            setSleepDuration({ hours: 8, minutes: 30 });
+            setRepeatDays(['Mon', 'Tue', 'Wed']);
+
+
+        } catch (error) {
+            console.error('Error scheduling notifications:', error);
+            Alert.alert('Error', 'Failed to schedule notifications');
+        }
     };
 
-    const getWorkoutsForTimeSlot = (timeSlot: string) => {
-        return schedules.filter(schedule => {
-            const isSameDate = schedule.date.toDateString() === selectedDate.toDateString();
-            const scheduleTime = schedule.time.toLowerCase().replace(/\s/g, '');
-            const slotTime = timeSlot.toLowerCase().replace(/\s/g, '');
-            return isSameDate && scheduleTime === slotTime;
-        });
+    // Function to cancel notifications when a schedule is disabled
+    const cancelScheduleNotifications = async (schedule: ScheduleItem) => {
+        if (schedule.notificationIds) {
+            for (const notificationId of schedule.notificationIds) {
+                await Notifications.cancelScheduledNotificationAsync(notificationId);
+            }
+        }
     };
 
-    const handlePrevMonth = () => {
-        const prevMonth = new Date(selectedDate);
-        prevMonth.setMonth(prevMonth.getMonth() - 1);
-        setSelectedDate(prevMonth);
+    const toggleSchedule = async (id: string) => {
+        setSchedules(prev =>
+            prev.map(item => {
+                if (item.id === id) {
+                    const updatedItem = { ...item, enabled: !item.enabled };
+
+                    // Cancel notifications if disabling
+                    if (!updatedItem.enabled && item.notificationIds) {
+                        cancelScheduleNotifications(item);
+                    }
+
+                    return updatedItem;
+                }
+                return item;
+            })
+        );
     };
 
-    const handleNextMonth = () => {
-        const nextMonth = new Date(selectedDate);
-        nextMonth.setMonth(nextMonth.getMonth() + 1);
-        setSelectedDate(nextMonth);
+    // Test notification function
+    const testNotification = async () => {
+        try {
+            await Notifications.scheduleNotificationAsync({
+                content: {
+                    title: "Test Alarm",
+                    body: "This is a test notification from Sleep Schedule",
+                    sound: 'default'
+                },
+                trigger: {
+                    type: Notifications.SchedulableTriggerInputTypes.DATE,
+                    date: new Date(Date.now() + 5000)
+                },
+            });
+            Alert.alert('Test', 'Test notification scheduled for 5 seconds from now!');
+        } catch (error) {
+            console.error('Error scheduling test notification:', error);
+        }
     };
+
+    console.log('schedules', schedules)
 
     console.log('ss', selectedDate)
     return (
@@ -121,52 +267,76 @@ const SleepScheduleScreen = () => {
             <CustomHeader title='Sleep Schedule' />
 
             {/* Month Navigation */}
-            <View style={styles.monthNav}>
-                <TouchableOpacity onPress={handlePrevMonth}>
-                    <Ionicons name="chevron-back" size={24} color={colors.tintText3} />
-                </TouchableOpacity>
-                <Text style={[styles.monthText, { color: colors.tintText3 }]}>
-                    {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                </Text>
-                <TouchableOpacity onPress={handleNextMonth}>
-                    <Ionicons name="chevron-forward" size={24} color={colors.tintText3} />
-                </TouchableOpacity>
+            <View style={[styles.targetCard, { opacity: 0.7, }, { backgroundColor: colors.card }]}>
+                <View style={{ flexDirection: 'column', gap: 6 }}>
+                    <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: colors.text }}>Ideal Hours for Sleep</Text>
+                    <Text style={{ fontFamily: 'PoppinsMedium', fontSize: 14, color: Colors.linearText }}>8hrs 30minutes</Text>
+                    <TouchableOpacity onPress={() => { }} >
+                        <LinearGradient
+                            colors={gradients.button}
+                            start={{ x: 1, y: 0 }}
+                            end={{ x: 0, y: 0 }}
+                            style={[styles.checkBtn,]}
+                        >
+                            <Text style={[styles.checkText]}>Check</Text>
+                        </LinearGradient>
+                    </TouchableOpacity>
+                </View>
+                <View>
+                    <MoonSvg />
+                </View>
             </View>
 
             {/* Calendar Days */}
-            <CalendarDays selectedDate={selectedDate}
-                onDateSelect={setSelectedDate} />
+            <View style={{ marginTop: 20, marginHorizontal: 20, gap: 12 }}>
+                <Text style={{ fontFamily: 'PoppinsSemiBold', fontSize: 16, color: colors.text }}>Your Schedule</Text>
+                <CalendarDays selectedDate={selectedDate} onDateSelect={setSelectedDate} />
+            </View>
 
-            {/* Schedule Timeline */}
-            <ScrollView style={styles.timeline} showsVerticalScrollIndicator={false}>
-                {timeSlots.map((slot, index) => {
-                    const workouts = getWorkoutsForTimeSlot(slot);
-
-                    return (
-                        <View key={index} style={styles.timeSlotContainer}>
-                            <Text style={[styles.timeText, { color: colors.tintText3 }]}>{slot}haldhd</Text>
-                            <View style={styles.slotContent}>
-                                {workouts.map((workout) => (
-                                    <TouchableOpacity
-                                        key={workout.id}
-                                        onPress={() => handleWorkoutClick(workout)}
-                                        style={styles.workoutBubble}
-                                    >
-                                        <LinearGradient
-                                            colors={gradients.button}
-                                            start={{ x: 0, y: 0 }}
-                                            end={{ x: 1, y: 1 }}
-                                            style={styles.workoutBubbleGradient}
-                                        >
-                                            <Text style={styles.workoutBubbleText}>d,sdjhdhkjmiuhi;{workout.title}, {workout.time}</Text>
-                                        </LinearGradient>
-                                    </TouchableOpacity>
-                                ))}
+            <View style={styles.section}>
+                {schedules.length === 0 && (
+                    <Text style={[styles.sectionLabel, { color: colors.tintText3 }]}>
+                        No sleep schedules yet. Tap the + button to add one.
+                    </Text>
+                )}
+                {schedules.map((item) => (
+                    <View key={item.id} style={[styles.scheduleItem, { backgroundColor: colors.card }]}>
+                        <View style={styles.scheduleLeft}>
+                            <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
+                                {item.type === 'bedtime' ? (
+                                    <MaterialCommunityIcons name="moon-waning-crescent" size={24} color={gradients.button[0]} />
+                                ) : (
+                                    <MaterialCommunityIcons name="alarm" size={24} color="#FF6B6B" />
+                                )}
+                            </View>
+                            <View>
+                                <View style={styles.scheduleItemHeader}>
+                                    <Text style={[styles.scheduleType, { color: colors.text }]}>
+                                        {item.type === 'bedtime' ? 'Bedtime' : 'Alarm'}
+                                    </Text>
+                                    <Text style={[styles.scheduleTime, { color: colors.text }]}>{item.bedTime}</Text>
+                                </View>
+                                <Text style={[styles.countdown, { color: colors.tintText3 }]}>
+                                    {item.countdown}nn{item.sleepHours}
+                                </Text>
                             </View>
                         </View>
-                    );
-                })}
-            </ScrollView>
+
+                        <View style={styles.scheduleRight}>
+                            <TouchableOpacity>
+                                <MaterialCommunityIcons name="dots-vertical" size={20} color={colors.tintText3} />
+                            </TouchableOpacity>
+                            <Switch
+                                value={item.enabled}
+                                onValueChange={() => toggleSchedule(item.id)}
+                                trackColor={{ false: colors.tintText3, true: gradients.greenLinear[0] }}
+                                thumbColor={item.enabled ? '#fff' : '#f4f3f4'}
+                            />
+                        </View>
+                    </View>
+                ))}
+            </View>
+
 
             {/* Add Button */}
             <TouchableOpacity
@@ -200,13 +370,13 @@ const SleepScheduleScreen = () => {
                         <View style={[styles.divider, { backgroundColor: colors.tintText3, opacity: 0.2 }]} />
 
                         <Text style={[styles.workoutDetailTitle, { color: colors.text }]}>
-                            {selectedWorkout?.title}
+                            Bedtime
                         </Text>
 
                         <View style={styles.workoutDetailTime}>
                             <Ionicons name="time-outline" size={20} color={colors.tintText3} />
                             <Text style={[styles.workoutDetailTimeText, { color: colors.tintText3 }]}>
-                                Today | {selectedWorkout?.time}
+                                Today | {selectedWorkout?.bedTime}
                             </Text>
                         </View>
 
@@ -255,7 +425,7 @@ const SleepScheduleScreen = () => {
                                         month: 'long',
                                         year: 'numeric',
                                     })}
-                                </Text>
+                                </Text>        
                             </TouchableOpacity>
 
                             {/* Date Picker */}
@@ -373,7 +543,7 @@ const SleepScheduleScreen = () => {
                         </ScrollView>
 
                         {/* Add Button */}
-                        <TouchableOpacity onPress={handleSaveWorkout}>
+                        <TouchableOpacity onPress={addSchedule}>
                             <LinearGradient
                                 colors={gradients.button}
                                 style={styles.saveButton}
@@ -395,67 +565,82 @@ const styles = StyleSheet.create({
         flex: 1,
         paddingTop: 50,
     },
-    header: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        alignItems: 'center',
+    targetCard: {
+        flexDirection: "row",
+        marginTop: 25,
+        padding: 20,
+        paddingVertical: 25,
+        borderRadius: 16,
+        justifyContent: "space-between",
+        alignItems: "center",
+        marginHorizontal: 20,
+    },
+    checkBtn: {
+        backgroundColor: "#5e3fff",
+        paddingVertical: 6,
+        borderRadius: 20,
+        alignItems: 'center'
+    },
+    checkText: {
+        color: 'white',
+        fontFamily: "PoppinsRegular",
+        fontSize: 12, marginTop: 2,
+        textAlign: 'center'
+    },
+
+    section: {
+        marginTop: 40,
         paddingHorizontal: 20,
         marginBottom: 20,
     },
-    headerButton: {
-        width: 40,
-        height: 40,
-        borderRadius: 10,
+    sectionTitle: {
+        fontSize: 16,
+        fontFamily: 'PoppinsSemiBold',
+        marginBottom: 16,
+    },
+    scheduleItem: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 16,
+        borderRadius: 16,
+        marginBottom: 12,
+    },
+    scheduleLeft: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    iconContainer: {
+        width: 50,
+        height: 50,
+        borderRadius: 25,
         justifyContent: 'center',
         alignItems: 'center',
+        marginRight: 12,
     },
-    headerTitle: {
-        fontSize: 18,
-        fontFamily: 'PoppinsSemiBold',
-    },
-    monthNav: {
+    scheduleItemHeader: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 40,
-        marginBottom: 20,
+        gap: 8,
+        marginBottom: 4,
     },
-    monthText: {
-        fontSize: 16,
+    scheduleType: {
+        fontSize: 14,
+        fontFamily: 'PoppinsMedium',
+    },
+    scheduleTime: {
+        fontSize: 12,
         fontFamily: 'PoppinsRegular',
     },
-    timeline: {
-        flex: 1,
-        paddingHorizontal: 20,
+    countdown: {
+        fontSize: 12,
+        fontFamily: 'PoppinsRegular',
     },
-    timeSlotContainer: {
+    scheduleRight: {
         flexDirection: 'row',
-        marginBottom: 20,
-        minHeight: 40,
-    },
-    timeText: {
-        width: 80,
-        fontSize: 12,
-        fontFamily: 'PoppinsRegular',
-        paddingTop: 8,
-    },
-    slotContent: {
-        flex: 1,
-        marginLeft: 20,
-    },
-    workoutBubble: {
-        marginBottom: 8,
-        borderRadius: 16,
-        overflow: 'hidden',
-    },
-    workoutBubbleGradient: {
-        paddingHorizontal: 16,
-        paddingVertical: 12,
-    },
-    workoutBubbleText: {
-        color: '#fff',
-        fontSize: 12,
-        fontFamily: 'PoppinsRegular',
+        alignItems: 'center',
+        gap: 12,
     },
     addButton: {
         position: 'absolute',

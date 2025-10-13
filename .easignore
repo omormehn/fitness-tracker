@@ -30,3 +30,4 @@ __tests__/
 .env.development
 
 /server
+/android

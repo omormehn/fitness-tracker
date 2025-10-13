@@ -5,30 +5,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { AddTargetModalProps, TargetData, TargetItem } from '@/types/types';
 
-interface AddTargetModalProps {
-    visible: boolean;
-    onClose: () => void;
-    onSave: (targets: TargetData) => void;
-}
-
-interface TargetData {
-    steps?: number;
-    water?: number;
-    calories?: number;
-    workoutMinutes?: number;
-}
-
-interface TargetItem {
-    id: string;
-    icon: any;
-    iconFamily: 'MaterialCommunity' | 'Material' | 'Ionicons';
-    label: string;
-    value: string;
-    unit: string;
-    placeholder: string;
-    keyboardType: 'numeric' | 'default';
-}
 
 const AddTargetModal: React.FC<AddTargetModalProps> = ({ visible, onClose, onSave }) => {
     const { colors, gradients, theme } = useTheme();
@@ -276,7 +254,7 @@ const styles = StyleSheet.create({
         marginTop: 10,
     },
     cancelButton: {
-        flex: 1,
+        padding: '10%',
         borderWidth: 1,
         borderRadius: 25,
         paddingVertical: 14,
@@ -287,7 +265,7 @@ const styles = StyleSheet.create({
         fontFamily: 'PoppinsMedium',
     },
     saveButton: {
-        flex: 1,
+        padding: '20%',
         borderRadius: 25,
         paddingVertical: 14,
         alignItems: 'center',

@@ -29,11 +29,11 @@ const CalendarDays = ({ selectedDate, onDateSelect }: CalendarDaysProps) => {
     return (
         <View style={{ height: 120 }}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.calendarScroll}>
-                {calendarDays.map((date, index) => {
+                {calendarDays.map((date) => {
                     const isSelected = date?.toDateString() === selectedDate?.toDateString();
                     return (
                         <TouchableOpacity
-                            key={index}
+                            key={date.toISOString()}
                             onPress={() => onDateSelect(date)}
                             style={[
                                 styles.dayCard,

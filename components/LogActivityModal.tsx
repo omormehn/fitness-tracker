@@ -15,19 +15,19 @@ const LogActivityModal = ({ visible, onClose, type }: LogActivityModalProps) => 
 
   const handleSave = async () => {
     const numValue = parseFloat(value);
-    
-    switch(type) {
+
+    switch (type) {
       case 'water':
-        await updateActivitySummary({ 
-          water: (todaysWater || 0) + numValue 
+        await updateActivitySummary({
+          water: numValue
         });
         break;
       case 'workout':
-        await updateActivitySummary({ 
-          workoutMinutes: (todaysWorkoutMinutes || 0) + numValue 
+        await updateActivitySummary({
+          workoutMinutes: numValue
         });
         break;
-      // Add other cases
+      // Add other cases  
     }
     onClose();
   };

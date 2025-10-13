@@ -1,203 +1,339 @@
-import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, TextInput } from 'react-native';
-import React, { useState } from 'react';
+import { StyleSheet, Text, View, ScrollView, TouchableOpacity, Modal, Alert, Switch, ActivityIndicator } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomHeader from '@/components/CustomHeader';
+import CalendarDays from '@/components/CalendarDays';
+import * as Notifications from 'expo-notifications';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useHealthStore } from '@/store/useHealthStore';
+import { WorkoutScheduleItem, WorkoutProgram } from '@/types/types';
+import axios from 'axios';
+import { router } from 'expo-router';
 
-interface WorkoutSchedule {
-  id: string;
-  title: string;
-  date: Date;
-  time: string;
-  difficulty?: string;
-}
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+    shouldShowBanner: true,
+    shouldShowList: true,
+  }),
+});
+
+export const WORKOUT_STORAGE_KEYS = {
+  SCHEDULES: 'workout_schedules',
+  NOTIFICATION_IDS: 'workout_notification_ids'
+};
+
+
+const WORKOUT_TYPES = [
+  'Upperbody Workout',
+  'Lowerbody Workout',
+  'Ab Workout',
+  'Full Body',
+  'Cardio',
+  'Yoga',
+  'HIIT',
+  'Strength Training'
+];
+
+const DIFFICULTY_LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
 const WorkoutScheduleScreen = () => {
-  const { colors, gradients, theme } = useTheme();
+  const { colors, gradients } = useTheme();
+  const { addTarget } = useHealthStore();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [addModalVisible, setAddModalVisible] = useState(false);
-  const [selectedWorkout, setSelectedWorkout] = useState<WorkoutSchedule | null>(null);
+  const [selectedWorkout, setSelectedWorkout] = useState<WorkoutScheduleItem | null>(null);
 
-  // Add workout form state
-  const [newWorkout, setNewWorkout] = useState({
-    date: new Date(),
-    time: new Date(),
-    workout: 'Upperbody Workout',
-    difficulty: 'Beginner',
-  });
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showTimePicker, setShowTimePicker] = useState(false);
+  const [workoutTime, setWorkoutTime] = useState(new Date());
+  const [workoutDuration, setWorkoutDuration] = useState(45);
+  const [selectedWorkoutType, setSelectedWorkoutType] = useState(WORKOUT_TYPES[0]);
+  const [selectedDifficulty, setSelectedDifficulty] = useState(DIFFICULTY_LEVELS[0]);
+  const [repeatDays, setRepeatDays] = useState<string[]>([]);
 
-  const [schedules, setSchedules] = useState<WorkoutSchedule[]>([
-    { id: '1', title: 'Ab Workout', date: new Date(2022, 4, 14), time: '7:30am', difficulty: 'Advanced' },
-    { id: '2', title: 'Upperbody Workout', date: new Date(2022, 4, 14), time: '9:00am', difficulty: 'Beginner' },
-    { id: '3', title: 'Lowerbody Workout', date: new Date(2022, 4, 14), time: '3:00pm', difficulty: 'Intermediate' },
-  ]);
+  const [schedules, setSchedules] = useState<WorkoutScheduleItem[]>([]);
+  const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
-  // Generate calendar days
-  const generateCalendarDays = () => {
-    const days = [];
-    const startDate = new Date(selectedDate);
-    startDate.setDate(startDate.getDate() - 2);
+  const [exercises, setExercises] = useState<WorkoutProgram[]>([]);
+  const [loadingExercises, setLoadingExercises] = useState(false);
+  const [exerciseLength, setLength] = useState<number | null>(0);
 
-    for (let i = 0; i < 7; i++) {
-      const date = new Date(startDate);
-      date.setDate(startDate.getDate() + i);
-      days.push(date);
+  // Fetch random exercises
+  const fetchRandomExercises = async () => {
+    setLoadingExercises(true);
+    const options = { method: 'GET', url: 'https://v1.exercisedb.dev/api/v1/exercises', params: { limit: 10, offset: 20 } };
+
+    try {
+
+      const { data } = await axios.request(options);
+
+      const { data: allExercises } = data;
+      const shuffled = allExercises.sort(() => 0.5 - Math.random());
+      const randomExercises = shuffled.slice(0, 8);
+
+      setExercises(randomExercises);
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+    } finally {
+      setLoadingExercises(false);
     }
-    return days;
   };
 
-  const calendarDays = generateCalendarDays();
-  const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  useEffect(() => {
+    fetchRandomExercises();
+  }, []);
 
-  // Generate time slots
-  const generateTimeSlots = () => {
-    const slots = [];
-    for (let hour = 6; hour <= 20; hour++) {
-      const period = hour >= 12 ? 'PM' : 'AM';
-      const displayHour = hour > 12 ? hour - 12 : hour;
-      slots.push(`${displayHour.toString().padStart(2, '0')}:00 ${period}`);
+
+  useEffect(() => {
+    loadSchedules();
+    restoreNotifications();
+  }, []);
+
+  useEffect(() => {
+    saveSchedules();
+  }, [schedules]);
+
+  const loadSchedules = async () => {
+    try {
+      const storedSchedules = await AsyncStorage.getItem(WORKOUT_STORAGE_KEYS.SCHEDULES);
+      if (storedSchedules) {
+        const parsedSchedules: WorkoutScheduleItem[] = JSON.parse(storedSchedules);
+        const schedulesWithDates = parsedSchedules.map((schedule: any) => ({
+          ...schedule,
+          date: new Date(schedule.date),
+          workoutTime: new Date(schedule.workoutTime)
+        }));
+        setSchedules(schedulesWithDates);
+      }
+    } catch (error) {
+      console.error('Error loading schedules:', error);
     }
-    return slots;
   };
 
-  const timeSlots = generateTimeSlots();
-
-  const handleDateSelect = (date: Date) => {
-    setSelectedDate(date);
+  const saveSchedules = async () => {
+    try {
+      await AsyncStorage.setItem(WORKOUT_STORAGE_KEYS.SCHEDULES, JSON.stringify(schedules));
+    } catch (error) {
+      console.error('Error saving schedules:', error);
+    }
   };
 
-  const handleWorkoutClick = (workout: WorkoutSchedule) => {
-    setSelectedWorkout(workout);
-    setDetailModalVisible(true);
+  const restoreNotifications = async () => {
+    try {
+      await Notifications.cancelAllScheduledNotificationsAsync();
+
+      const storedSchedules = await AsyncStorage.getItem(WORKOUT_STORAGE_KEYS.SCHEDULES);
+      if (storedSchedules) {
+        const parsedSchedules = JSON.parse(storedSchedules);
+
+        for (const schedule of parsedSchedules) {
+          if (schedule.enabled && schedule.workoutTime) {
+            const workoutTime = new Date(schedule.workoutTime);
+
+            if (workoutTime > new Date()) {
+              await scheduleWorkoutNotification(
+                workoutTime,
+                schedule.workoutType,
+                schedule.duration
+              );
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error restoring notifications:', error);
+    }
   };
 
-  const handleMarkAsDone = () => {
-    // Implement mark as done logic
-    setDetailModalVisible(false);
-  };
-
-  const handleSaveWorkout = () => {
-    const newSchedule: WorkoutSchedule = {
-      id: Date.now().toString(),
-      title: newWorkout.workout,
-      date: newWorkout.date,
-      time: newWorkout.time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
-      difficulty: newWorkout.difficulty,
-    };
-    setSchedules([...schedules, newSchedule]);
-    setAddModalVisible(false);
-  };
-
-  const getWorkoutsForTimeSlot = (timeSlot: string) => {
-    return schedules.filter(schedule => {
-      const isSameDate = schedule.date.toDateString() === selectedDate.toDateString();
-      const scheduleTime = schedule.time.toLowerCase().replace(/\s/g, '');
-      const slotTime = timeSlot.toLowerCase().replace(/\s/g, '');
-      return isSameDate && scheduleTime === slotTime;
+  const scheduleWorkoutNotification = async (
+    workoutTime: Date,
+    workoutType: string,
+    duration: number
+  ) => {
+    return await Notifications.scheduleNotificationAsync({
+      content: {
+        title: "🏋️ Workout Time!",
+        body: `Time for your ${workoutType}! Duration: ${duration} minutes`,
+        sound: 'default',
+        priority: Notifications.AndroidNotificationPriority.HIGH,
+      },
+      trigger: {
+        type: Notifications.SchedulableTriggerInputTypes.DATE,
+        date: workoutTime
+      },
     });
   };
 
+  const toggleDay = (day: string) => {
+    setRepeatDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
+
+  const addSchedule = async () => {
+    try {
+      // Create workout time
+      const scheduledWorkoutTime = new Date(selectedDate);
+      scheduledWorkoutTime.setHours(workoutTime.getHours());
+      scheduledWorkoutTime.setMinutes(workoutTime.getMinutes());
+      scheduledWorkoutTime.setSeconds(0);
+
+      const notificationId = await scheduleWorkoutNotification(
+        scheduledWorkoutTime,
+        selectedWorkoutType,
+        workoutDuration
+      );
+      await addTarget({ workoutMinutes: workoutDuration });
+      const selectedExercise = exercises.find(ex => ex.name === selectedWorkoutType);
+      const newSchedule: WorkoutScheduleItem = {
+        id: Date.now().toString(),
+        workoutType: selectedWorkoutType,
+        difficulty: selectedDifficulty,
+        date: selectedDate,
+        time: workoutTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        workoutTime: scheduledWorkoutTime,
+        duration: workoutDuration,
+        enabled: true,
+        notificationId,
+        repeatDays: repeatDays.length > 0 ? repeatDays : undefined,
+        exerciseData: selectedExercise,
+        exerciseLength: exerciseLength || undefined
+      };
+
+      setSchedules(prev => [...prev, newSchedule]);
+      setAddModalVisible(false);
+
+      // Reset form
+      setWorkoutTime(new Date());
+      setWorkoutDuration(45);
+      setSelectedWorkoutType(WORKOUT_TYPES[0]);
+      setSelectedDifficulty(DIFFICULTY_LEVELS[0]);
+      setRepeatDays([]);
+
+      Alert.alert('Success', 'Workout scheduled successfully!');
+    } catch (error) {
+      console.error('Error scheduling workout:', error);
+      Alert.alert('Error', 'Failed to schedule workout');
+    }
+  };
+
+  const cancelWorkoutNotification = async (schedule: WorkoutScheduleItem) => {
+    if (schedule.notificationId) {
+      await Notifications.cancelScheduledNotificationAsync(schedule.notificationId);
+    }
+  };
+
+
+  const deleteSchedule = (id: string) => {
+    Alert.alert(
+      'Delete Workout',
+      'Are you sure you want to delete this workout?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            const schedule = schedules.find(s => s.id === id);
+            if (schedule?.notificationId) {
+              await cancelWorkoutNotification(schedule);
+            }
+            setSchedules(prev => prev.filter(item => item.id !== id));
+          }
+        }
+      ]
+    );
+  };
+
+
+  const getWorkoutsForDate = (date: Date) => {
+    return schedules.filter(schedule =>
+      schedule.date.toDateString() === date.toDateString()
+    );
+  };
+
+  const routeToDetail = (id: string) => {
+    if (!id) return;
+    router.push({
+      pathname: '/[id]',
+      params: {
+        id
+      }
+    })
+  }
+
+  const todaysWorkouts = getWorkoutsForDate(selectedDate);
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Header */}
       <CustomHeader title='Workout Schedule' />
 
-      {/* Month Navigation */}
-      <View style={styles.monthNav}>
-        <TouchableOpacity>
-          <Ionicons name="chevron-back" size={24} color={colors.tintText3} />
-        </TouchableOpacity>
-        <Text style={[styles.monthText, { color: colors.tintText3 }]}>
-          {selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+      {/* Stats Card */}
+      <View style={[styles.statsCard, { backgroundColor: colors.card }]}>
+        <View style={{ flexDirection: 'column', gap: 6 }}>
+          <Text style={{ fontFamily: 'PoppinsRegular', fontSize: 12, color: colors.text }}>
+            Weekly Workouts
+          </Text>
+          <Text style={{ fontFamily: 'PoppinsMedium', fontSize: 20, color: gradients.button[0] }}>
+            {schedules.length} Scheduled
+          </Text>
+        </View>
+        <MaterialCommunityIcons name="dumbbell" size={48} color={gradients.button[0]} />
+      </View>
+
+      {/* Calendar */}
+      <View style={{ marginTop: 20, marginHorizontal: 20, gap: 12 }}>
+        <Text style={{ fontFamily: 'PoppinsSemiBold', fontSize: 16, color: colors.text }}>
+          Your Schedule
         </Text>
-        <TouchableOpacity>
-          <Ionicons name="chevron-forward" size={24} color={colors.tintText3} />
-        </TouchableOpacity>
+        <CalendarDays selectedDate={selectedDate} onDateSelect={setSelectedDate} />
       </View>
 
-      {/* Calendar Days */}
-      <View style={{ height: 120 }}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.calendarScroll}
-        >
-          {calendarDays.map((date, index) => {
-            const isSelected = date.toDateString() === selectedDate.toDateString();
-            return (
-              <TouchableOpacity
-                key={index}
-                onPress={() => handleDateSelect(date)}
-                style={[
-                  styles.dayCard,
-                  { backgroundColor: colors.card },
-                  isSelected && { backgroundColor: 'transparent' }
-                ]}
-              >
-                {isSelected && (
-                  <LinearGradient
-                    colors={gradients.button}
-                    style={styles.selectedDayGradient}
-                  />
-                )}
-                <Text
-                  style={[
-                    styles.dayName,
-                    { color: colors.tintText3 },
-                    isSelected && { color: '#fff' },
-                  ]}
-                >
-                  {daysOfWeek[date.getDay()].substring(0, 3)}
-                </Text>
-                <Text
-                  style={[
-                    styles.dayNumber,
-                    { color: colors.text },
-                    isSelected && { color: '#fff' },
-                  ]}
-                >
-                  {date.getDate()}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </ScrollView>
-      </View>
+      {/* Schedule List */}
+      <ScrollView style={styles.section} showsVerticalScrollIndicator={false}>
+        {todaysWorkouts.length === 0 ? (
+          <Text style={[styles.emptyText, { color: colors.tintText3 }]}>
+            No workouts scheduled for this day. Tap the + button to add one.
+          </Text>
+        ) : (
+          todaysWorkouts.map((item) => (
+            <View key={item.id} style={[styles.scheduleItem, { backgroundColor: colors.card }]}>
+              <View style={styles.scheduleLeft}>
+                <View style={[styles.iconContainer, { backgroundColor: colors.background }]}>
+                  <MaterialCommunityIcons name="dumbbell" size={24} color={gradients.button[0]} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={[styles.workoutType, { color: colors.text }]}>
+                    {item.workoutType}
+                  </Text>
+                  <View style={styles.scheduleDetails}>
+                    <Text style={[styles.scheduleTime, { color: colors.tintText3 }]}>
+                      {item.time} • {item.duration} min
+                    </Text>
+                  </View>
+                  <View style={styles.difficultyBadge}>
+                    <Text style={[styles.difficultyText, { color: gradients.button[0] }]}>
+                      {item.difficulty}
+                    </Text>
+                  </View>
+                </View>
+              </View>
 
-      {/* Schedule Timeline */}
-      <ScrollView style={styles.timeline} showsVerticalScrollIndicator={false}>
-        {timeSlots.map((slot, index) => {
-          const workouts = getWorkoutsForTimeSlot(slot);
-
-          return (
-            <View key={index} style={styles.timeSlotContainer}>
-              <Text style={[styles.timeText, { color: colors.tintText3 }]}>{slot}haldhd</Text>
-              <View style={styles.slotContent}>
-                {workouts.map((workout) => (
-                  <TouchableOpacity
-                    key={workout.id}
-                    onPress={() => handleWorkoutClick(workout)}
-                    style={styles.workoutBubble}
-                  >
-                    <LinearGradient
-                      colors={gradients.button}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 1 }}
-                      style={styles.workoutBubbleGradient}
-                    >
-                      <Text style={styles.workoutBubbleText}>d,sdjhdhkjmiuhi;{workout.title}, {workout.time}</Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                ))}
+              <View style={styles.scheduleRight}>
+                <TouchableOpacity onPress={() => deleteSchedule(item.id)}>
+                  <Ionicons name="trash-outline" size={20} color="#FF6B6B" />
+                </TouchableOpacity>
               </View>
             </View>
-          );
-        })}
+          ))
+        )}
       </ScrollView>
 
       {/* Add Button */}
@@ -205,54 +341,10 @@ const WorkoutScheduleScreen = () => {
         onPress={() => setAddModalVisible(true)}
         style={styles.addButton}
       >
-        <LinearGradient
-          colors={gradients.button}
-          style={styles.addButtonGradient}
-        >
+        <LinearGradient colors={gradients.button} style={styles.addButtonGradient}>
           <Ionicons name="add" size={32} color="#fff" />
         </LinearGradient>
       </TouchableOpacity>
-
-      {/* Workout Detail Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={detailModalVisible}
-        onRequestClose={() => setDetailModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.detailModal, { backgroundColor: colors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Workout Schedule</Text>
-              <TouchableOpacity onPress={() => setDetailModalVisible(false)}>
-                <Ionicons name="close" size={24} color={colors.tintText3} />
-              </TouchableOpacity>
-            </View>
-
-            <View style={[styles.divider, { backgroundColor: colors.tintText3, opacity: 0.2 }]} />
-
-            <Text style={[styles.workoutDetailTitle, { color: colors.text }]}>
-              {selectedWorkout?.title}
-            </Text>
-
-            <View style={styles.workoutDetailTime}>
-              <Ionicons name="time-outline" size={20} color={colors.tintText3} />
-              <Text style={[styles.workoutDetailTimeText, { color: colors.tintText3 }]}>
-                Today | {selectedWorkout?.time}
-              </Text>
-            </View>
-
-            <TouchableOpacity onPress={handleMarkAsDone}>
-              <LinearGradient
-                colors={gradients.greenLinear}
-                style={styles.doneButton}
-              >
-                <Text style={styles.doneButtonText}>Mark as Done</Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       {/* Add Workout Modal */}
       <Modal
@@ -267,84 +359,200 @@ const WorkoutScheduleScreen = () => {
               <TouchableOpacity onPress={() => setAddModalVisible(false)}>
                 <Ionicons name="close" size={24} color={colors.text} />
               </TouchableOpacity>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Add Schedule</Text>
-              <TouchableOpacity>
-                <MaterialCommunityIcons name="dots-horizontal" size={24} color={colors.text} />
-              </TouchableOpacity>
+              <Text style={[styles.modalTitle, { color: colors.text }]}>Add Workout</Text>
+              <View style={{ width: 24 }} />
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
-              {/* Date Picker */}
-              <TouchableOpacity style={[styles.dateSelector, { backgroundColor: colors.background }]}>
+              {/* Date Selector */}
+              <TouchableOpacity
+                style={[styles.dateSelector, { backgroundColor: colors.background }]}
+                onPress={() => setShowDatePicker(true)}
+              >
                 <Ionicons name="calendar-outline" size={24} color={colors.tintText3} />
                 <Text style={[styles.dateSelectorText, { color: colors.tintText3 }]}>
-                  {newWorkout.date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })}
+                  {selectedDate.toLocaleDateString('en-US', {
+                    weekday: 'short',
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric',
+                  })}
                 </Text>
               </TouchableOpacity>
 
-              {/* Time Section */}
-              <Text style={[styles.sectionLabel, { color: colors.text }]}>Time</Text>
-              <View style={styles.timePicker}>
-                <View style={styles.timeColumn}>
-                  <Text style={[styles.timeValue, { color: colors.tintText3 }]}>3</Text>
+              {showDatePicker && (
+                <DateTimePicker
+                  value={selectedDate}
+                  mode="date"
+                  display="spinner"
+                  onChange={(event, date) => {
+                    setShowDatePicker(false);
+                    if (date) setSelectedDate(date);
+                  }}
+                />
+              )}
+
+              {/* Time Selector */}
+              <TouchableOpacity
+                style={[styles.detailOption, { backgroundColor: colors.background }]}
+                onPress={() => setShowTimePicker(true)}
+              >
+                <View style={styles.detailOptionLeft}>
+                  <Ionicons name="time-outline" size={24} color={colors.tintText3} />
+                  <Text style={[styles.detailOptionLabel, { color: colors.tintText3 }]}>
+                    Workout Time
+                  </Text>
                 </View>
-                <View style={styles.timeColumn}>
-                  <Text style={[styles.timeValue, { color: colors.text }]}>30</Text>
+                <View style={styles.detailOptionRight}>
+                  <Text style={[styles.detailOptionValue, { color: colors.text }]}>
+                    {workoutTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                  <Ionicons name="chevron-forward" size={20} color={colors.tintText3} />
                 </View>
-                <View style={styles.timeColumn}>
-                  <Text style={[styles.timeValue, { color: colors.text }]}>PM</Text>
+              </TouchableOpacity>
+
+              {showTimePicker && (
+                <DateTimePicker
+                  value={workoutTime}
+                  mode="time"
+                  is24Hour={false}
+                  display="spinner"
+                  onChange={(event, time) => {
+                    setShowTimePicker(false);
+                    if (time) setWorkoutTime(time);
+                  }}
+                />
+              )}
+
+              {/* Duration Selector */}
+              <View style={[styles.detailOption, { backgroundColor: colors.background }]}>
+                <View style={styles.detailOptionLeft}>
+                  <Ionicons name="timer-outline" size={24} color={colors.tintText3} />
+                  <Text style={[styles.detailOptionLabel, { color: colors.tintText3 }]}>
+                    Duration (minutes)
+                  </Text>
+                </View>
+                <View style={styles.durationButtons}>
+                  {[30, 45, 60, 90].map(duration => (
+                    <TouchableOpacity
+                      key={duration}
+                      onPress={() => setWorkoutDuration(duration)}
+                      style={[
+                        styles.durationButton,
+                        { backgroundColor: colors.card },
+                        workoutDuration === duration && { backgroundColor: gradients.button[0] }
+                      ]}
+                    >
+                      <Text style={[
+                        styles.durationButtonText,
+                        { color: colors.text },
+                        workoutDuration === duration && { color: '#fff' }
+                      ]}>
+                        {duration}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
               </View>
 
-              {/* Details Section */}
-              <Text style={[styles.sectionLabel, { color: colors.text }]}>Details Workout</Text>
+              {/* Workout Type */}
 
-              <TouchableOpacity style={[styles.detailOption, { backgroundColor: colors.background }]}>
-                <View style={styles.detailOptionLeft}>
-                  <MaterialCommunityIcons name="dumbbell" size={24} color={colors.tintText3} />
-                  <Text style={[styles.detailOptionLabel, { color: colors.tintText3 }]}>Choose Workout</Text>
+              <View style={{ marginTop: 16 }}>
+                <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <Text style={[styles.sectionLabel, { color: colors.text }]}>Select Exercise</Text>
+                  <TouchableOpacity onPress={fetchRandomExercises}>
+                    <Ionicons name="refresh" size={20} color={colors.tintText3} />
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.detailOptionRight}>
-                  <Text style={[styles.detailOptionValue, { color: colors.text }]}>{newWorkout.workout}</Text>
-                  <Ionicons name="chevron-forward" size={20} color={colors.tintText3} />
-                </View>
-              </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.detailOption, { backgroundColor: colors.background }]}>
-                <View style={styles.detailOptionLeft}>
-                  <Ionicons name="swap-vertical" size={24} color={colors.tintText3} />
-                  <Text style={[styles.detailOptionLabel, { color: colors.tintText3 }]}>Difficulty</Text>
-                </View>
-                <View style={styles.detailOptionRight}>
-                  <Text style={[styles.detailOptionValue, { color: colors.text }]}>{newWorkout.difficulty}</Text>
-                  <Ionicons name="chevron-forward" size={20} color={colors.tintText3} />
-                </View>
-              </TouchableOpacity>
+                {loadingExercises ? (
+                  <ActivityIndicator size="small" color={gradients.button[0]} />
+                ) : (
+                  <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                    {exercises.map(exercise => (
+                      <TouchableOpacity
+                        key={exercise.exerciseId}
+                        onPress={() => {
+                          routeToDetail(exercise.exerciseId)
+                          setSelectedWorkoutType(exercise.name)
+                          setLength(exercise.instructions.length)
+                        }}
+                        style={[
+                          styles.typeButton,
+                          { backgroundColor: colors.background },
+                          selectedWorkoutType === exercise.name && { backgroundColor: gradients.button[0] }
+                        ]}
+                      >
+                        <Text style={[
+                          styles.typeButtonText,
+                          { color: colors.text },
+                          selectedWorkoutType === exercise.name && { color: '#fff' }
+                        ]}>
+                          {exercise.name}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </ScrollView>
+                )}
+              </View>
 
-              <TouchableOpacity style={[styles.detailOption, { backgroundColor: colors.background }]}>
-                <View style={styles.detailOptionLeft}>
-                  <MaterialCommunityIcons name="chart-bar" size={24} color={colors.tintText3} />
-                  <Text style={[styles.detailOptionLabel, { color: colors.tintText3 }]}>Custom Repetitions</Text>
+              {/* Difficulty */}
+              <View style={{ marginTop: 16 }}>
+                <Text style={[styles.sectionLabel, { color: colors.text }]}>Difficulty</Text>
+                <View style={styles.difficultyButtons}>
+                  {DIFFICULTY_LEVELS.map(level => (
+                    <TouchableOpacity
+                      key={level}
+                      onPress={() => setSelectedDifficulty(level)}
+                      style={[
+                        styles.difficultyButton,
+                        { backgroundColor: colors.background },
+                        selectedDifficulty === level && { backgroundColor: gradients.button[0] }
+                      ]}
+                    >
+                      <Text style={[
+                        styles.difficultyButtonText,
+                        { color: colors.text },
+                        selectedDifficulty === level && { color: '#fff' }
+                      ]}>
+                        {level}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.tintText3} />
-              </TouchableOpacity>
+              </View>
 
-              <TouchableOpacity style={[styles.detailOption, { backgroundColor: colors.background }]}>
-                <View style={styles.detailOptionLeft}>
-                  <MaterialCommunityIcons name="weight-kilogram" size={24} color={colors.tintText3} />
-                  <Text style={[styles.detailOptionLabel, { color: colors.tintText3 }]}>Custom Weights</Text>
+              {/* Repeat Days */}
+              <View style={{ marginTop: 16 }}>
+                <Text style={[styles.sectionLabel, { color: colors.text }]}>Repeat</Text>
+                <View style={styles.daysContainer}>
+                  {days.map((day) => (
+                    <TouchableOpacity
+                      key={day}
+                      onPress={() => toggleDay(day)}
+                      style={[
+                        styles.dayButton,
+                        { backgroundColor: colors.background },
+                        repeatDays.includes(day) && { backgroundColor: gradients.button[0] }
+                      ]}
+                    >
+                      <Text style={[
+                        styles.dayButtonText,
+                        { color: colors.text },
+                        repeatDays.includes(day) && { color: '#fff' }
+                      ]}>
+                        {day}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
                 </View>
-                <Ionicons name="chevron-forward" size={20} color={colors.tintText3} />
-              </TouchableOpacity>
+              </View>
             </ScrollView>
 
-            {/* Save Button */}
-            <TouchableOpacity onPress={handleSaveWorkout}>
-              <LinearGradient
-                colors={gradients.button}
-                style={styles.saveButton}
-              >
-                <Text style={styles.saveButtonText}>Save</Text>
+            {/* Add Button */}
+            <TouchableOpacity onPress={addSchedule}>
+              <LinearGradient colors={gradients.button} style={styles.saveButton}>
+                <Text style={styles.saveButtonText}>Add Workout</Text>
               </LinearGradient>
             </TouchableOpacity>
           </View>
@@ -361,96 +569,73 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 50,
   },
-  header: {
+  statsCard: {
     flexDirection: 'row',
+    marginTop: 25,
+    padding: 20,
+    paddingVertical: 25,
+    borderRadius: 16,
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginHorizontal: 20,
+  },
+  section: {
+    marginTop: 20,
     paddingHorizontal: 20,
     marginBottom: 20,
   },
-  headerButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
+  emptyText: {
+    fontFamily: 'PoppinsRegular',
+    fontSize: 14,
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  scheduleItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 16,
+    marginBottom: 12,
+  },
+  scheduleLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconContainer: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontFamily: 'PoppinsSemiBold',
-  },
-  monthNav: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-    marginBottom: 20,
-  },
-  monthText: {
-    fontSize: 16,
-    fontFamily: 'PoppinsRegular',
-  },
-  calendarScroll: {
-    paddingHorizontal: 20,
-    marginBottom: 20,
-  },
-  dayCard: {
-    width: 80,
-    paddingVertical: 16,
     marginRight: 12,
-    borderRadius: 16,
-    alignItems: 'center',
-    position: 'relative',
-    overflow: 'hidden',
   },
-  selectedDayGradient: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
+  workoutType: {
+    fontSize: 14,
+    fontFamily: 'PoppinsMedium',
+    marginBottom: 4,
   },
-  dayName: {
-    fontSize: 12,
-    fontFamily: 'PoppinsRegular',
-    marginBottom: 8,
-  },
-  dayNumber: {
-    fontSize: 20,
-    fontFamily: 'PoppinsSemiBold',
-  },
-  timeline: {
-    flex: 1,
-    paddingHorizontal: 20,
-  },
-  timeSlotContainer: {
+  scheduleDetails: {
     flexDirection: 'row',
-    marginBottom: 20,
-    minHeight: 40,
+    alignItems: 'center',
+    marginBottom: 4,
   },
-  timeText: {
-    width: 80,
+  scheduleTime: {
     fontSize: 12,
     fontFamily: 'PoppinsRegular',
-    paddingTop: 8,
   },
-  slotContent: {
-    flex: 1,
-    marginLeft: 20,
+  difficultyBadge: {
+    alignSelf: 'flex-start',
   },
-  workoutBubble: {
-    marginBottom: 8,
-    borderRadius: 16,
-    overflow: 'hidden',
+  difficultyText: {
+    fontSize: 10,
+    fontFamily: 'PoppinsMedium',
   },
-  workoutBubbleGradient: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-  },
-  workoutBubbleText: {
-    color: '#fff',
-    fontSize: 12,
-    fontFamily: 'PoppinsRegular',
+  scheduleRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
   },
   addButton: {
     position: 'absolute',
@@ -474,12 +659,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
   },
-  detailModal: {
-    borderTopLeftRadius: 30,
-    borderTopRightRadius: 30,
-    padding: 24,
-    paddingBottom: 40,
-  },
   addModal: {
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
@@ -497,65 +676,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontFamily: 'PoppinsSemiBold',
   },
-  divider: {
-    height: 1,
-    marginBottom: 20,
-  },
-  workoutDetailTitle: {
-    fontSize: 20,
-    fontFamily: 'PoppinsSemiBold',
-    marginBottom: 12,
-  },
-  workoutDetailTime: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 24,
-  },
-  workoutDetailTimeText: {
-    fontSize: 14,
-    fontFamily: 'PoppinsRegular',
-  },
-  doneButton: {
-    paddingVertical: 16,
-    borderRadius: 25,
-    alignItems: 'center',
-  },
-  doneButtonText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: 'PoppinsSemiBold',
-  },
   dateSelector: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     padding: 16,
     borderRadius: 12,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   dateSelectorText: {
     fontSize: 14,
     fontFamily: 'PoppinsRegular',
-  },
-  sectionLabel: {
-    fontSize: 16,
-    fontFamily: 'PoppinsSemiBold',
-    marginBottom: 16,
-  },
-  timePicker: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 40,
-    marginBottom: 32,
-    paddingVertical: 20,
-  },
-  timeColumn: {
-    alignItems: 'center',
-  },
-  timeValue: {
-    fontSize: 32,
-    fontFamily: 'PoppinsSemiBold',
   },
   detailOption: {
     flexDirection: 'row',
@@ -581,6 +712,62 @@ const styles = StyleSheet.create({
   },
   detailOptionValue: {
     fontSize: 14,
+    fontFamily: 'PoppinsRegular',
+  },
+  durationButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  durationButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 12,
+  },
+  durationButtonText: {
+    fontSize: 12,
+    fontFamily: 'PoppinsMedium',
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontFamily: 'PoppinsSemiBold',
+    marginBottom: 12,
+  },
+  typeButton: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 20,
+    marginRight: 8,
+  },
+  typeButtonText: {
+    fontSize: 12,
+    fontFamily: 'PoppinsRegular',
+  },
+  difficultyButtons: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  difficultyButton: {
+    flex: 1,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  difficultyButtonText: {
+    fontSize: 12,
+    fontFamily: 'PoppinsMedium',
+  },
+  daysContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  dayButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+  },
+  dayButtonText: {
+    fontSize: 12,
     fontFamily: 'PoppinsRegular',
   },
   saveButton: {

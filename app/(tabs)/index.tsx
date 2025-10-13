@@ -1,6 +1,6 @@
 // HomeScreen.js
 import React, { useCallback, useEffect, useState } from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable, Platform } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Dimensions, ScrollView, Pressable, Platform, ToastAndroid } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { useTheme } from "@/context/ThemeContext";
@@ -16,7 +16,8 @@ import healthconnectService from "@/services/healthconnect.service";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useHealthStore } from "@/store/useHealthStore";
 import ViewTargetModal from "@/components/ViewTargetModal";
-import { TargetProgress } from "@/types/types";
+import { TargetProgress, WorkoutProgram } from "@/types/types";
+import axios from "axios";
 
 
 
@@ -24,14 +25,12 @@ const { width, height } = Dimensions.get("window");
 
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
-  const { user } = useAuthStore();
-  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories, fetchTodaySummary, todaysWater } = useHealthStore()
+  const { user, refreshToken, token } = useAuthStore();
+  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories, fetchTodaySummary, todaysWater, todaysWorkoutMinutes } = useHealthStore()
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
   const [isInitialized, setIsInitialized] = useState(false)
-
-  console.log('tod', todaysWater)
 
   // Activity data states
 
@@ -39,6 +38,8 @@ const HomeScreen = () => {
   const [stepGoal] = useState(10000); // Default goal, would be customized later
   const [bmi, setBmi] = useState<number>();
   const [targetModalVisible, setTargetModalVisible] = useState(false);
+  const [exercises, setExercises] = useState<WorkoutProgram[]>([]);
+  const [loadingExercises, setLoadingExercises] = useState(false);
 
   const ImageComponent = theme === 'dark' ? SleepGraphDark : SleepGraphLight;
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
@@ -50,29 +51,44 @@ const HomeScreen = () => {
 
   // Initialize Health Connect and fetch data
   const fetchHealth = useCallback(async () => {
+    if (!user) return;
     await fetchHealthData();
     await fetchTarget();
-    await fetchTodaySummary()
-  }, [])
-
-  const initializeHealthTracking = useCallback(async () => {
-    if (Platform.OS === 'android') {
-      const initialized = await healthconnectService.initialize();
-      if (initialized) {
-        setIsInitialized(true)
-        const hasPermissions = await healthconnectService.requestPermissions();
-        if (hasPermissions) {
-          await fetchHealth();
-        }
-      }
-    }
-    setLoading(false);
-  }, [fetchHealth])
+    await fetchTodaySummary();
+    const { steps, calories } = await healthconnectService.getTodayActivity();
+    console.log(steps, calories, 'steps and cal')
+  }, [fetchHealthData, fetchTarget, fetchTodaySummary, user]);
 
   useEffect(() => {
-    void initializeHealthTracking();
+    const initialize = async () => {
+      const rtk = await AsyncStorage.getItem('refreshToken');
+      if (!user || !rtk) return;
+
+      if (Platform.OS === 'android') {
+        const initialized = await healthconnectService.initialize();
+        if (initialized) {
+          setIsInitialized(true);
+          const hasPermissions = await healthconnectService.requestPermissions();
+          if (hasPermissions) {
+            console.log('Fetching health data...');
+            await fetchHealthData();
+            await fetchTarget();
+            await fetchTodaySummary();
+          }
+        }
+      } else {
+        ToastAndroid.show('Health Connect is not available on this device.', ToastAndroid.LONG);
+      }
+
+      setLoading(false);
+    };
+
+    initialize();
+  }, [user]);
+
+  useEffect(() => {
     calculateBMI();
-  }, [initializeHealthTracking, user]);
+  }, [user]);
 
   useEffect(() => {
     if (user?.weight && user?.height) {
@@ -99,12 +115,47 @@ const HomeScreen = () => {
     }
 
   };
+
   const getBMIStatus = (bmi: number) => {
     if (bmi < 18.5) return 'Underweight';
     if (bmi < 25) return 'Normal weight';
     if (bmi < 30) return 'Overweight';
     return 'Obese';
   };
+
+  function estimateDuration(instructions: string[], sets: number = 3, reps: number = 12): number {
+    const avgStepTime = 5;
+    const timePerRep = instructions.length * avgStepTime;
+    const totalTime = timePerRep * reps * sets;
+
+
+    return Math.ceil(totalTime / 60);
+  }
+  // Fetch random exercises
+  const fetchRandomExercises = async () => {
+    if (!user) return;
+    setLoadingExercises(true);
+    const options = { method: 'GET', url: 'https://v1.exercisedb.dev/api/v1/exercises', params: { limit: 10, offset: 20 } };
+
+    try {
+
+      const { data } = await axios.request(options);
+
+      const { data: allExercises } = data;
+      const shuffled = allExercises.sort(() => 0.5 - Math.random());
+      const randomExercises = shuffled.slice(0, 8);
+
+      setExercises(randomExercises);
+    } catch (error) {
+      console.error('Error fetching exercises:', error);
+    } finally {
+      setLoadingExercises(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchRandomExercises();
+  }, []);
 
   const todayTargets: TargetProgress[] = [
     {
@@ -142,12 +193,22 @@ const HomeScreen = () => {
       icon: 'timer-outline',
       iconFamily: 'Ionicons' as const,
       label: 'Workout',
-      current: 45,
+      current: todaysWorkoutMinutes,
       target: targetWorkoutMinutes,
       unit: 'mins',
       gradient: ['#FFA726', '#FB8C00'],
     },
   ];
+
+  const routeToDetail = (id: string) => {
+    if (!id) return;
+    router.push({
+      pathname: '/[id]',
+      params: {
+        id
+      }
+    })
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -176,6 +237,9 @@ const HomeScreen = () => {
         >
           <Text style={styles.cardTitle}>BMI (Body Mass Index)</Text>
           <Text style={styles.cardSubtitle}>You have a status: {bmi ? getBMIStatus(bmi) : 'N/A'}</Text>
+          {!user?.weight || !user?.height ? (
+            <Text style={styles.cardSubtitle}>Please <Text onPress={() => router.push('/(profile)/PersonalData')} style={{ color: 'blue' }}>update</Text> profile to calculate BMI.</Text>
+          ) : null}
           <View style={styles.bmiRow}>
             <Text style={styles.bmiValue}>{bmi?.toFixed(1)}</Text>
             <TouchableOpacity >
@@ -210,32 +274,27 @@ const HomeScreen = () => {
         <View style={{ margin: 20 }}>
           <Text style={[styles.sectionTitle, { color: textColor }]}>Activity Status</Text>
 
-          <View style={[styles.chartCard, { backgroundColor: colors.card }]}>
-            <Text style={[styles.heartRate, { color: colors.text }]}>Heart Rate</Text>
-            <Text style={[styles.heartRateValue, theme === 'dark' ? { color: '#C050F6' } : { color: '#C150F6' }]}>78 BPM</Text>
-            <LinearGradient
-              colors={['#983BCB', '#4023D7']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 1 }}
-              style={styles.timeAgo}
-            >
-              <Text style={styles.timeAgoText}>3 mins ago</Text>
-            </LinearGradient>
-
-            {/* Chart */}
-            <LineChartComponent theme={theme} graphFrom={lineChartBg} graphTo={lineChartBg} width={width * 0.80} />
-          </View>
         </View>
 
         {/* Water & Sleep */}
         <View style={styles.statsRow}>
           <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
             <Text style={[styles.statTitle, { color: colors.text }]}>Water Intake</Text>
-            <Text style={styles.statWaterValue}>4 Liters</Text>
-            <Text style={styles.statSub}>Real-time updates</Text>
+            <Text style={styles.statWaterValue}>{todaysWater || 0} Liters</Text>
+            <Text style={styles.statSub}></Text>
           </View>
           <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
-            <Text style={[styles.statTitle, { color: colors.text }]}>Sleep</Text>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Steps</Text>
+            <Text style={styles.statWaterValue}>{todaysSteps || 0}</Text>
+            <Text style={styles.statSub}></Text>
+          </View>
+          <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Calories</Text>
+            <Text style={styles.statWaterValue}>{todaysCalories || 0}</Text>
+            <Text style={styles.statSub}></Text>
+          </View>
+          <View style={[styles.statCard, theme === 'dark' ? { backgroundColor: "#2A2C38" } : { backgroundColor: 'white' }]}>
+            <Text style={[styles.statTitle, { color: colors.text }]}>Sleep (Avg)</Text>
             <Text style={styles.statSleepValue}>9h 20m</Text>
             <View className="justify-center items-center">
               <ImageComponent />
@@ -243,30 +302,7 @@ const HomeScreen = () => {
           </View>
         </View>
 
-        {/* Workout */}
-        <View style={{ margin: 20 }}>
-          <View style={styles.workoutHeader}>
-            <Text style={[styles.sectionTitle, { color: textColor }]}>Workout Progress</Text>
-            <TouchableOpacity >
-              {/* Todo: add drop down for filter */}
-              <LinearGradient
-                colors={gradients.onboarding}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={[styles.checkBtn, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}
-              >
-                <Text style={[styles.checkText, { color: colors.text }]}>Weekly</Text>
-                <MaterialIcons size={23} name="keyboard-arrow-down" />
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.workoutGraph}>
-            <LineChartComponent theme={theme} graphFrom={graphBg} graphTo={graphBg} />
-          </View>
-        </View>
-
-
-        {/* Latest Workout */}
+        {/* Latest Workouts */}
         <View style={{ margin: 20 }}>
           <View style={styles.workoutHeader}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Latest Workout</Text>
@@ -287,13 +323,19 @@ const HomeScreen = () => {
           </View>
 
           <View style={styles.workoutCardContainer}>
-            {workouts.map((workout, index) => (
-              <WorkoutCard
-                key={workout.title + index}
-                title={workout.title}
-                calories={workout.calories}
-                time={workout.time} />
-            ))}
+            {exercises.map((workout, index) => {
+              const duration = estimateDuration(workout.instructions);
+              const id = workout.exerciseId
+              return (
+                <WorkoutCard
+                  key={workout.exerciseId}
+                  title={workout.name}
+                  gif={workout.gifUrl}
+                  onpress={() => routeToDetail(id)}
+                  time={duration} />
+              )
+
+            })}
           </View>
         </View>
       </ScrollView >
@@ -336,7 +378,9 @@ const styles = StyleSheet.create({
   timeAgoText: { textAlign: 'center', fontSize: 12, color: '#FFFFFF' },
 
 
-  statsRow: { flexDirection: "row", justifyContent: "space-between", marginHorizontal: 15, marginBottom: 20, gap: 0 },
+  statsRow: {
+    flexDirection: 'column', marginHorizontal: 15, marginBottom: 20, gap: 0
+  },
   statCard: {
     flex: 1, margin: 5, padding: 15, borderRadius: 16, backgroundColor: "#2a2940", shadowColor: "#000",
     shadowOffset: { width: 0, height: 4 },

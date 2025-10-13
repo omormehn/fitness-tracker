@@ -87,9 +87,9 @@ const WaterIntakeScreen = () => {
                 <View style={[styles.targetCard, { backgroundColor: colors.card }]}>
                     <Text style={[styles.cardTitle, { color: colors.text }]}>Today's Water Goal</Text>
                     <Text style={[styles.cardValue, { color: Colors.linearText }]}>
-                        {todaysWater?.toFixed(1)} / {targetWater} L
+                        {(todaysWater ?? 0).toFixed(1)} / {(targetWater ?? 0)} L
                     </Text>
-                   {renderProgressRing()}
+                    {renderProgressRing()}
                 </View>
 
                 {/* Add Intake */}

@@ -30,11 +30,7 @@ app.use(
     credentials: true,
   })
 );
-const limiter = rateLimit({
-  windowMs: 60 * 1000,
-  max: 100,
-});
-app.use(limiter);
+
 
 connectDB(MONGO_URI);
 

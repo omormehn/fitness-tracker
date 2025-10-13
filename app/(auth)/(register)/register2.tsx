@@ -19,11 +19,12 @@ import InputContainer from '@/components/InputContainer'
 import { LinearGradient } from 'expo-linear-gradient'
 import Button from '@/components/button'
 import { Dropdown } from 'react-native-element-dropdown'
-import { Gender } from '@/types/types'
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router'
-import api from '@/lib/axios'
+import { router, useLocalSearchParams } from 'expo-router'
 import { useAuthStore } from "@/store/useAuthStore";
+import DateTimePicker from '@react-native-community/datetimepicker';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons'
+
 
 const OPTIONS = [
     { label: 'Male', value: 'male' },
@@ -33,14 +34,19 @@ const { width, height } = Dimensions.get('window')
 const RegisterScreen2 = () => {
     const { colors, theme, gradients } = useTheme();
     const { height } = useWindowDimensions()
+    const { updateUser, loading } = useAuthStore()
+
     const dark = theme === 'dark'
+
     const [gender, setGender] = useState(null);
-    const { user, updateUser } = useAuthStore()
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [dateOfBirth, setDateOfBirth] = useState(new Date(2000, 0, 1));
+
+    const { userId } = useLocalSearchParams()
 
 
     const [form, setForm] = useState({
         gender: null,
-        dob: '',
         weight: "",
         height: ""
     })
@@ -50,9 +56,9 @@ const RegisterScreen2 = () => {
     };
 
     const handleSubmit = async () => {
-        if(!form) return;
+        if (!form) return;
         try {
-            const data = { ...form, userId: user?.id }
+            const data = { ...form, userId, dob: dateOfBirth };
             const ok = await updateUser(data)
             if (ok) router.push('/goals')
         } catch (error) {
@@ -60,8 +66,6 @@ const RegisterScreen2 = () => {
         }
     }
 
-    const [showDatePicker, setShowDatePicker] = useState(false);
-    const [dateOfBirth, setDateOfBirth] = useState(new Date(2000, 0, 1));
 
     return (
         <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -120,12 +124,32 @@ const RegisterScreen2 = () => {
                                     }}
                                 />
                             </View>
-                            {/* Use a date picker */}
-                            <InputContainer iconName={'date-range'} placeholder='Date of Birth' theme={theme} value={form.dob} onChangeText={(v) => handleChange('dob', v)} />
-
+                            <TouchableOpacity onPress={() => setShowDatePicker(true)} style={[styles.datePicker, styles.dropdown, theme === 'dark' ? { backgroundColor: '#161818', } : { backgroundColor: '#F7F8F8', }]}>
+                                <MaterialIcons name='date-range' size={24} color={theme === 'dark' ? 'white' : 'black'} />
+                                <Text style={[styles.dateSelectorText, { color: colors.tintText3 }]}>
+                                    {dateOfBirth.toLocaleDateString('en-US', {
+                                        weekday: 'short',
+                                        day: 'numeric',
+                                        month: 'long',
+                                        year: 'numeric',
+                                    })}
+                                </Text>
+                            </TouchableOpacity>
+                            {/* Date Picker */}
+                            {showDatePicker && (
+                                <DateTimePicker
+                                    value={dateOfBirth}
+                                    mode="date"
+                                    display="spinner"
+                                    onChange={(event, date) => {
+                                        setShowDatePicker(false);
+                                        if (date) setDateOfBirth(date);
+                                    }}
+                                />
+                            )}
                             {/* Todo create a component */}
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                                <InputContainer width={'80%'} iconName={'monitor-weight'} placeholder='Your Weight' theme={theme} value={form.weight} onChangeText={(v) => handleChange('weight', v)} />
+                                <InputContainer width={'80%'} iconName={'monitor-weight'} placeholder='Your Weight' theme={theme} keyboardType="decimal-pad" value={form.weight} onChangeText={(v) => handleChange('weight', v)} />
 
                                 <LinearGradient
                                     colors={gradients.onboarding}
@@ -137,7 +161,7 @@ const RegisterScreen2 = () => {
                                 </LinearGradient>
                             </View>
                             <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 10 }}>
-                                <InputContainer width={'80%'} iconName={'height'} placeholder='Your Height' theme={theme} value={form.height} onChangeText={(v) => handleChange('height', v)} />
+                                <InputContainer width={'80%'} iconName={'height'} placeholder='Your Height' theme={theme} keyboardType="decimal-pad" value={form.height} onChangeText={(v) => handleChange('height', v)} />
                                 <LinearGradient
                                     colors={gradients.onboarding}
                                     start={{ x: 0, y: 0 }}
@@ -150,8 +174,8 @@ const RegisterScreen2 = () => {
                         </View>
 
                         {/* Button */}
-                        <TouchableOpacity onPress={handleSubmit} style={styles.buttonContainer}>
-                            <Button text='Next' />
+                        <TouchableOpacity disabled={loading} onPress={handleSubmit} style={styles.buttonContainer}>
+                            <Button loading={loading} text='Next' />
                         </TouchableOpacity>
                     </View>
 
@@ -187,6 +211,10 @@ const styles = StyleSheet.create({
         gap: 16,
         marginBottom: 0,
     },
+    dateSelectorText: {
+        fontSize: 14,
+        fontFamily: 'PoppinsRegular',
+    },
     buttonContainer: {
         width: '100%',
         marginTop: 'auto',
@@ -197,6 +225,10 @@ const styles = StyleSheet.create({
         paddingHorizontal: 10,
         height: 55,
         borderWidth: 1,
-
+    },
+    datePicker: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 10
     }
 })

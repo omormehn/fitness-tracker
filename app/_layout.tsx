@@ -9,6 +9,9 @@ import '../global.css';
 import { ActivityIndicator, StatusBar, View } from 'react-native';
 import { useAuthStore } from '@/store/useAuthStore';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import * as Notifications from 'expo-notifications';
+import * as Device from 'expo-device';
+import { Platform } from 'react-native';
 
 export {
   ErrorBoundary,
@@ -30,9 +33,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  useEffect(() => {
-    if (error) throw error;
-  }, [error]);
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -42,6 +42,40 @@ export default function RootLayout() {
     })
   }, [])
 
+
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
+
+  async function registerForPushNotificationsAsync() {
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get permission for notifications!');
+        return;
+      }
+    }
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        sound: 'default',
+        vibrationPattern: [0, 250, 250, 250],
+      });
+    }
+  }
+
+  useEffect(() => {
+    if (error) throw error;
+  }, [error]);
+
+
+
   if (!loaded) {
     return null;
   }
@@ -50,7 +84,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { user, initializeAuthState, hasOnboarded, initialized } = useAuthStore();
+  const { user, initializeAuthState, hasOnboarded, initialized, justRegistered, clearRegisterFlag, } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
   const navigationState = useRootNavigationState();
@@ -58,57 +92,47 @@ function RootLayoutNav() {
 
   useEffect(() => {
     initializeAuthState();
-  }, [initializeAuthState]);
+  }, []);
 
 
   useEffect(() => {
-    if (initialized) return;
-    if (!navigationState?.key) return;
-
-    // Only navigate once
+    if (!initialized || !navigationState?.key) return;
     if (hasNavigated.current) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
-    const inOnboardingGroup = segments[0] === '(onboarding)';
-    const inAppGroup = segments[0] === '(tabs)';
-
-    let targetRoute: any = null;
-
-    if (!user) {
-      if (!inAuthGroup) {
-        targetRoute = '/(auth)/login';
-      }
-    } else if (!hasOnboarded) {
-      if (!inOnboardingGroup) {
-        targetRoute = '/(onboarding)';
-      }
-    } else {
-      if (!inAppGroup) {
-        targetRoute = '/(tabs)';
-      }
-    }
-
+    console.log('navigating', hasOnboarded)
+    // Only navigate once
     hasNavigated.current = true;
 
-    if (targetRoute) {
-      setTimeout(() => {
-        router.replace(targetRoute);
-        setTimeout(() => {
-          SplashScreen.hideAsync();
-        }, 100);
-      }, 50);
-    } else {
-      setTimeout(() => {
-        SplashScreen.hideAsync();
-      }, 100);
-    }
-
-  }, [initialized, navigationState?.key, user, hasOnboarded, segments]);
+    const determineRoute = () => {
+      if (!hasOnboarded) {
+        return '/(onboarding)';
+      }
+      if (!user) {
+        return '/(auth)/login';
+      }
+      if (user && justRegistered) {
+        return '/(auth)/(register)/register2';
+      }
+      return '/(tabs)';
+    };
 
 
-  if (initialized || !navigationState?.key || !hasNavigated.current) {
+    const targetRoute = determineRoute();
+
+
+    setTimeout(() => {
+      router.replace(targetRoute as any);
+      if (justRegistered) {
+        useAuthStore.getState().clearRegisterFlag();
+      }
+      SplashScreen.hideAsync();
+    }, 100);
+
+  }, [navigationState?.key, user, hasOnboarded, initialized, justRegistered]);
+
+
+  if (!navigationState?.key || !hasNavigated.current) {
     return (
-      <View   
+      <View
         style={{
           flex: 1,
           justifyContent: 'center',

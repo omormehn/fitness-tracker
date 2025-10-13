@@ -27,7 +27,6 @@ const LoginScreen = () => {
     const [isloading, setIsLoading] = useState(false)
 
 
-
     const handleGoogleSignIn = async () => {
         setIsLoading(true)
         try {

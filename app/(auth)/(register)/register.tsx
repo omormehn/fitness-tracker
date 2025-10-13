@@ -64,9 +64,17 @@ const RegisterScreen = () => {
         try {
             if (form.email.length <= 0) {
                 setError({ field: 'email', msg: 'Invalid Email Address' })
+                return;
             }
-            const ok = await register(formData)
-            if (ok) router.push('/(auth)/(register)/register2')
+            const id = await register(formData);
+            if (id) {
+                setTimeout(() => {
+                    router.push({
+                        pathname: '/(auth)/(register)/register2',
+                        params: { userId: id }
+                    })
+                }, 100);
+            }
         } catch (error) {
             console.log('err', error)
         }
@@ -101,7 +109,7 @@ const RegisterScreen = () => {
                     {error.field === 'email' && <ErrorText msg={error.msg} />}
                 </View>
                 <View>
-                    <InputContainer value={form.phone} textContentType='telephoneNumber' onChangeText={(v) => handleChange("phone", v)} iconName={'phone'} placeholder='Phone Number' theme={theme} />
+                    <InputContainer value={form.phone} textContentType='telephoneNumber' keyboardType="decimal-pad" onChangeText={(v) => handleChange("phone", v)} iconName={'phone'} placeholder='Phone Number' theme={theme} />
                     {error.field === 'phone' && <ErrorText msg={error.msg} />}
                 </View>
                 <View>

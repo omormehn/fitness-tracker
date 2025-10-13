@@ -1,4 +1,4 @@
-import { Dimensions, StyleSheet, Text, View } from 'react-native'
+import { Dimensions, StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native'
 import React from 'react'
 import { useTheme } from '@/context/ThemeContext';
 import LinearGradientComponent from './linearGradient';
@@ -6,30 +6,29 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 interface WorkoutCardProps {
     title: string
-    calories: string
-    time: string
+    calories?: string
+    time: string | number
+    gif?: string
+    onpress?: () => void
 }
 
 
-const WorkoutCard = ({ title, calories, time }: WorkoutCardProps) => {
+const WorkoutCard = ({ title, calories, time, gif, onpress }: WorkoutCardProps) => {
     const { colors, gradients } = useTheme();
-
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
+        <TouchableOpacity onPress={onpress} style={[styles.container, { backgroundColor: colors.background }]}>
             {/* First col */}
-            <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
-                {/* TODO: Add your card content here */}
-            </LinearGradientComponent>
+            <Image source={{ uri: gif }} style={{ width: 50, height: 55 }} resizeMode="contain" />
 
             {/* 2nd col */}
             <View style={styles.column2}>
-                <Text style={[styles.title, { color: colors.text }]}>{title}</Text>
+                <Text style={[styles.title, { color: colors.text }]}>{title.charAt(0).toUpperCase() + title.slice(1)}</Text>
                 <Text style={[styles.subTitle, { color: colors.tintText3 }]}>{calories} Calories Burn | {time} minutes</Text>
             </View>
 
             {/* 3rd col */}
             <View style={styles.circle} />
-        </View>
+        </TouchableOpacity>
     )
 }
 
@@ -49,12 +48,13 @@ const styles = StyleSheet.create({
     },
     title: {
         fontSize: 14,
-        fontFamily: 'PoppinsMedium'
+        fontFamily: 'PoppinsMedium',
+        width: 150,
     },
     subTitle: {
         fontSize: 14,
         fontFamily: 'PoppinsRegular',
-        width: 200
+        // width: 200
     },
     circle: {
         width: 40,
