@@ -18,32 +18,71 @@ const BAR_WIDTH = 28;
 
 
 
-const ActivityBarChart = () => {
-    const { colors, gradients, theme } = useTheme();
-    const { todaysSteps, targetSteps, targetWater, todaysWater, fetchWeeklySummary } = useHealthStore();
-
-    const stepsProgress = (todaysSteps! / (targetSteps || 1)) * 100;
-    const waterProgress = (todaysWater! / (targetWater || 1)) * 100;
-
-    console.log('pp, ', stepsProgress, waterProgress);
+const ActivityBarChart = ({ filter }: { filter: string | null }) => {
+    const { colors, gradients, } = useTheme();
+    const { todaysSteps, fetchWeeklySummary, todaysCalories } = useHealthStore();
+    const [loading, setLoading] = useState(true);
     const [weeklyData, setWeeklyData] = useState<any[]>([]);
+
     const loadWeeklyData = useCallback(async () => {
-        console.log('dopppm ')
-        const data = await fetchWeeklySummary();
-        console.log('week', data);
-        setWeeklyData(data);
+        try {
+            setLoading(true);
+            const data = await fetchWeeklySummary();
+            setWeeklyData(data || []);
+        } catch (error) {
+            console.error('Error loading weekly data:', error);
+            setWeeklyData([]);
+        } finally {
+            setLoading(false);
+        }
     }, [fetchWeeklySummary]);
 
     useEffect(() => {
         loadWeeklyData();
     }, [loadWeeklyData]);
+    const getValueByFilter = (day: any) => {
+        switch (filter) {
+            case 'steps':
+                return todaysSteps || 0;
+            case 'calories':
+                return todaysCalories || 0;
+            case 'workoutMinutes':
+                return day.workoutMinutes || 0;
+            case 'water':
+                return day.water || 0;
+            default:
+                return todaysSteps || 0;
+        }
+    };
 
+    const getGradientByFilter = (index: number) => {
+        switch (filter) {
+            case 'steps':
+                return index % 2 === 0 ? gradients.greenLinear : gradients.button;
+            case 'calories':
+                return ['#FF6B6B', '#FF8E8E'];
+            case 'workoutMinutes':
+                return ['#4ECDC4', '#88D3CE'];
+            case 'water':
+                return ['#4A90E2', '#6AAEFF'];
+            default:
+                return index % 2 === 0 ? gradients.greenLinear : gradients.button;
+        }
+    };
 
     const activityData: ChartBarData[] = weeklyData?.map((day, index) => ({
         day: new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' }),
-        value: day.steps || 0, // or day.calories, day.workoutMinutes,
-        gradient: index % 2 === 0 ? gradients.greenLinear : gradients.button,
+        value: getValueByFilter(day),
+        gradient: getGradientByFilter(index),
     }));
+
+    if (loading) {
+        return (
+            <View style={[styles.chartContainer, { backgroundColor: colors.card }]}>
+                <ActivityIndicator size="small" color={colors.text} />
+            </View>
+        );
+    }
 
 
     if (activityData?.length === 0) {
@@ -52,12 +91,12 @@ const ActivityBarChart = () => {
         );
     }
 
-    // Calculate max for the week
+
     const values = activityData && activityData.length > 0
         ? activityData.map(d => d.value)
         : [0];
 
-    const maxValue = Math.max(...values, 100);
+    const maxValue = Math.max(...values, 1000);
 
     return (
         <View style={[styles.chartContainer, { backgroundColor: colors.card }]}>
@@ -66,7 +105,7 @@ const ActivityBarChart = () => {
                     <BarItem
                         key={item.day}
                         day={item.day}
-                        value={stepsProgress}
+                        value={item.value}
                         maxValue={maxValue}
                         gradient={item.gradient}
                         delay={index * 100}
@@ -107,7 +146,7 @@ const BarItem: React.FC<BarItemProps> = ({
     return (
         <View style={styles.barContainer}>
             <View style={styles.barWrapper}>
-                {/* Background bar (inactive state) */}
+
                 <View
                     style={[
                         styles.backgroundBar,
