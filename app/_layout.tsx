@@ -84,7 +84,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { user, initializeAuthState, hasOnboarded, initialized, token, refreshToken } = useAuthStore();
+  const { user, initializeAuthState, hasOnboarded, initialized, justRegistered, clearRegisterFlag, } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
   const navigationState = useRootNavigationState();
@@ -109,7 +109,9 @@ function RootLayoutNav() {
       if (!user) {
         return '/(auth)/login';
       }
-
+      if (user && justRegistered) {
+        return '/(auth)/(register)/register2';
+      }
       return '/(tabs)';
     };
 
@@ -119,10 +121,13 @@ function RootLayoutNav() {
 
     setTimeout(() => {
       router.replace(targetRoute as any);
+      if (justRegistered) {
+        useAuthStore.getState().clearRegisterFlag();
+      }
       SplashScreen.hideAsync();
     }, 100);
 
-  }, [navigationState?.key, user, hasOnboarded, initialized]);
+  }, [navigationState?.key, user, hasOnboarded, initialized, justRegistered]);
 
 
   if (!navigationState?.key || !hasNavigated.current) {
@@ -140,7 +145,6 @@ function RootLayoutNav() {
     );
   }
 
-  console.log('onboard', hasOnboarded)
   return (
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} barStyle="light-content" />
