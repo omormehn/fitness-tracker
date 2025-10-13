@@ -63,6 +63,7 @@ const WorkoutScheduleScreen = () => {
 
   const [exercises, setExercises] = useState<WorkoutProgram[]>([]);
   const [loadingExercises, setLoadingExercises] = useState(false);
+  const [exerciseLength, setLength] = useState<number | null>(0);
 
   // Fetch random exercises
   const fetchRandomExercises = async () => {
@@ -123,7 +124,7 @@ const WorkoutScheduleScreen = () => {
       console.error('Error saving schedules:', error);
     }
   };
-                            
+
   const restoreNotifications = async () => {
     try {
       await Notifications.cancelAllScheduledNotificationsAsync();
@@ -203,6 +204,7 @@ const WorkoutScheduleScreen = () => {
         notificationId,
         repeatDays: repeatDays.length > 0 ? repeatDays : undefined,
         exerciseData: selectedExercise,
+        exerciseLength: exerciseLength || undefined
       };
 
       setSchedules(prev => [...prev, newSchedule]);
@@ -228,22 +230,6 @@ const WorkoutScheduleScreen = () => {
     }
   };
 
-  const toggleSchedule = async (id: string) => {
-    setSchedules(prev =>
-      prev.map(item => {
-        if (item.id === id) {
-          const updatedItem = { ...item, enabled: !item.enabled };
-
-          if (!updatedItem.enabled && item.notificationId) {
-            cancelWorkoutNotification(item);
-          }
-
-          return updatedItem;
-        }
-        return item;
-      })
-    );
-  };
 
   const deleteSchedule = (id: string) => {
     Alert.alert(
@@ -266,12 +252,6 @@ const WorkoutScheduleScreen = () => {
     );
   };
 
-  const handleMarkAsDone = () => {
-    if (selectedWorkout) {
-      Alert.alert('Great Job!', 'Workout marked as completed! 💪');
-      setDetailModalVisible(false);
-    }
-  };
 
   const getWorkoutsForDate = (date: Date) => {
     return schedules.filter(schedule =>
@@ -495,6 +475,7 @@ const WorkoutScheduleScreen = () => {
                         onPress={() => {
                           routeToDetail(exercise.exerciseId)
                           setSelectedWorkoutType(exercise.name)
+                          setLength(exercise.instructions.length)
                         }}
                         style={[
                           styles.typeButton,

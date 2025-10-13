@@ -61,11 +61,13 @@ interface AuthState {
   refreshToken: string | null;
   loading: boolean;
   initialized: boolean;
+  justRegistered: boolean;
   googleSignIn: () => Promise<boolean>;
   login: (data) => Promise<boolean>;
-  register: (data) => Promise<boolean>;
+  register: (data) => Promise<any>;
   logout: () => Promise<void>;
   updateUser: (data) => Promise<boolean>
+  clearRegisterFlag: () => void;
   error: { field?: string | null, msg: string | null }
   hasOnboarded: boolean;
   setOnboarded: () => void;
@@ -151,6 +153,30 @@ type TargetItems = {
   workoutMinutes: number;
   steps: number;
 }
+interface AddTargetModalProps {
+  visible: boolean;
+  onClose: () => void;
+  onSave: (targets: TargetData) => void;
+}
+
+interface TargetData {
+  steps?: number;
+  water?: number;
+  calories?: number;
+  workoutMinutes?: number;
+}
+
+interface TargetItem {
+  id: string;
+  icon: any;
+  iconFamily: 'MaterialCommunity' | 'Material' | 'Ionicons';
+  label: string;
+  value: string;
+  unit: string;
+  placeholder: string;
+  keyboardType: 'numeric' | 'default';
+}
+
 interface HealthState {
   targetSteps: number | null,
   targetWater: number | null,
@@ -185,15 +211,15 @@ interface ScheduleItem {
   enabled: boolean;
   sleepHours?: number;
   date?: Date;
-  notificationIds?: string[]; 
+  notificationIds?: string[];
   bedtimeAlarm?: Date;
   wakeUpTime?: Date;
 }
 interface SleepSchedule {
-    id: string;
-    date: Date;
-    bedTime: string;
-    sleepHours: number;
+  id: string;
+  date: Date;
+  bedTime: string;
+  sleepHours: number;
 }
 
 
@@ -210,4 +236,36 @@ interface WorkoutScheduleItem {
   notificationId?: string;
   repeatDays?: string[];
   exerciseData?: WorkoutProgram;
+  exerciseLength?: number;
 }
+
+interface BaseNotification {
+  id: string;
+  type: NotificationType;
+  title: string;
+  message: string;
+  timestamp: Date;
+  read: boolean;
+  data?: any;
+}
+
+
+interface SleepNotification extends BaseNotification {
+  type: 'sleep';
+  data: {
+    scheduleId: string;
+    bedtimeAlarm?: Date;
+    wakeUpTime?: Date;
+  };
+}
+
+interface WorkoutNotification extends BaseNotification {
+  type: 'workout';
+  data: {
+    scheduleId: string;
+    workoutTime: Date;
+    exerciseCount: number;
+  };
+}
+
+type AppNotification = SleepNotification | WorkoutNotification;

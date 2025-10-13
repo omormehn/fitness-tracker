@@ -18,9 +18,7 @@ const WorkoutCard = ({ title, calories, time, gif, onpress }: WorkoutCardProps) 
     return (
         <TouchableOpacity onPress={onpress} style={[styles.container, { backgroundColor: colors.background }]}>
             {/* First col */}
-            <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
-                <Image source={{ uri: gif }} style={{ width: 15, height: 15 }} resizeMode="contain" />
-            </LinearGradientComponent>
+            <Image source={{ uri: gif }} style={{ width: 50, height: 55 }} resizeMode="contain" />
 
             {/* 2nd col */}
             <View style={styles.column2}>

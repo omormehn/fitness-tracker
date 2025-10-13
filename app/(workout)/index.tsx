@@ -63,12 +63,6 @@ const WorkoutTrackerScreen = () => {
         }
     }
 
-
-    const [upcomingWorkouts, setUpcomingWorkouts] = useState<UpcomingWorkout[]>([
-        { id: '1', title: 'Fullbody Workout', time: 'Today, 03:00pm', icon: '💪', enabled: true },
-        { id: '2', title: 'Upperbody Workout', time: 'June 05, 02:00pm', icon: '🏋️', enabled: false },
-    ]);
-
     const workoutData: WorkoutData[] = [
         { day: 'Sun', value: 20 },
         { day: 'Mon', value: 45 },
