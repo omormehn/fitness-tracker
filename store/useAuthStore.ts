@@ -15,6 +15,7 @@ export const useAuthStore = create<AuthState>()(
             token: null,
             refreshToken: null,
             initialized: false,
+            justRegistered: false,
             loading: false,
             error: { field: '', msg: '' },
             hasOnboarded: false,
@@ -38,6 +39,11 @@ export const useAuthStore = create<AuthState>()(
                     });
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                    if (!user?.weight || !user?.height) {
+                        setTimeout(() => {
+                            router.replace('/(auth)/(register)/register2');
+                        }, 100);
+                    }
 
                     return true;
                 } catch (err: any) {
@@ -55,21 +61,20 @@ export const useAuthStore = create<AuthState>()(
 
             register: async (data) => {
                 try {
-                    set({ loading: true, error: { field: null, msg: null } });
+                    set({ loading: true, error: { field: null, msg: null }, justRegistered: true });
                     const res = await api.post("/auth/register", data);
                     const { refreshToken, accessToken, user } = res.data;
-
+                    const id = user?.id;
                     await TokenService.setTokens(accessToken, refreshToken);
 
                     set({
-                        user: user || null,
                         token: accessToken,
                         refreshToken
                     });
 
                     api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
-                    return true;
+                    return id;
                 } catch (err: any) {
                     const errors = err.response?.data?.errors;
                     if (Array.isArray(errors) && errors.length > 0) {
@@ -83,6 +88,7 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
+            clearRegisterFlag: () => set({ justRegistered: false }),
             updateUser: async (data) => {
                 try {
                     set({ loading: true, error: { field: null, msg: null } });
@@ -130,7 +136,13 @@ export const useAuthStore = create<AuthState>()(
                         api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
 
                         if (!user?.weight || !user?.height) {
-                            router.push('/(auth)/(register)/register2');
+                            setTimeout(() => {
+                                router.replace('/(auth)/(register)/register2');
+                            }, 100);
+                        } else {
+                            setTimeout(() => {
+                                router.replace('/(tabs)');
+                            }, 100);
                         }
 
                         return true;
@@ -166,7 +178,7 @@ export const useAuthStore = create<AuthState>()(
                                 );
                                 break;
                             default:
-                                console.error(error);  
+                                console.error(error);
                                 ToastAndroid.showWithGravityAndOffset(
                                     'Network Error, Please try again',
                                     ToastAndroid.LONG,

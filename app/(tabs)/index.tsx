@@ -26,7 +26,7 @@ const { width, height } = Dimensions.get("window");
 const HomeScreen = () => {
   const { theme, colors, gradients } = useTheme()
   const { user, refreshToken, token } = useAuthStore();
-  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories, fetchTodaySummary, todaysWater } = useHealthStore()
+  const { targetSteps, targetWater, targetCalories, targetWorkoutMinutes, fetchTarget, fetchHealthData, todaysSteps, todaysCalories, fetchTodaySummary, todaysWater, todaysWorkoutMinutes } = useHealthStore()
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -52,7 +52,6 @@ const HomeScreen = () => {
   // Initialize Health Connect and fetch data
   const fetchHealth = useCallback(async () => {
     if (!user) return;
-    console.log('fetching health data...');
     await fetchHealthData();
     await fetchTarget();
     await fetchTodaySummary();
@@ -134,6 +133,7 @@ const HomeScreen = () => {
   }
   // Fetch random exercises
   const fetchRandomExercises = async () => {
+    if (!user) return;
     setLoadingExercises(true);
     const options = { method: 'GET', url: 'https://v1.exercisedb.dev/api/v1/exercises', params: { limit: 10, offset: 20 } };
 
@@ -193,7 +193,7 @@ const HomeScreen = () => {
       icon: 'timer-outline',
       iconFamily: 'Ionicons' as const,
       label: 'Workout',
-      current: 45,
+      current: todaysWorkoutMinutes,
       target: targetWorkoutMinutes,
       unit: 'mins',
       gradient: ['#FFA726', '#FB8C00'],
@@ -237,6 +237,9 @@ const HomeScreen = () => {
         >
           <Text style={styles.cardTitle}>BMI (Body Mass Index)</Text>
           <Text style={styles.cardSubtitle}>You have a status: {bmi ? getBMIStatus(bmi) : 'N/A'}</Text>
+          {!user?.weight || !user?.height ? (
+            <Text style={styles.cardSubtitle}>Please <Text onPress={() => router.push('/(profile)/PersonalData')} style={{ color: 'blue' }}>update</Text> profile to calculate BMI.</Text>
+          ) : null}
           <View style={styles.bmiRow}>
             <Text style={styles.bmiValue}>{bmi?.toFixed(1)}</Text>
             <TouchableOpacity >

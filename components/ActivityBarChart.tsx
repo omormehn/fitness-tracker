@@ -28,6 +28,7 @@ const ActivityBarChart = () => {
     console.log('pp, ', stepsProgress, waterProgress);
     const [weeklyData, setWeeklyData] = useState<any[]>([]);
     const loadWeeklyData = useCallback(async () => {
+        console.log('dopppm ')
         const data = await fetchWeeklySummary();
         console.log('week', data);
         setWeeklyData(data);
