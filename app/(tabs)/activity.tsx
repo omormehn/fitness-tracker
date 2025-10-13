@@ -22,7 +22,6 @@ const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
   const { todaysSteps, addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes, fetchWeeklySummary } = useHealthStore()
 
-  console.log('ee', todaysSteps)
   const [steps, setSteps] = useState<number>();
   const [modalVisible, setModalVisible] = useState(false);
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
@@ -37,21 +36,19 @@ const ActivityScreen = () => {
   const handleSaveTargets = async (targets: any) => {
     try {
       const ok = await addTarget(targets)
+      if (!ok) {
+        alert('Failed to add target')
+        return
+      }
+      setModalVisible(false)
+      alert('Target added successfully')
 
     } catch (error) {
       console.log('err', error)
     }
   };
 
-  const handleSteps = async () => {
-    const { steps } = await healthconnectService.getTodayActivity()
-    setSteps(steps)
-  }
 
-
-  useEffect(() => {
-    handleSteps()
-  }, [])
 
 
 
@@ -126,7 +123,7 @@ const ActivityScreen = () => {
             <Text style={[styles.sectionTitle, { color: textColor }]}>Latest Activity</Text>
           </View>
           {/* Activity details */}
-          <TouchableOpacity onPress={() => router.push('/(activity)')} style={styles.activityDetailsContainer}>
+          <TouchableOpacity onPress={() => router.push('/(activity)/sleeptracker')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
               <LinearGradientComponent gradient={gradients.card} style={{ padding: 15, borderRadius: 35, }} >
