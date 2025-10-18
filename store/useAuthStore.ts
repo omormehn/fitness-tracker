@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist, createJSONStorage } from "zustand/middleware";
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -7,6 +6,7 @@ import { AuthState } from '@/types/types';
 import { GoogleSignin, isErrorWithCode, isSuccessResponse, statusCodes } from '@react-native-google-signin/google-signin';
 import { ToastAndroid } from 'react-native';
 import { router } from 'expo-router';
+import { TokenService } from '@/lib/tokenService';
 
 export const useAuthStore = create<AuthState>()(
     persist(
@@ -14,28 +14,40 @@ export const useAuthStore = create<AuthState>()(
             user: null,
             token: null,
             refreshToken: null,
-            initializing: false,
             initialized: false,
+            justRegistered: false,
             loading: false,
             error: { field: '', msg: '' },
             hasOnboarded: false,
+
             setAuth: ({ user, token }) => set({ user, token }),
             setError: (error: { field: string | null, msg: string | null }) => set({ error }),
             setOnboarded: () => set({ hasOnboarded: true }),
-
 
             login: async (data) => {
                 try {
                     set({ loading: true, error: { field: null, msg: null } });
                     const res = await api.post("/auth/login", data);
-                    const { refreshToken, accessToken, user } = res.data
-                    await AsyncStorage.setItem("token", accessToken);
-                    await AsyncStorage.setItem("refreshToken", refreshToken);
-                    set({ user: user || null, token: accessToken, refreshToken: refreshToken });
+                    const { refreshToken, accessToken, user } = res.data;
+
+                    await TokenService.setTokens(accessToken, refreshToken);
+
+                    set({
+                        user: user || null,
+                        token: accessToken,
+                        refreshToken
+                    });
+
+                    api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+                    if (!user?.weight || !user?.height) {
+                        setTimeout(() => {
+                            router.replace('/(auth)/(register)/register2');
+                        }, 100);
+                    }
+
                     return true;
                 } catch (err: any) {
                     const errors = err.response?.data?.errors;
-                    console.log('err', errors)
                     if (Array.isArray(errors) && errors.length > 0) {
                         set({ error: { field: errors[0].field, msg: errors[0].message } });
                     } else {
@@ -43,23 +55,28 @@ export const useAuthStore = create<AuthState>()(
                     }
                     return false;
                 } finally {
-                    set({ loading: false, });
+                    set({ loading: false });
                 }
             },
 
             register: async (data) => {
                 try {
-                    set({ loading: true, error: { field: null, msg: null } });
+                    set({ loading: true, error: { field: null, msg: null }, justRegistered: true });
                     const res = await api.post("/auth/register", data);
                     const { refreshToken, accessToken, user } = res.data;
-                    await AsyncStorage.setItem("token", accessToken);
-                    await AsyncStorage.setItem("refreshToken", refreshToken);
-                    set({ user: user || null, token: accessToken });
-                    return true;
+                    const id = user?.id;
+                    await TokenService.setTokens(accessToken, refreshToken);
+
+                    set({
+                        token: accessToken,
+                        refreshToken
+                    });
+
+                    api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+                    return id;
                 } catch (err: any) {
-                    console.log('err', err)
                     const errors = err.response?.data?.errors;
-                    console.log('err', errors)
                     if (Array.isArray(errors) && errors.length > 0) {
                         set({ error: { field: errors[0].field, msg: errors[0].message } });
                     } else {
@@ -71,6 +88,7 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
 
+            clearRegisterFlag: () => set({ justRegistered: false }),
             updateUser: async (data) => {
                 try {
                     set({ loading: true, error: { field: null, msg: null } });
@@ -78,9 +96,7 @@ export const useAuthStore = create<AuthState>()(
                     set({ user: res.data.user });
                     return true;
                 } catch (err: any) {
-                    console.log('err', err)
                     const errors = err.response?.data?.errors;
-                    console.log('err', errors)
                     if (Array.isArray(errors) && errors.length > 0) {
                         set({ error: { field: errors[0].field, msg: errors[0].message } });
                     } else {
@@ -93,27 +109,43 @@ export const useAuthStore = create<AuthState>()(
             },
 
             googleSignIn: async () => {
-                set({ loading: true })
+                set({ loading: true });
                 try {
                     await GoogleSignin.hasPlayServices();
                     await GoogleSignin.signOut();
                     const res = await GoogleSignin.signIn();
+
                     if (isSuccessResponse(res)) {
-                        const { idToken, } = res.data
+                        const { idToken } = res.data;
                         const serverResponse = await api.post('/auth/google', {
                             token: idToken,
-                        })
-                        const { user, accessToken, refreshToken } = serverResponse.data;
-                        await AsyncStorage.setItem("token", accessToken);
-                        await AsyncStorage.setItem("refreshToken", refreshToken);
-                        if (!user?.weight || !user?.height) {
-                            console.log('com')
-                            router.push('/(auth)/(register)/register2')
-                        }
-                        set({ user, token: accessToken, refreshToken: refreshToken });
-                        set({ error: { field: null, msg: null } })
-                        return true
+                        });
 
+                        const { user, accessToken, refreshToken } = serverResponse.data;
+
+                        await TokenService.setTokens(accessToken, refreshToken);
+
+                        set({
+                            user,
+                            token: accessToken,
+                            refreshToken,
+                            error: { field: null, msg: null }
+                        });
+
+
+                        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+
+                        if (!user?.weight || !user?.height) {
+                            setTimeout(() => {
+                                router.replace('/(auth)/(register)/register2');
+                            }, 100);
+                        } else {
+                            setTimeout(() => {
+                                router.replace('/(tabs)');
+                            }, 100);
+                        }
+
+                        return true;
                     } else {
                         ToastAndroid.showWithGravityAndOffset(
                             'Sign in canceled',
@@ -122,7 +154,7 @@ export const useAuthStore = create<AuthState>()(
                             25,
                             50,
                         );
-                        return false
+                        return false;
                     }
                 } catch (error) {
                     if (isErrorWithCode(error)) {
@@ -146,7 +178,7 @@ export const useAuthStore = create<AuthState>()(
                                 );
                                 break;
                             default:
-                                console.log('erro', error)
+                                console.error(error);
                                 ToastAndroid.showWithGravityAndOffset(
                                     'Network Error, Please try again',
                                     ToastAndroid.LONG,
@@ -154,14 +186,11 @@ export const useAuthStore = create<AuthState>()(
                                     25,
                                     50,
                                 );
-                                console.log('err', error.code)
                         }
-                    } else {
-                        console.log('err in goog', error)
                     }
                     return false;
                 } finally {
-                    set({ loading: false })
+                    set({ loading: false });
                 }
             },
 
@@ -170,34 +199,30 @@ export const useAuthStore = create<AuthState>()(
                     await AsyncStorage.multiRemove(['token', 'refreshToken']);
                     delete (api.defaults.headers.common as any).Authorization;
                 } finally {
-                    set({ user: null, token: null, refreshToken: null });
+                    set({
+                        user: null,
+                        token: null,
+                        refreshToken: null
+                    });
                 }
             },
+
             initializeAuthState: async () => {
-                set({ initializing: true, });
-                const token = await AsyncStorage.getItem("token");
-                const refreshToken = await AsyncStorage.getItem("refreshToken");
+                try {
+                    const [refreshToken, token] = await Promise.all([
+                        AsyncStorage.getItem('refreshToken'),
+                        AsyncStorage.getItem('token')
+                    ])
 
+                    if (token) {
+                        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    }
 
-
-                if (!token || !refreshToken) {
-                    set({ initializing: false });
-                    return;
+                    set({ refreshToken, token, initialized: true, });
+                } catch (error) {
+                    console.error('Error initializing auth state:', error);
+                    set({ initialized: true });
                 }
-
-                // try {
-                //     const res = await api.get('/auth/me', {
-                //         headers: {
-                //             Authorization: `Bearer ${token}`
-                //         }
-                //     });
-                //     set({ user: res.data.user || null, token, refreshToken, });
-                // } catch (err) {
-                //     console.log('err in init', err)
-                //     await AsyncStorage.multiRemove(['token', 'refreshToken']);
-                //     set({ user: null, token: null, refreshToken: null, });
-                // }
-                set({ initializing: false, })
             },
         }),
         {
@@ -212,10 +237,9 @@ export const useAuthStore = create<AuthState>()(
             onRehydrateStorage: () => (state) => {
                 if (state) {
                     state.loading = false;
-                    state.initializing = false;
+                    state.initialized = false;
                 }
             },
         }
     )
 );
-

@@ -10,7 +10,7 @@ import {
     getSdkStatus,
 
 } from 'react-native-health-connect';
-import { Platform } from 'react-native';
+import { Platform, ToastAndroid } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface StepData {
@@ -44,6 +44,7 @@ class HealthConnectService {
 
     async initialize() {
         if (Platform.OS !== 'android') {
+            ToastAndroid.show('Health Connect is only available on Android.', ToastAndroid.LONG);
             console.log('Health Connect is only available on Android');
             return false;
         }
@@ -51,6 +52,7 @@ class HealthConnectService {
         try {
             const status = await getSdkStatus();
             if (status !== SdkAvailabilityStatus.SDK_AVAILABLE) {
+                ToastAndroid.show('Health Connect SDK is not available, Please install to continue.', ToastAndroid.LONG);
                 console.log('Health Connect SDK is not available');
                 return false;
             }
@@ -66,6 +68,7 @@ class HealthConnectService {
 
     async requestPermissions() {
         if (!this.initialized) {
+            ToastAndroid.show('Health Connect is not initialized yet.', ToastAndroid.LONG);
             console.warn("Health Connect is not initialized yet. Call initialize() first.");
             return false;
         }

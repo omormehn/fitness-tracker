@@ -16,14 +16,15 @@ import api from '@/lib/axios'
 import { useHealthStore } from '@/store/useHealthStore'
 import Ionicons from '@expo/vector-icons/Ionicons'
 import { router } from 'expo-router'
+import { Dropdown } from 'react-native-element-dropdown'
 
 
 const ActivityScreen = () => {
   const { colors, gradients, theme } = useTheme();
-  const { todaysSteps, addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes, fetchWeeklySummary } = useHealthStore()
+  const { addTarget, targetSteps, targetWater, fetchTarget, targetCalories, targetWorkoutMinutes } = useHealthStore();
+  const [filterOption, setFilterOption] = useState<string | null>('steps');
 
-  console.log('ee', todaysSteps)
-  const [steps, setSteps] = useState<number>();
+
   const [modalVisible, setModalVisible] = useState(false);
   const textColor = theme === 'dark' ? '#FFFFFF' : '#000000';
   useEffect(() => {
@@ -37,22 +38,24 @@ const ActivityScreen = () => {
   const handleSaveTargets = async (targets: any) => {
     try {
       const ok = await addTarget(targets)
+      if (!ok) {
+        alert('Failed to add target')
+        return
+      }
+      setModalVisible(false)
+      alert('Target added successfully')
 
     } catch (error) {
       console.log('err', error)
     }
   };
 
-  const handleSteps = async () => {
-    const { steps } = await healthconnectService.getTodayActivity()
-    setSteps(steps)
-  }
-
-
-  useEffect(() => {
-    handleSteps()
-  }, [])
-
+  const OPTIONS = [
+    { label: 'Steps', value: 'steps' },
+    { label: 'Calories', value: 'calories' },
+    { label: 'Workout Minutes', value: 'workoutMinutes' },
+    { label: 'Water', value: 'water' },
+  ]
 
 
   return (
@@ -105,52 +108,67 @@ const ActivityScreen = () => {
         <View style={{ marginTop: 30, paddingHorizontal: 30 }}>
           <View style={styles.activityHeader}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Activity Progress</Text>
-            <TouchableOpacity>
+            <View style={styles.dropdownContainer}>
               <LinearGradient
                 colors={gradients.greenLinear}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={[styles.activityBtn, { flexDirection: 'row', alignItems: 'center', gap: 4 }]}
+                style={[styles.dropdownWrapper]}
               >
-                <Text style={[styles.activityBtnText, { color: colors.text }]}>Weekly</Text>
-                <MaterialIcons size={23} name="keyboard-arrow-down" />
+
+                <Dropdown
+                  style={styles.dropdown}
+                  placeholderStyle={[styles.placeholderStyle, { color: theme === 'dark' ? '#ACA3A5' : '#A5A3B0' }]}
+                  selectedTextStyle={[styles.selectedTextStyle, { color: colors.text }]}
+                  inputSearchStyle={styles.inputSearchStyle}
+                  iconStyle={styles.iconStyle}
+                  data={OPTIONS}
+                  maxHeight={300}
+                  labelField="label"
+                  valueField="value"
+                  placeholder="Filter"
+                  value={filterOption}
+                  onChange={item => {
+                    setFilterOption(item.value)
+                  }}
+                  renderLeftIcon={() => (
+                    <MaterialCommunityIcons
+                      name="filter"
+                      size={20}
+                      color={colors.text}
+                      style={styles.filterIcon}
+                    />
+                  )}
+
+                  itemTextStyle={{ color: colors.text }}
+                  itemContainerStyle={{ backgroundColor: colors.card }}
+                  containerStyle={[styles.dropdownListContainer, { backgroundColor: colors.card }]}
+                  activeColor={colors.background}
+                />
               </LinearGradient>
-            </TouchableOpacity>
+            </View>
           </View>
-          <ActivityBarChart />
+          <ActivityBarChart filter={filterOption} />
         </View>
 
         {/* Latest Activity */}
         <View style={{ marginTop: 20, paddingHorizontal: 30 }}>
           <View style={styles.activityHeader}>
             <Text style={[styles.sectionTitle, { color: textColor }]}>Latest Activity</Text>
-            <TouchableOpacity
-              accessibilityRole="button"
-              accessibilityLabel="See more activity"
-              hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
-              onPress={() => {
-                // TODO: navigate to activity history
-              }}
-            >
-              <View
-                style={[{ flexDirection: 'row', alignItems: 'center', gap: 4 }]}
-              >
-                <Text style={{ fontFamily: 'PoppinsMedium', fontSize: 12, color: colors.tintText3 }}>See more</Text>
-              </View>
-            </TouchableOpacity>
           </View>
           {/* Activity details */}
-          <TouchableOpacity onPress={() => router.push('/(activity)')} style={styles.activityDetailsContainer}>
+          <TouchableOpacity onPress={() => router.push('/(activity)/sleeptracker')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
-              <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
+              <LinearGradientComponent gradient={gradients.card} style={{ padding: 15, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
+                <Text style={{ fontSize: 25 }}>🛌</Text>
               </LinearGradientComponent>
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
                 <Text style={[styles.title, { color: colors.text }]}>Sleep Tracker</Text>
-                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 10 minutes ago</Text>
+                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>Monitor sleep activity 😴</Text>
               </View>
 
               {/* 3rd col */}
@@ -161,14 +179,36 @@ const ActivityScreen = () => {
           <TouchableOpacity onPress={() => router.push('/(activity)/waterintake')} style={styles.activityDetailsContainer}>
             <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
               {/* First col */}
-              <LinearGradientComponent gradient={gradients.card} style={{ padding: 30, borderRadius: 35, }} >
+              <LinearGradientComponent gradient={gradients.card} style={{ padding: 15, borderRadius: 35, }} >
                 {/* TODO: Add your card content here */}
+                <Text style={{ fontSize: 25 }}>💧</Text>
               </LinearGradientComponent>
+
 
               {/* 2nd col */}
               <View style={styles.activityDetailsContainer}>
                 <Text style={[styles.title, { color: colors.text }]}>Water Intake</Text>
-                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>About 3 minutes ago</Text>
+                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>View water intake 💦 </Text>
+              </View>
+
+              {/* 3rd col */}
+              <View style={styles.circle} />
+            </View>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.push('/(workout)')} style={styles.activityDetailsContainer}>
+            <View style={[styles.activityDetails, { backgroundColor: colors.background }]}>
+              {/* First col */}
+              <LinearGradientComponent gradient={gradients.card} style={{ padding: 15, borderRadius: 35, }} >
+                {/* TODO: Add your card content here */}
+                <Text style={{ fontSize: 25 }}>🦾</Text>
+              </LinearGradientComponent>
+
+
+              {/* 2nd col */}
+              <View style={styles.activityDetailsContainer}>
+                <Text style={[styles.title, { color: colors.text }]}>Workout Tracker</Text>
+                <Text style={[styles.subTitle, { color: colors.tintText3 }]}>Track your workout💪</Text>
               </View>
 
               {/* 3rd col */}
@@ -182,6 +222,7 @@ const ActivityScreen = () => {
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onSave={handleSaveTargets}
+
       />
     </View>
   )
@@ -242,6 +283,53 @@ const styles = StyleSheet.create({
     fontFamily: "PoppinsSemiBold",
     marginTop: 10
   },
+
+  dropdownContainer: {
+    width: 130,
+  },
+  dropdownWrapper: {
+    borderRadius: 20,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  dropdown: {
+    height: 30,
+    backgroundColor: 'transparent',
+  },
+  placeholderStyle: {
+    fontSize: 13,
+    fontFamily: 'PoppinsRegular',
+    textAlign: 'center',
+  },
+  selectedTextStyle: {
+    fontSize: 13,
+    fontFamily: 'PoppinsRegular',
+    textAlign: 'center',
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  filterIcon: {
+    marginRight: 8,
+  },
+  dropdownListContainer: {
+    borderRadius: 12,
+    borderWidth: 0,
+    marginTop: 5,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
   activityBtnText: {
     color: 'white',
     fontFamily: "PoppinsRegular",
@@ -249,9 +337,9 @@ const styles = StyleSheet.create({
     marginTop: 2
   },
   activityBtn: {
-    backgroundColor: "#5e3fff",
-    paddingHorizontal: 18,
-    paddingVertical: 6,
+    flexDirection: 'row',
+    paddingHorizontal: 38,
+    paddingVertical: 0,
     borderRadius: 20
   },
   activityDetailsContainer: {

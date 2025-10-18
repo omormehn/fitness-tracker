@@ -4,7 +4,6 @@ import { useTheme } from '@/context/ThemeContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { router } from 'expo-router';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CustomHeader from '@/components/CustomHeader';
 import CalendarDays from '@/components/CalendarDays';
@@ -426,7 +425,7 @@ const SleepScheduleScreen = () => {
                                         month: 'long',
                                         year: 'numeric',
                                     })}
-                                </Text>
+                                </Text>        
                             </TouchableOpacity>
 
                             {/* Date Picker */}

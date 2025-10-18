@@ -9,13 +9,13 @@ export const saveTarget = async (req: AuthRequest, res: Response) => {
     try {
         const userId = req.user.id;
         const { steps, water, calories, workoutMinutes } = req.body;
-
+        console.log('er', req.body);
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // start of today
+        today.setHours(0, 0, 0, 0);
 
-        // next midnight (end of day)
+
         const expiresAt = new Date(today);
-        expiresAt.setDate(expiresAt.getDate() + 1); // tomorrow 00:00
+        expiresAt.setDate(expiresAt.getDate() + 1);
 
         const updates: any = {};
         if (steps) updates.steps = steps;

@@ -35,7 +35,6 @@ export default function RootLayout() {
 
 
   useEffect(() => {
-    console.log('eirn')
     GoogleSignin.configure({
       iosClientId: process.env.EXPO_PUBLIC_IOS_CLIENT_ID,
       webClientId: process.env.EXPO_PUBLIC_CLIENT_ID,
@@ -85,7 +84,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-  const { user, initializeAuthState, hasOnboarded, initialized, initializing, token, refreshToken } = useAuthStore();
+  const { user, initializeAuthState, hasOnboarded, initialized, justRegistered, clearRegisterFlag, } = useAuthStore();
   const segments = useSegments();
   const router = useRouter();
   const navigationState = useRootNavigationState();
@@ -93,49 +92,45 @@ function RootLayoutNav() {
 
   useEffect(() => {
     initializeAuthState();
-  }, [initializeAuthState]);
+  }, []);
 
 
   useEffect(() => {
-    if (initializing) return;
-    if (!navigationState?.key) return;
-
-    // Only navigate once
+    if (!initialized || !navigationState?.key) return;
     if (hasNavigated.current) return;
-
-    const inAuthGroup = segments[0] === '(auth)';
-    const inOnboardingGroup = segments[0] === '(onboarding)';
-    const inAppGroup = segments[0] === '(tabs)';
-
-    let targetRoute: any = null;
-
-    if (!hasOnboarded) {
-      if (!inOnboardingGroup) targetRoute = '/(onboarding)';
-    } else if (!user || !token || !refreshToken) {
-      if (!inAuthGroup) targetRoute = '/(auth)/login';
-    } else {
-      if (!inAppGroup) targetRoute = '/(tabs)';
-    }
+    console.log('navigating', hasOnboarded)
+    // Only navigate once
     hasNavigated.current = true;
 
-    if (targetRoute) {
-      setTimeout(() => {
-        router.replace(targetRoute);
-        setTimeout(() => {
-          SplashScreen.hideAsync();
-        }, 100);
-      }, 50);
-    } else {
-      setTimeout(() => {
-        SplashScreen.hideAsync();
-      }, 100);
-    }
-
-  }, [navigationState?.key, user, hasOnboarded, segments]);
-  console.log('ss', hasNavigated.current, navigationState?.key, initializing)
+    const determineRoute = () => {
+      if (!hasOnboarded) {
+        return '/(onboarding)';
+      }
+      if (!user) {
+        return '/(auth)/login';
+      }
+      if (user && justRegistered) {
+        return '/(auth)/(register)/register2';
+      }
+      return '/(tabs)';
+    };
 
 
-  if (initializing || !navigationState?.key || !hasNavigated.current) {
+    const targetRoute = determineRoute();
+
+
+    setTimeout(() => {
+      router.replace(targetRoute as any);
+      if (justRegistered) {
+        useAuthStore.getState().clearRegisterFlag();
+      }
+      SplashScreen.hideAsync();
+    }, 100);
+
+  }, [navigationState?.key, user, hasOnboarded, initialized, justRegistered]);
+
+
+  if (!navigationState?.key || !hasNavigated.current) {
     return (
       <View
         style={{
@@ -150,7 +145,6 @@ function RootLayoutNav() {
     );
   }
 
-  console.log('onboard', hasOnboarded)
   return (
     <ThemeProvider>
       <StatusBar backgroundColor={'black'} barStyle="light-content" />

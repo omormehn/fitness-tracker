@@ -6,6 +6,7 @@ import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, useLocalSearchParams } from 'expo-router';
 import axios from 'axios';
+import CustomHeader from '@/components/CustomHeader';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,22 +21,6 @@ interface ExerciseDetailProps {
   instructions: string[];
 }
 
-// Sample data - replace with actual data from route params
-const sampleExercise: ExerciseDetailProps = {
-  exerciseId: '1',
-  name: 'jumping jack',
-  gifUrl: 'https://example.com/jump.gif',
-  targetMuscles: ['quadriceps', 'calves'],
-  bodyParts: ['legs', 'cardio'],
-  equipments: ['body weight'],
-  secondaryMuscles: ['shoulders', 'core'],
-  instructions: [
-    'Spread Your Arms - To make the gestures feel more relaxed, stretch your arms as you start this movement. No bending of hands.',
-    'Rest at The Toe - The basis of this movement is jumping. Now, what needs to be considered is that you have to use the tips of your feet',
-    'Adjust Foot Movement - Jumping Jack is not just an ordinary jump. But you also have to pay close attention to leg movements.',
-    'Clapping Both Hands - This cannot be taken lightly. You see, without realizing it, the clapping of your hands helps you to keep your rhythm while doing the Jumping Jack'
-  ]
-};
 
 const WorkoutDetailScreen = () => {
   const { colors, gradients, theme } = useTheme();
@@ -46,7 +31,6 @@ const WorkoutDetailScreen = () => {
     { id: 2, reps: 30, calories: 450 },
     { id: 3, reps: 31, calories: 450 },
   ]);
-  const [descriptionExpanded, setDescriptionExpanded] = useState(false);
   const [exercise, setExercise] = useState<ExerciseDetailProps>();
 
 
@@ -80,20 +64,16 @@ const WorkoutDetailScreen = () => {
     );
   };
 
-  const totalCalories = customReps.reduce((sum, item) => sum + item.calories, 0);
-  console.log(exercise?.gifUrl)
+
+
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={[styles.headerButton, { backgroundColor: colors.card }]}>
-          <Ionicons name="chevron-back" size={24} color={colors.text} />
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.headerButton, { backgroundColor: colors.card }]}>
-          <MaterialCommunityIcons name="dots-horizontal" size={24} color={colors.text} />
-        </TouchableOpacity>
+      <View style={{ paddingTop: 40, position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10 }}>
+        <CustomHeader title='' />
       </View>
+
 
       <ScrollView showsVerticalScrollIndicator={false}>
         {/* Hero Image/GIF */}
@@ -172,16 +152,13 @@ const WorkoutDetailScreen = () => {
                   <Text style={[styles.stepTitle, { color: colors.text }]}>
                     {instruction.split('-')[0].trim()}
                   </Text>
-                  <Text style={[styles.stepText, { color: colors.tintText3 }]}>
-                    {instruction.split('-')[1]?.trim() || instruction}
-                  </Text>
                 </View>
               </View>
             ))}
           </View>
 
           {/* Custom Repetitions */}
-          <View style={styles.section}>
+          {/* <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <Text style={[styles.sectionTitle, { color: colors.text }]}>Custom Repetitions</Text>
               <View style={styles.caloriesBadge}>
@@ -211,7 +188,7 @@ const WorkoutDetailScreen = () => {
                 </View>
               </View>
             ))}
-          </View>
+          </View> */}
 
           {/* Muscle Groups */}
           <View style={styles.section}>
@@ -284,6 +261,7 @@ const styles = StyleSheet.create({
   heroPlaceholder: {
     justifyContent: 'center',
     alignItems: 'center',
+    paddingTop: 30
   },
   favoriteButton: {
     position: 'absolute',
