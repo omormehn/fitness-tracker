@@ -19,6 +19,7 @@ interface OnboardingProps {
   title: string;
   description: string;
   route?: any;
+
 };
 
 export type InputContainerProps = {
